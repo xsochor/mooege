@@ -38,7 +38,10 @@ namespace Mooege.Core.GS.Player
         {
             _equipment[slot] = item.DynamicID;
             item.Owner = _owner;
-            item.SetInventoryLocation(slot, 0, 0);            
+            item.SetInventoryLocation(slot, 0, 0);
+            GameAttributeMap map = new GameAttributeMap();
+            map[GameAttributeB.Item_Equipped] = true;
+            map.SendMessage(item.Owner.InGameClient, item.DynamicID); // flag item as equipped, so as not to shown in red color
         }
 
         public void EquipItem(uint itemID, int slot)
@@ -58,6 +61,9 @@ namespace Mooege.Core.GS.Player
                 {
                     _equipment[i] = 0;
                     item.SetInventoryLocation(-1, -1, -1);
+                    GameAttributeMap map = new GameAttributeMap();
+                    map[GameAttributeB.Item_Equipped] = false;
+                    map.SendMessage(item.Owner.InGameClient, item.DynamicID); // unflag item
                     item.Owner = null;
                     return i;
                 }
