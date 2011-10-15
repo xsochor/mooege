@@ -18,11 +18,13 @@ namespace Mooege.Core.GS.Effect
 {
     public class ActorEffect
     {
+        // TODO: deal with repeated casting of the same overlapping effect with actor (e. g. lethal decoy)
         public int EffectID { get; set; }
         public Actor Actor { get; set; } // initial target for effect + attachment
         public Actor ProxyActor { get; protected set; } // newly created proxy actor if DurationInTicks present
         public int? StartingTick { get; set; } // don't spawn until Game.Tick >= StartingTick
-        public int? DurationInTicks { get; set; } // longetivity of proxy actor - some effects (mainly those lingering in world for time) need actor
+        public int? DurationInTicks { get; set; } // longetivity of effect 
+        public bool NeedsActor { get; set; } // proxy actor - some effects (mainly those lingering in world for time) need actor
         public Vector3D Position { get; set; } // some effects are cast on Position
         public bool Attached { get; set; } // some lingering effects are attached to other actors
 
@@ -41,11 +43,6 @@ namespace Mooege.Core.GS.Effect
             if (!_started)
             {
                 // check if effect should start
-                if (DurationInTicks.HasValue && !this.StartingTick.HasValue)
-                {
-                    // lingering effect without set start, set actual tick
-                    this.StartingTick = Actor.World.Game.Tick;
-                }
                 if (!this.StartingTick.HasValue || (tick >= this.StartingTick))
                 {
                     // immediate or effect should start
@@ -64,25 +61,35 @@ namespace Mooege.Core.GS.Effect
                     }
                     else
                     {
+                        if (!this.StartingTick.HasValue)
+                        {
+                            // lingering effect without set start, set actual tick
+                            this.StartingTick = Actor.World.Game.Tick;
+                        }
                         // lingering effect
-                        // create proxy actor
-                        this.ProxyActor = CreateProxyActor();
-                        if (ProxyActor == null)
+                        if (this.NeedsActor)
                         {
-                            return true;
+                            // create proxy actor
+                            this.ProxyActor = CreateProxyActor();
+                            if (ProxyActor == null)
+                            {
+                                return true;
+                            }
+                            // attach if needed
+                            if (this.Attached)
+                            {
+                                GameAttributeMap map = new GameAttributeMap();
+                                map[GameAttribute.Attached_To_ACD] = unchecked((int)this.Actor.DynamicID);
+                                map[GameAttribute.Attachment_Handled_By_Client] = true;
+                                map[GameAttribute.Actor_Updates_Attributes_From_Owner] = true;
+                                Actor a = (this.NeedsActor ? ProxyActor : Actor);
+                                foreach (var msg in map.GetMessageList(a.DynamicID))
+                                    this.ProxyActor.World.BroadcastIfRevealed(msg, a);
+                            }
                         }
-                        // attach if needed
-                        if (this.Attached)
+                        if (this.NeedsActor && ProxyActor.DynamicID == Effect.GenericPowerProxyID) // generic power proxy
                         {
-                            GameAttributeMap map = new GameAttributeMap();
-                            map[GameAttribute.Attached_To_ACD] = unchecked((int)this.Actor.DynamicID);
-                            map[GameAttribute.Attachment_Handled_By_Client] = true;
-                            map[GameAttribute.Actor_Updates_Attributes_From_Owner] = true;
-                            foreach (var msg in map.GetMessageList(this.ProxyActor.DynamicID))
-                                this.ProxyActor.World.BroadcastIfRevealed(msg, this.ProxyActor);
-                        }
-                        if (ProxyActor.DynamicID == Effect.GenericPowerProxyID) // generic power proxy
-                        {
+                            // not sure if needed
                             this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                             {
                                 Id = 0x7a,
@@ -99,7 +106,7 @@ namespace Mooege.Core.GS.Effect
             else
             {
                 // check if effect should end
-                if (this.ProxyActor.World.GetActor(this.ProxyActor.DynamicID) == null)
+                if ((this.NeedsActor) && (this.ProxyActor.World.GetActor(this.ProxyActor.DynamicID) == null))
                 {
                     // proxy actor already left world, remove effect
                     EffectEndingAction();
@@ -108,8 +115,11 @@ namespace Mooege.Core.GS.Effect
                 if (tick > this.StartingTick + DurationInTicks)
                 {
                     EffectEndingAction();
-                    // destroy proxy actor for this effect
-                    DestroyProxyActor();
+                    if (this.NeedsActor)
+                    {
+                        // destroy proxy actor for this effect
+                        DestroyProxyActor();
+                    }
                     return true;
                 }
             }
@@ -120,12 +130,7 @@ namespace Mooege.Core.GS.Effect
         protected virtual Actor CreateProxyActor()
         {
             
-            if (EffectID == 99694)
-            {
-                // temporary HACK: TODO: move to subclasses
-                return new Effect(Actor.World, 99694, Actor.Position);
-            }
-            else if ((EffectID == 99241) || (EffectID == 208435))
+            if ((EffectID == 99241) || (EffectID == 208435))
             {
                 return new Effect(Actor.World, EffectID, Actor.Position);
             }
@@ -153,14 +158,20 @@ namespace Mooege.Core.GS.Effect
                 map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
                 // icon + cooldown
                 GameAttributeMap atm = new GameAttributeMap();
-                atm[GameAttribute.Buff_Icon_Count0, PowerSNO] = 1;
-                atm[GameAttribute.Buff_Icon_Start_Tick0, PowerSNO] = Actor.World.Game.Tick;//Actor.World.Game.Tick;
-                atm[GameAttribute.Buff_Icon_End_Tick0, PowerSNO] = Actor.World.Game.Tick + (6 * 120); // 60 ticks per second 
-                atm[GameAttribute.Buff_Visual_Effect, PowerSNO] = true;
-                atm[GameAttribute.Buff_Active, PowerSNO] = true;
-                atm[GameAttribute.Power_Cooldown_Start, PowerSNO] = Actor.World.Game.Tick;
-                atm[GameAttribute.Power_Cooldown, PowerSNO] = Actor.World.Game.Tick + (6 * 30);
-                atm.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+                Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] += 1; // update attributes on server too
+                map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
+                map[GameAttribute.Buff_Icon_Start_Tick0, PowerSNO] = Actor.World.Game.Tick;//Actor.World.Game.Tick;
+                map[GameAttribute.Buff_Icon_End_Tick0, PowerSNO] = Actor.World.Game.Tick + (60 * 120); // 60 ticks per second 
+                map[GameAttribute.Power_Cooldown_Start, PowerSNO] = Actor.World.Game.Tick;
+                map[GameAttribute.Power_Cooldown, PowerSNO] = Actor.World.Game.Tick + (60 * 30);
+                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
+                {
+                    // first mantra casted
+                    map[GameAttribute.Buff_Active, PowerSNO] = true;
+                    // visual effect
+                    map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = true; // switch on effect
+                }
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
             }
             else if ((EffectID == 99241) || (EffectID == 208435))
             {
@@ -173,21 +184,24 @@ namespace Mooege.Core.GS.Effect
             if (EffectID == 99694)
             {
                 // temporary HACK: TODO: move to subclasses
-                this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                GameAttributeMap map = new GameAttributeMap();
+                int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfEvasion;
+                Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] -= 1; // update attributes on server too
+                map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
+                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0) {
+                    // last mantra casted expired
+                    this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
                         Id = 0x7a,
-                        ActorID = this.ProxyActor.DynamicID,
+                        ActorID = this.Actor.DynamicID,
                         Field1 = 32,
                         Field2 = 199677,
-                    }, this.ProxyActor);
-                GameAttributeMap map = new GameAttributeMap();
-                map[GameAttribute.Dodge_Chance_Bonus] -= 0.3f;
+                    }, this.Actor);
+                    map[GameAttribute.Dodge_Chance_Bonus] -= 0.3f;
+                    map[GameAttribute.Buff_Active, PowerSNO] = false;
+                    map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
+                }
                 map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
-                GameAttributeMap atm = new GameAttributeMap();
-                int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfEvasion;
-                atm[GameAttribute.Buff_Icon_Count0, PowerSNO] = 0;
-                atm[GameAttribute.Buff_Active, PowerSNO] = false;
-                atm.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
             }
             else if ((EffectID == 99241) || (EffectID == 208435))
             {
