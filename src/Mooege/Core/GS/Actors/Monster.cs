@@ -77,7 +77,7 @@ namespace Mooege.Core.GS.Actors
             this.Attributes[GameAttribute.Hitpoints_Max] = 4.546875f;
             this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f;
             this.Attributes[GameAttribute.Hitpoints_Cur] = 4.546875f;
-            this.Attributes[GameAttribute.Invulnerable] = true;
+            this.Attributes[GameAttribute.Invulnerable] = false;
             this.Attributes[GameAttribute.Buff_Active, 30582] = true;
             this.Attributes[GameAttribute.TeamID] = 10;
             this.Attributes[GameAttribute.Level] = 1;
@@ -223,6 +223,7 @@ namespace Mooege.Core.GS.Actors
                 ActorID = this.DynamicID,
                 Field1 = 0x37,
             }, this);
+            /*
             this.World.BroadcastIfRevealed(new PlayHitEffectMessage()
             {
                 ActorID = this.DynamicID,
@@ -230,7 +231,7 @@ namespace Mooege.Core.GS.Actors
                 Field2 = 0x2,
                 Field3 = false,
             }, this);
-
+            */
             this.World.SpawnRandomDrop(player, this.Position);
             this.World.SpawnGold(player, this.Position);
             this.Destroy();

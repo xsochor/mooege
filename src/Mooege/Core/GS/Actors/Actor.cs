@@ -25,6 +25,7 @@ using Mooege.Net.GS.Message.Fields;
 using Mooege.Net.GS.Message.Definitions.ACD;
 using Mooege.Net.GS.Message.Definitions.Misc;
 using Mooege.Core.Common.Items;
+using System;
 
 // TODO: Need to move all of the remaining ACD fields into Actor (such as the affix list)
 
@@ -54,7 +55,8 @@ namespace Mooege.Core.GS.Actors
         NPC,
         Monster,
         Item,
-        Portal
+        Portal,
+        Effect
     }
 
     // Base actor

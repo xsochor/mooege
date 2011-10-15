@@ -54,7 +54,7 @@ namespace Mooege.Core.GS.Game
 
         public readonly int UpdateFrequency=100;
         private int _tickCounter;
-        
+
         public int Tick
         {
             get { return _tickCounter; }
@@ -85,7 +85,9 @@ namespace Mooege.Core.GS.Game
         {
             while (true)
             {
-                Interlocked.Add(ref this._tickCounter, 20);
+                // Client shows 60 ticks per second (from monk's aura buff test)
+                Interlocked.Add(ref this._tickCounter, 6);
+//                Interlocked.Add(ref this._tickCounter, 20);
 
                 // only update worlds with active players in it - so mob's brain() in empty worlds doesn't get called and take actions for nothing. /raist.
                 foreach (var pair in this._worlds.Where(pair => pair.Value.HasPlayersIn)) 

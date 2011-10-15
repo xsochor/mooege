@@ -20,6 +20,7 @@ using System.Text;
 using Mooege.Common.Helpers;
 using Mooege.Core.GS.Skills;
 using Mooege.Net.GS.Message.Fields;
+using Mooege.Core.GS.Effect;
 
 namespace Mooege.Net.GS.Message.Definitions.Animation
 {
@@ -31,6 +32,25 @@ namespace Mooege.Net.GS.Message.Definitions.Animation
 
         public void Handle(GameClient client)
         {
+            if (PowerSNO == Skills.Monk.Mantras.MantraOfEvasion)
+            {
+                client.Player.World.AddEffect(new ActorEffect { Actor = client.Player, EffectID = 143964, });
+                client.Player.World.AddEffect(new ActorEffect { Actor = client.Player, DurationInTicks = (60 * 12), EffectID = 99694, Attached = true }); // 60 ticks/s * 12 = 12s
+                return;
+            }
+            if (PowerSNO == Skills.Monk.SpiritSpenders.LethalDecoy)
+            {
+                int effectID = (client.Player.Properties.Gender == 0) ? 99241 : 208435;
+                client.Player.World.AddEffect(new ActorEffect { Actor = client.Player, DurationInTicks = (60 * 5), EffectID = effectID }); // 60 ticks/s * 5 = 5s
+                return;
+            }
+            if (PowerSNO == Skills.Monk.SpiritSpenders.BreathOfHeaven)
+            {
+                client.Player.World.AddEffect(new ActorEffect { Actor = client.Player, EffectID = 101174, });
+                GameAttributeMap atm = new GameAttributeMap();
+                atm[GameAttribute.Resource_Cur, client.Player.ResourceID] -= 100f;
+                atm.SendMessage(client, client.Player.DynamicID);
+            }
             if (PowerSNO != Skills.Monk.SpiritSpenders.BlindingFlash) return;
             var player = client.Player;
             var pos = new Vector3D();
