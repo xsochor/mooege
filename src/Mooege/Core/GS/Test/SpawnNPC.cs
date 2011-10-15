@@ -357,7 +357,7 @@ namespace Mooege.Core.GS.Test
                 Field2 = false,
             });
             #endregion
-            player.Inventory.AssignSharedStash(aID);
+//            player.Inventory.AssignSharedStash(aID);
         }
 
 
