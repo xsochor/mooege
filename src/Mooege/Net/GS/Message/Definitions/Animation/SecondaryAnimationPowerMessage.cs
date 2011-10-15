@@ -47,9 +47,12 @@ namespace Mooege.Net.GS.Message.Definitions.Animation
             if (PowerSNO == Skills.Monk.SpiritSpenders.BreathOfHeaven)
             {
                 client.Player.World.AddEffect(new ActorEffect { Actor = client.Player, EffectID = 101174, });
+                /*
+                 * move to effect
                 GameAttributeMap atm = new GameAttributeMap();
-                atm[GameAttribute.Resource_Cur, client.Player.ResourceID] -= 100f;
+                atm[GameAttribute.Resource_Cur, client.Player.ResourceID] = atm[GameAttribute.Resource_Cur, client.Player.ResourceID] - 75f;
                 atm.SendMessage(client, client.Player.DynamicID);
+                 * */
             }
             if (PowerSNO != Skills.Monk.SpiritSpenders.BlindingFlash) return;
             var player = client.Player;
