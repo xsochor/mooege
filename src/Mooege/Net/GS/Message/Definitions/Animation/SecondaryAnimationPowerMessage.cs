@@ -32,28 +32,7 @@ namespace Mooege.Net.GS.Message.Definitions.Animation
 
         public void Handle(GameClient client)
         {
-            if (PowerSNO == Skills.Monk.Mantras.MantraOfEvasion)
-            {
-                client.Player.World.AddEffect(new ActorEffect { Actor = client.Player, EffectID = 143964, });
-                client.Player.World.AddEffect(new ActorEffect { Actor = client.Player, DurationInTicks = (60 * 120), EffectID = 99694, Attached = true }); // 60 ticks/s * 120 = 120s
-                return;
-            }
-            if (PowerSNO == Skills.Monk.SpiritSpenders.LethalDecoy)
-            {
-                int effectID = (client.Player.Properties.Gender == 0) ? 99241 : 208435;
-                client.Player.World.AddEffect(new ActorEffect { Actor = client.Player, DurationInTicks = (60 * 5), EffectID = effectID, NeedsActor = true }); // 60 ticks/s * 5 = 5s
-                return;
-            }
-            if (PowerSNO == Skills.Monk.SpiritSpenders.BreathOfHeaven)
-            {
-                client.Player.World.AddEffect(new ActorEffect { Actor = client.Player, EffectID = 101174, });
-                /*
-                 * move to effect
-                GameAttributeMap atm = new GameAttributeMap();
-                atm[GameAttribute.Resource_Cur, client.Player.ResourceID] = atm[GameAttribute.Resource_Cur, client.Player.ResourceID] - 75f;
-                atm.SendMessage(client, client.Player.DynamicID);
-                 * */
-            }
+            ClientEffect.CreateVisualSkill(client.Player, this);
             if (PowerSNO != Skills.Monk.SpiritSpenders.BlindingFlash) return;
             var player = client.Player;
             var pos = new Vector3D();

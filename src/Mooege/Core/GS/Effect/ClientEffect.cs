@@ -19,8 +19,11 @@ namespace Mooege.Core.GS.Effect
     public class ActorEffect
     {
         // TODO: deal with repeated casting of the same overlapping effect with actor (e. g. lethal decoy)
+        // TODO: after ComplexEffectAddMessage is decyphered switch from sending multiple effect to sending one complex
+
         public int EffectID { get; set; }
-        public Actor Actor { get; set; } // initial target for effect + attachment
+        public Actor Actor { get; set; } // initial actor for effect + attachment
+        public Actor Target { get; set; } // target actor, used when effect is Actor->Target
         public Actor ProxyActor { get; protected set; } // newly created proxy actor if DurationInTicks present
         public int? StartingTick { get; set; } // don't spawn until Game.Tick >= StartingTick
         public int? DurationInTicks { get; set; } // longetivity of effect 
@@ -49,13 +52,28 @@ namespace Mooege.Core.GS.Effect
                     if (!DurationInTicks.HasValue)
                     {
                         // one-shot effect
-                        this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                        if (this.Target == null)
                         {
-                            Id = 0x7a,
-                            ActorID = this.Actor.DynamicID,
-                            Field1 = 32,
-                            Field2 = this.EffectID,
-                        }, this.Actor);
+                            // effect on Actor
+                            this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                            {
+                                Id = 0x7a,
+                                ActorID = this.Actor.DynamicID,
+                                Field1 = 32,
+                                Field2 = this.EffectID,
+                            }, this.Actor);
+                        }
+                        else
+                        {
+                            // effect Actor->Target
+                            this.Actor.World.BroadcastIfRevealed(new EffectGroupACDToACDMessage()
+                            {
+                                Id = 0x7a,
+                                Field0 = unchecked((int)this.Actor.DynamicID),
+                                Field1 = unchecked((int)this.Target.DynamicID),
+                                Field2 = this.EffectID,
+                            }, this.Actor);
+                        }
                         EffectStartingAction();
                         return true;
                     }
@@ -99,6 +117,11 @@ namespace Mooege.Core.GS.Effect
                             }, this.ProxyActor);
                         }
                         EffectStartingAction();
+                        if (DurationInTicks == -1)
+                        {
+                            // infinite duration ("until is destroyed")
+                            return true;
+                        }
                         _started = true;
                     }
                 }
@@ -134,6 +157,14 @@ namespace Mooege.Core.GS.Effect
             {
                 return new Effect(Actor.World, EffectID, Actor.Position);
             }
+            else if ((EffectID == 169904) || (EffectID == 123885))
+            {
+                return new Effect(Actor.World, EffectID, Actor.Position);
+            }
+            else if (EffectID == 98557)
+            {
+                return new Effect(Actor.World, EffectID, Actor.Position);
+            }
             else
             {
                 return new Effect(Actor.World, Effect.GenericPowerProxyID, Actor.Position);
@@ -149,15 +180,78 @@ namespace Mooege.Core.GS.Effect
         // effect start actions
         protected virtual void EffectStartingAction()
         {
-            // temporary HACK: TODO: move to subclasses
+            // temporary HACK: TODO: move to subclasses + add sending visuals to other players
             if (EffectID == 99694)
             {
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfEvasion;
                 GameAttributeMap map = new GameAttributeMap();
+                // skill effect
                 map[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
-                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
                 // icon + cooldown
-                GameAttributeMap atm = new GameAttributeMap();
+                Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] += 1; // update attributes on server too
+                map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
+                map[GameAttribute.Buff_Icon_Start_Tick0, PowerSNO] = Actor.World.Game.Tick;//Actor.World.Game.Tick;
+                map[GameAttribute.Buff_Icon_End_Tick0, PowerSNO] = Actor.World.Game.Tick + (60 * 120); // 60 ticks per second 
+                map[GameAttribute.Power_Cooldown_Start, PowerSNO] = Actor.World.Game.Tick;
+                map[GameAttribute.Power_Cooldown, PowerSNO] = Actor.World.Game.Tick + (60 * 30);
+                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
+                {
+                    // first mantra casted
+                    map[GameAttribute.Buff_Active, PowerSNO] = true;
+                    // visual effect
+                    map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = true; // switch on effect
+                }
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+            }
+            else if (EffectID == 140190) {
+                int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfHealing;
+                GameAttributeMap map = new GameAttributeMap();
+                // skill effect
+                map[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
+                // icon + cooldown
+                Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] += 1; // update attributes on server too
+                map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
+                map[GameAttribute.Buff_Icon_Start_Tick0, PowerSNO] = Actor.World.Game.Tick;//Actor.World.Game.Tick;
+                map[GameAttribute.Buff_Icon_End_Tick0, PowerSNO] = Actor.World.Game.Tick + (60 * 120); // 60 ticks per second 
+                map[GameAttribute.Power_Cooldown_Start, PowerSNO] = Actor.World.Game.Tick;
+                map[GameAttribute.Power_Cooldown, PowerSNO] = Actor.World.Game.Tick + (60 * 30);
+                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
+                {
+                    // first mantra casted
+                    map[GameAttribute.Buff_Active, PowerSNO] = true;
+                    // visual effect
+                    map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = true; // switch on effect
+                }
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+            }
+            else if (EffectID == 146990) {
+                int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfConviction;
+                GameAttributeMap map = new GameAttributeMap();
+                // skill effect
+                map[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
+                // icon + cooldown
+                Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] += 1; // update attributes on server too
+                map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
+                map[GameAttribute.Buff_Icon_Start_Tick0, PowerSNO] = Actor.World.Game.Tick;//Actor.World.Game.Tick;
+                map[GameAttribute.Buff_Icon_End_Tick0, PowerSNO] = Actor.World.Game.Tick + (60 * 120); // 60 ticks per second 
+                map[GameAttribute.Power_Cooldown_Start, PowerSNO] = Actor.World.Game.Tick;
+                map[GameAttribute.Power_Cooldown, PowerSNO] = Actor.World.Game.Tick + (60 * 30);
+                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
+                {
+                    // first mantra casted
+                    map[GameAttribute.Buff_Active, PowerSNO] = true;
+                    // visual effect
+                    map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = true; // switch on effect
+                }
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+            }
+            else if (EffectID == 142987)
+            {
+                int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfRetribution;
+                GameAttributeMap map = new GameAttributeMap();
+                // skill effect
+                map[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
+                // icon + cooldown
                 Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] += 1; // update attributes on server too
                 map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
                 map[GameAttribute.Buff_Icon_Start_Tick0, PowerSNO] = Actor.World.Game.Tick;//Actor.World.Game.Tick;
@@ -175,6 +269,74 @@ namespace Mooege.Core.GS.Effect
             }
             else if ((EffectID == 99241) || (EffectID == 208435))
             {
+                // LethalDecoy
+            }
+            else if (EffectID == 143230)
+            {
+                int PowerSNO = Skills.Skills.Monk.SpiritSpenders.Serenity;
+                GameAttributeMap map = new GameAttributeMap();
+                // skill effect
+                map[GameAttribute.Invulnerable] = true;
+                map[GameAttribute.Immune_To_Knockback] = true;
+                map[GameAttribute.Immune_To_Charm] = true;
+                map[GameAttribute.Immune_To_Blind] = true;
+                map[GameAttribute.Freeze_Immune] = true;
+                map[GameAttribute.Fear_Immune] = true;
+                map[GameAttribute.Stun_Immune] = true;
+                map[GameAttribute.Slowdown_Immune] = true;
+                map[GameAttribute.Root_Immune] = true;
+                // icon + cooldown
+                Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] = 1; // update attributes on server too
+                map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
+                map[GameAttribute.Buff_Icon_Start_Tick0, PowerSNO] = Actor.World.Game.Tick;//Actor.World.Game.Tick;
+                map[GameAttribute.Buff_Icon_End_Tick0, PowerSNO] = Actor.World.Game.Tick + (60 * 3); // 60 ticks per second 
+                map[GameAttribute.Power_Cooldown_Start, PowerSNO] = Actor.World.Game.Tick;
+                map[GameAttribute.Power_Cooldown, PowerSNO] = Actor.World.Game.Tick + (60 * 60);
+                map[GameAttribute.Buff_Active, PowerSNO] = true;
+                    // visual effect
+                map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = true; // switch on effect
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+            }
+            else if (EffectID == 92225)
+            {
+                // doesn't work (exploding palm 2)
+                GameAttributeMap map = new GameAttributeMap();
+                map[GameAttribute.Buff_Active, 92225] = true;
+                map[GameAttribute.Bleeding] = true;
+                map[GameAttribute.Buff_Visual_Effect, 92225] = true;
+                foreach (var msg in map.GetMessageList(Actor.DynamicID))
+                    this.Actor.World.BroadcastIfRevealed(msg, Actor);
+            }
+            else if (EffectID == 111132)
+            {
+                int PowerSNO = Skills.Skills.Monk.SpiritSpenders.DashingStrike;
+                GameAttributeMap map = new GameAttributeMap();
+                map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = true; // switch on effect
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+            }
+            else if (EffectID == 143782)
+            {
+                int PowerSNO = Skills.Skills.Monk.SpiritSpenders.LashingTailKick;
+                GameAttributeMap map = new GameAttributeMap();
+                map[GameAttribute.Power_Cooldown_Start, PowerSNO] = Actor.World.Game.Tick;
+                map[GameAttribute.Power_Cooldown, PowerSNO] = Actor.World.Game.Tick + (60 * 3);
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+            }
+            else if (EffectID == 98826)
+            {
+                int PowerSNO = Skills.Skills.Monk.SpiritSpenders.SevenSidedStrike;
+                GameAttributeMap map = new GameAttributeMap();
+                map[GameAttribute.Power_Cooldown_Start, PowerSNO] = Actor.World.Game.Tick;
+                map[GameAttribute.Power_Cooldown, PowerSNO] = Actor.World.Game.Tick + (60 * 30);
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+            }
+            else if (EffectID == 145011)
+            {
+                int PowerSNO = Skills.Skills.Monk.SpiritSpenders.WaveOfLight;
+                GameAttributeMap map = new GameAttributeMap();
+                map[GameAttribute.Power_Cooldown_Start, PowerSNO] = Actor.World.Game.Tick;
+                map[GameAttribute.Power_Cooldown, PowerSNO] = Actor.World.Game.Tick + (60 * 15);
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
             }
         }
 
@@ -205,11 +367,128 @@ namespace Mooege.Core.GS.Effect
             }
             else if ((EffectID == 99241) || (EffectID == 208435))
             {
+                // LethalDecoy
                 this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
                         ActorID = this.ProxyActor.DynamicID,
-                        Field1 = 44,
+                        Field1 = 32,
+                        Field2 = 99504
                     }, this.ProxyActor);
+            }
+            else if (EffectID == 92225)
+            {
+                // doesn't work (exploding palm 2)
+                GameAttributeMap map = new GameAttributeMap();
+                map[GameAttribute.Buff_Active, 92225] = false;
+                map[GameAttribute.Bleeding] = false;
+                map[GameAttribute.Bleeding] = false;
+                map[GameAttribute.Buff_Visual_Effect, 92225] = false;
+                foreach (var msg in map.GetMessageList(Actor.DynamicID))
+                    this.Actor.World.BroadcastIfRevealed(msg, Actor);
+            }
+            else if (EffectID == 143230)
+            {
+                GameAttributeMap map = new GameAttributeMap();
+                int PowerSNO = Skills.Skills.Monk.SpiritSpenders.Serenity;
+                // skill effect
+                map[GameAttribute.Invulnerable] = false;
+                map[GameAttribute.Immune_To_Knockback] = false;
+                map[GameAttribute.Immune_To_Charm] = false;
+                map[GameAttribute.Immune_To_Blind] = false;
+                map[GameAttribute.Freeze_Immune] = false;
+                map[GameAttribute.Fear_Immune] = false;
+                map[GameAttribute.Stun_Immune] = false;
+                map[GameAttribute.Slowdown_Immune] = false;
+                map[GameAttribute.Root_Immune] = false;
+                Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] = 0; // update attributes on server too
+                map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
+                    this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                    {
+                        Id = 0x7a,
+                        ActorID = this.Actor.DynamicID,
+                        Field1 = 32,
+                        Field2 = 143230,
+                    }, this.Actor);
+                    map[GameAttribute.Buff_Active, PowerSNO] = false;
+                    map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+            }
+            else if (EffectID == 140190)
+            {
+                GameAttributeMap map = new GameAttributeMap();
+                int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfHealing;
+                Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] -= 1; // update attributes on server too
+                map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
+                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0) {
+                    // last mantra casted expired
+                    this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                    {
+                        Id = 0x7a,
+                        ActorID = this.Actor.DynamicID,
+                        Field1 = 32,
+                        Field2 = 199677,
+                    }, this.Actor);
+                    map[GameAttribute.Buff_Active, PowerSNO] = false;
+                    map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
+                }
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+            }
+            else if (EffectID == 146990)
+            {
+                GameAttributeMap map = new GameAttributeMap();
+                int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfConviction;
+                Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] -= 1; // update attributes on server too
+                map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
+                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0) {
+                    // last mantra casted expired
+                    this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                    {
+                        Id = 0x7a,
+                        ActorID = this.Actor.DynamicID,
+                        Field1 = 32,
+                        Field2 = 199677,
+                    }, this.Actor);
+                    map[GameAttribute.Buff_Active, PowerSNO] = false;
+                    map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
+                }
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+            }
+            else if (EffectID == 142987)
+            {
+                GameAttributeMap map = new GameAttributeMap();
+                int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfRetribution;
+                Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] -= 1; // update attributes on server too
+                map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
+                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0) {
+                    // last mantra casted expired
+                    this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                    {
+                        Id = 0x7a,
+                        ActorID = this.Actor.DynamicID,
+                        Field1 = 32,
+                        Field2 = 199677,
+                    }, this.Actor);
+                    map[GameAttribute.Buff_Active, PowerSNO] = false;
+                    map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
+                }
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+            }
+            else if (EffectID == 98557)
+            {
+                // inner sanct
+                this.ProxyActor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                    {
+                        ActorID = this.ProxyActor.DynamicID,
+                        Field1 = 32,
+                        Field2 = 98556
+                    }, this.ProxyActor);
+            }
+            else if (EffectID == 111132)
+            {
+                int PowerSNO = Skills.Skills.Monk.SpiritSpenders.DashingStrike;
+                GameAttributeMap map = new GameAttributeMap();
+                map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
+                map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
             }
         }
     }
@@ -314,13 +593,15 @@ namespace Mooege.Core.GS.Effect
     {
         public static void CreateVisualSkill(Actor actor, TargetMessage message)
         {
+            // TODO: refactor to switches toonclass/power (or subclases)
             Vector3D targetPosition = message.Field2.Position;
+            Actor target = null;
             if (message.TargetID != 0xFFFFFFFF)
             {
-                Actor npc = actor.World.GetActor(message.TargetID);
-                if (npc != null)
+                target = actor.World.GetActor(message.TargetID);
+                if (target != null)
                 {
-                    targetPosition = npc.Position;
+                    targetPosition = target.Position;
                 }
             }
             if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.FistsOfThunder)
@@ -331,10 +612,11 @@ namespace Mooege.Core.GS.Effect
                 switch (message.Field5)
                 {
                     case 0:
+                        startingTick += actor.World.Game.Tick + (6 * 1);
                         break;
                     case 1:
-                        effectID = 143569; // cast
-                        effectID2 = 96177;
+                        effectID =  143561;//143569; // cast
+                        effectID2 = 96176;//96177;
                         break;
                     case 2:
                         effectID = 72331; // cast
@@ -348,6 +630,7 @@ namespace Mooege.Core.GS.Effect
             else if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.ExplodingPalm)
             { 
                 int effectID = 142471;
+                int masterEffectID = 143841;
                 switch (message.Field5)
                 {
                     case 0:
@@ -355,14 +638,20 @@ namespace Mooege.Core.GS.Effect
                     case 1:
                         break;
                     case 2:
-                        effectID = 142473;// WRONG - must be on target
+                        effectID = 142473;
+                        masterEffectID = 143473;
                         break;
                 }
                 actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, });
+                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = masterEffectID, });
+                if ((target != null) & (message.Field5 == 2))
+                {
+                    actor.World.AddEffect(new ActorEffect { Actor = target, EffectID = 92225, DurationInTicks = (60 * 3) });
+                }
             }
             else if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.DeadlyReach)
             {
-                int effectID = 71921;
+                int masterEffectID = 140870;
                 int startingTick = 0;
                 switch (message.Field5)
                 {
@@ -370,14 +659,14 @@ namespace Mooege.Core.GS.Effect
                         startingTick += actor.World.Game.Tick + (6 * 1);
                         break;
                     case 1:
-                        effectID = 72134;
+                        masterEffectID = 140871;
                         break;
                     case 2:
-                        effectID = 72331;
+                        masterEffectID = 140872;
                         startingTick += actor.World.Game.Tick + (6 * 3);
                         break;
                 }
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, StartingTick = startingTick});
+                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = masterEffectID, StartingTick = startingTick });
             }
             else if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.CripplingWave)
             {
@@ -414,40 +703,122 @@ namespace Mooege.Core.GS.Effect
             else if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.WayOfTheHundredFists)
             {
                 int effectID = 2612;
+                int masterEffectID = 137345;
                 int startingTick = 0;
                 switch (message.Field5)
                 {
                     case 0:
+                        startingTick = actor.World.Game.Tick + (6 * 3);
                         break;
                     case 1:
                         effectID = 98412;
+                        masterEffectID = 137346;
                         break;
                     case 2:
-                        startingTick = actor.World.Game.Tick + (6 * 1);
+                        startingTick = actor.World.Game.Tick + (6 * 2);
+                        masterEffectID = 137347;
                         effectID = 98416;
                         break;
                 }
+                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = masterEffectID, StartingTick = startingTick });
                 actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, StartingTick = startingTick});
             }
             else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.DashingStrike)
             {
-                //                id = actor.World.SpawnTempObject(actor, 192095, actor.Position, actor.RotationAmount, actor.DynamicID);
-                //                System.Threading.Thread.Sleep(500);
-                //                actor.World.BroadcastIfRevealed(new ANNDataMessage(Opcodes.ANNDataMessage6) { ActorID = id, }, actor);
+                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = 111132, DurationInTicks = 24, StartingTick = actor.World.Game.Tick + (6 * 1) });
+                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = 192085, DurationInTicks = 30 });
+                
+            }
+            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.LashingTailKick)
+            {
+                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = 143782 });
+            }
+            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.WaveOfLight)
+            {
+                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = 145011, });
+                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = 144079, });
+                return;
             }
             else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.SevenSidedStrike)
             {
-                /* // find targets for effects
+                // TODO: find targets for effects, now targetting self
                 int effectID = 98826;
-                int startingTick = actor.World.Game.Tick + 20;
+                int startingTick = actor.World.Game.Tick + 12;
                 actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, StartingTick = startingTick});
                 effectID = 98831;
-                startingTick += 60;
+                startingTick += 12;
                 actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, StartingTick = startingTick});
                 effectID = 98842;
-                startingTick += 80;
+                startingTick += 12;
                 actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, StartingTick = startingTick});
-                 */
+            }
+        }
+
+        public static void CreateVisualSkill(Player.Player player, SecondaryAnimationPowerMessage message) {
+            // TODO: refactor to switches  toonclass/power (or subclases)
+            if (message.PowerSNO == Skills.Skills.Monk.Mantras.MantraOfEvasion)
+            {
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 143964, });
+                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 99694, Attached = true }); // 60 ticks/s * 120 = 120s
+                return;
+            }
+            else if (message.PowerSNO == Skills.Skills.Monk.Mantras.MantraOfHealing)
+            {
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 99948, });
+                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 140190, Attached = true }); // 60 ticks/s * 120 = 120s
+                return;
+            }
+            else if (message.PowerSNO == Skills.Skills.Monk.Mantras.MantraOfConviction)
+            {
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 95955, });
+                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 146990, Attached = true }); // 60 ticks/s * 120 = 120s
+                return;
+            }
+            else if (message.PowerSNO == Skills.Skills.Monk.Mantras.MantraOfRetribution)
+            {
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 142974, });
+                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 142987, Attached = true }); // 60 ticks/s * 120 = 120s
+                return;
+            }
+            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.LethalDecoy)
+            {
+                int effectID = (player.Properties.Gender == 0) ? 99241 : 208435;
+                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 5), EffectID = effectID, NeedsActor = true }); // 60 ticks/s * 5 = 5s
+                return;
+            }
+            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.BreathOfHeaven)
+            {
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 101174, });
+                return;
+                /*
+                 * move to effect
+                Actor.Attributes[GameAttribute.Resource_Cur, player.ResourceID] -= 75f;
+                GameAttributeMap atm = new GameAttributeMap();
+                atm[GameAttribute.Resource_Cur, player.ResourceID] = Actor.Attributes[GameAttribute.Resource_Cur, player.ResourceID];
+                atm.SendMessage(client, player.DynamicID);
+                 * */
+            }
+            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.InnerSanctuary)
+            {
+                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 8), EffectID = 98557, NeedsActor = true });
+                return;
+            }
+            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.Serenity)
+            {
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 123156, });
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 142890, });
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 143230, DurationInTicks = (60 * 3) });
+            }
+            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.MysticAlly)
+            {
+                int effectID = (player.Properties.Gender == 0) ? 169904 : 123885;
+                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = -1, EffectID = effectID, NeedsActor = true }); // until is destroyed
+                return;
+            }
+            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.BlindingFlash)
+            {
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 2588, });
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 137107, });
             }
         }
     }

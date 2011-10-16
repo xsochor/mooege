@@ -37,6 +37,7 @@ using Mooege.Net.GS.Message.Definitions.Hero;
 using Mooege.Net.GS.Message.Definitions.Player;
 using Mooege.Net.GS.Message.Definitions.Skill;
 using Mooege.Net.GS.Message.Definitions.Effect;
+using Mooege.Net.GS.Message.Definitions.Tick;
 
 
 // TODO: When the player moves, it will set the Position property which will bounce back to the player again.
@@ -242,7 +243,7 @@ namespace Mooege.Core.GS.Player
             this.Attributes[GameAttribute.Buff_Icon_Count0, 0x0000CE11] = 1;
             this.Attributes[GameAttribute.Hidden] = false;
             this.Attributes[GameAttribute.Level_Cap] = 13;
-            this.Attributes[GameAttribute.Level] = this.Properties.Level;
+            this.Attributes[GameAttribute.Level] = 30;// this.Properties.Level;
             this.Attributes[GameAttribute.Experience_Next] = 1200;
             this.Attributes[GameAttribute.Experience_Granted] = 1000;
             this.Attributes[GameAttribute.Armor_Total] = 0;
@@ -255,6 +256,9 @@ namespace Mooege.Core.GS.Player
             this.Attributes[GameAttribute.Backpack_Slots] = 60;
             this.Attributes[GameAttribute.General_Cooldown] = 0;
             #endregion // Attributes            
+            // temp attributes
+            this.Attributes[GameAttribute.ItemMeltUnlocked] = true;
+
         }
 
         public void Consume(GameClient client, GameMessage message)
@@ -271,6 +275,7 @@ namespace Mooege.Core.GS.Player
 
         public override void Update()
         {
+            // TODO: if on autopilot, process it
             this.InGameClient.SendTick(); // if there's available messages to send, will handle ticking and flush the outgoing buffer.
         }
 
@@ -382,6 +387,10 @@ namespace Mooege.Core.GS.Player
         // Message handlers
         private void OnObjectTargeted(GameClient client, TargetMessage message)
         {
+            if (message.PowerSNO != 0)
+            {
+                Mooege.Core.GS.Effect.ClientEffect.CreateVisualSkill(this, message);
+            }
             Actor actor = this.World.GetActor(message.TargetID);
             if (actor != null)
             {
@@ -389,6 +398,29 @@ namespace Mooege.Core.GS.Player
             }
             else
             {
+                if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.DashingStrike)
+                {
+                    // TODO: add player going to auto-pilot: movement to place/target
+                    this.Position = message.Field2.Position;
+                    client.SendMessage(new ACDWorldPositionMessage
+                    {
+                        ActorID = this.DynamicID,
+                        WorldLocation = new WorldLocationMessageData
+                        {
+                            Scale = 1f,
+                            Transform = new PRTransform
+                            {
+                                Rotation = new Quaternion
+                                {
+                                    Amount = this.RotationAmount,
+                                    Axis = this.RotationAxis
+                                },
+                                ReferencePoint = message.Field2.Position
+                            },
+                            WorldID = this.World.DynamicID
+                        }
+                    });
+                }
                 //Logger.Warn("Player targeted an invalid object (ID = {0})", message.TargetID);
             }
         }
