@@ -13,6 +13,8 @@ using Mooege.Common.Helpers;
 using Mooege.Net.GS.Message.Definitions.Misc;
 using Mooege.Net.GS.Message.Definitions.ACD;
 using Mooege.Net.GS.Message.Definitions.Animation;
+using Mooege.Net.GS.Message.Definitions.Actor;
+using Mooege.Common;
 
 namespace Mooege.Core.GS.Effect
 {
@@ -159,7 +161,7 @@ namespace Mooege.Core.GS.Effect
             }
             else if ((EffectID == 169904) || (EffectID == 123885))
             {
-                return new Effect(Actor.World, EffectID, Actor.Position);
+                return new MysticAllyEffect(Actor.World, EffectID, Actor.Position, Actor);
             }
             else if (EffectID == 98557)
             {
@@ -180,6 +182,10 @@ namespace Mooege.Core.GS.Effect
         // effect start actions
         protected virtual void EffectStartingAction()
         {
+            /* streaming skills (which drain resource until dismissed:
+             * starts using with targetMessage
+             * ends with DWordDataMessage5
+            */
             // temporary HACK: TODO: move to subclasses + add sending visuals to other players
             if (EffectID == 99694)
             {
@@ -495,9 +501,17 @@ namespace Mooege.Core.GS.Effect
 
     public class Effect : Actor
     {
+        private static readonly Logger Logger = LogManager.CreateLogger();
+
         public const int GenericPowerProxyID = 4176;
 
         public override ActorType ActorType { get { return ActorType.Effect; } }
+
+        protected int? idleAnimationSNO;
+
+        protected int ticksBetweenActions = 6;
+
+        protected float walkDistance = 1f;
 
         public Effect(World world, int actorSNO, Vector3D position)
             : base(world, world.NewActorID)
@@ -523,59 +537,28 @@ namespace Mooege.Core.GS.Effect
             this.Attributes[GameAttribute.Untargetable] = true;
             this.Attributes[GameAttribute.UntargetableByPets] = true;
             this.Attributes[GameAttribute.Invulnerable] = true;
-            
+            setAdditionalAttributes();
             this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
+        }
+
+        public virtual void setAdditionalAttributes()
+        {
         }
 
         public override bool Reveal(Mooege.Core.GS.Player.Player player)
         {
-            base.Reveal(player);
-            this.Attributes.SendMessage(player.InGameClient, this.DynamicID);
-
-            player.InGameClient.SendMessage(new AffixMessage()
+            if (!base.Reveal(player))
             {
-                ActorID = this.DynamicID,
-                Field1 = 0x1,
-                aAffixGBIDs = new int[0]
-            });
-            player.InGameClient.SendMessage(new AffixMessage()
+                return false;
+            }
+            if (this.idleAnimationSNO.HasValue)
             {
-                ActorID = this.DynamicID,
-                Field1 = 0x2,
-                aAffixGBIDs = new int[0]
-            });
-            player.InGameClient.SendMessage(new ACDCollFlagsMessage
-            {
-                ActorID = this.DynamicID,
-                CollFlags = 0x1
-            });
-
-            player.InGameClient.SendMessage(new ACDGroupMessage
-            {
-                ActorID = this.DynamicID,
-                Field1 = unchecked((int)0xb59b8de4),
-                Field2 = unchecked((int)0xffffffff)
-            });
-
-            player.InGameClient.SendMessage(new ANNDataMessage(Opcodes.ANNDataMessage24)
-            {
-                ActorID = this.DynamicID
-            });
-
-            player.InGameClient.SendMessage(new SetIdleAnimationMessage
-            {
-                ActorID = this.DynamicID,
-                AnimationSNO = 0x11150
-            });
-
-            player.InGameClient.SendMessage(new SNONameDataMessage
-            {
-                Name = new SNOName
+                player.InGameClient.SendMessage(new SetIdleAnimationMessage
                 {
-                    Group = 0x1,
-                    Handle = this.ActorSNO
-                }
-            });
+                    ActorID = this.DynamicID,
+                    AnimationSNO = this.idleAnimationSNO.Value
+                });
+            }
             return true;
         }
 
@@ -586,6 +569,215 @@ namespace Mooege.Core.GS.Effect
                 ActorID = this.DynamicID,
             }, this);
             this.Destroy();
+        }
+
+        protected bool CheckRange(Actor target, float range)
+        {
+            if (target == null) return false;
+            return (Math.Sqrt(Math.Pow(this.Position.X - target.Position.X,2) + Math.Pow(this.Position.Y - target.Position.Y, 2)) < range);
+        }
+
+        protected float GetDistance(Actor target)
+        {
+            if (target == null) return 0;
+            return (float)Math.Sqrt(Math.Pow(this.Position.X - target.Position.X,2) + Math.Pow(this.Position.Y - target.Position.Y, 2));
+        }
+
+        protected float[] GetDistanceDelta(float facingAngle)
+        {
+            float[] res = new float[2];
+            res[0] = walkDistance * (float)Math.Sin(facingAngle + 20); // TODO: find more precise
+            res[1] = walkDistance * (float)Math.Cos(-facingAngle + 20);
+            return res;
+        }
+
+        protected float GetFacingAngle(Actor target)
+        {
+            return -1.0f * (float)Math.Atan2(this.Position.X - target.Position.X, this.Position.Y - target.Position.Y) - 20; // TODO: find more precise
+        }
+    }
+
+    public class MysticAllyEffect : Effect
+    {
+        public override ActorType ActorType { get { return ActorType.NPC; } }
+
+        private Actor _target = null;
+        private Actor _spawner = null;
+        private int walkAnimationSNO;
+        private int attackAnimationSNO;
+
+        public MysticAllyEffect(World world, int actorSNO, Vector3D position, Actor spawner) :
+            base(world, actorSNO, position)
+        {
+            this._spawner = spawner;
+        }
+
+        public override void setAdditionalAttributes()
+        {
+            this.Attributes[GameAttribute.Cannot_Be_Added_To_AI_Target_List] = false;
+            this.Attributes[GameAttribute.Is_Power_Proxy] = false;
+            this.Attributes[GameAttribute.Untargetable] = true;
+            this.Attributes[GameAttribute.UntargetableByPets] = true;
+            this.Attributes[GameAttribute.Invulnerable] = false;
+
+            this.Attributes[GameAttribute.Uninterruptible] = true;
+
+            this.Attributes[GameAttribute.Hitpoints_Max_Total] = 100f;
+            this.Attributes[GameAttribute.Hitpoints_Max] = 100f;
+            this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f;
+            this.Attributes[GameAttribute.Hitpoints_Cur] = 100f;
+            this.Attributes[GameAttribute.Invulnerable] = false;
+            this.Attributes[GameAttribute.TeamID] = 1;
+            this.Attributes[GameAttribute.Level] = 1;
+
+            this.GBHandle.Type = (int)GBHandleType.CustomBrain;
+            this.idleAnimationSNO = (this.ActorSNO == 169904) ? 69968 : 69632;
+            this.walkAnimationSNO = (this.ActorSNO == 169904) ? 69728 : 69728; // TODO: find tags
+            this.attackAnimationSNO = (this.ActorSNO == 169904) ? 69776 : 69776; // TODO: find tags
+            this.Scale = 1.22f;
+            this.ticksBetweenActions = 30; // 500 ms
+            this.walkDistance = 2f;
+        }
+
+        public override void Update()
+        {
+            if (_target == _spawner)
+            {
+                // following player, try to get monsters nearby
+                _target = null;
+            }
+            // player is too far away, warp to his position
+            if (GetDistance(_spawner) > 200)
+            {
+                this.Position = _spawner.Position;
+                this._target = null;
+                this.World.BroadcastIfRevealed(ACDWorldPositionMessage, this);
+                return;
+            }
+            if ((_target == null) || (_target.World == null) || (this.World.GetActor(_target.DynamicID) == null))
+            {
+                _target = getTarget(50f);
+            }
+            if (!CheckRange(_target, 3f))
+            {
+                MoveTo(_target);
+            }
+            else if ((_target.ActorType == Actors.ActorType.Monster))
+            {
+                if (this.World.Game.Tick > this.Attributes[GameAttribute.Last_Action_Timestamp] + this.ticksBetweenActions)
+                {
+                    this.Attributes[GameAttribute.Last_Action_Timestamp] = this.World.Game.Tick;
+                    if (_target.World != null)
+                    {
+                        Attack(_target);
+                        (_target as Monster).Die((_spawner as Player.Player));
+                        _target = null;
+                    }
+                    else
+                    {
+                        _target = null;
+                    }
+                }
+            }
+        }
+
+        private Actor getTarget(float range)
+        {
+            Actor result = null;
+            List<Actor> actors = this.World.GetActorsInRange(this.Position, 50f);
+            if (actors.Count > 1)
+            {
+                // TODO: get nearest monster
+                for (int i = 0; i < actors.Count; i++)
+                {
+                    if (actors[i] == this)
+                    {
+                        // don't target self
+                        continue;
+                    }
+                    if (actors[i].ActorType == Actors.ActorType.Monster)
+                    {
+                        if ((actors[i].World == null) || (this.World.GetActor(actors[i].DynamicID) == null))
+                        {
+                            continue;
+                        }
+                        result = actors[i];
+                        break;
+                    }
+                }
+            }
+            if (result == null)
+            {
+                return _spawner;
+            }
+            return result;
+        }
+
+        private void Attack(Actor target)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            this.World.BroadcastIfRevealed(new PlayAnimationMessage()
+            {
+                ActorID = this.DynamicID,
+                Field1 = 0xb,
+                Field2 = 0,
+                tAnim = new PlayAnimationMessageSpec[1]
+                {
+                    new PlayAnimationMessageSpec()
+                    {
+                        Field0 = 0x20,
+                        Field1 = attackAnimationSNO,
+                        Field2 = 0x0,
+                        Field3 = 0.174f
+                    }
+                }
+            }, this);
+        }
+
+        private bool _cLientKnowsWalkAnimation = false;
+        private void MoveTo(Actor target)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            float angle = GetFacingAngle(target);
+            float[] delta = GetDistanceDelta(angle);
+            Position.X += delta[0];
+            Position.Y += delta[1];
+            angle = GetFacingAngle(target);
+
+            if (_cLientKnowsWalkAnimation)
+            {
+                this.World.BroadcastIfRevealed(new NotifyActorMovementMessage()
+                {
+                    ActorId = (int)this.DynamicID,
+                    Position = this.Position,
+                    Angle = angle,
+                    Id = 0x006E,
+                }, this);
+            }
+            else
+            {
+                this.World.BroadcastIfRevealed(new NotifyActorMovementMessage()
+                {
+                    ActorId = (int)this.DynamicID,
+                    Position = this.Position,
+                    Angle = angle,
+                    Field3 = false,
+                    Field4 = 0.174f,
+                    Field5 = 0,
+                    Id = 0x006E,
+                    Field6 = this.walkAnimationSNO,
+
+                }, this);
+                _cLientKnowsWalkAnimation = true;
+            }
         }
     }
 
@@ -619,7 +811,7 @@ namespace Mooege.Core.GS.Effect
                         effectID2 = 96176;//96177;
                         break;
                     case 2:
-                        effectID = 72331; // cast
+                        effectID = 143566; // cast
                         effectID2 = 96178;
                         startingTick += actor.World.Game.Tick + (6 * 3);
                         break;
@@ -702,8 +894,8 @@ namespace Mooege.Core.GS.Effect
             }
             else if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.WayOfTheHundredFists)
             {
-                int effectID = 2612;
-                int masterEffectID = 137345;
+                int effectID = 2612;//((actor as Player.Player).Properties.Gender == 0) ? 2612 : ???;
+                int masterEffectID = 137345;//((actor as Player.Player).Properties.Gender == 0) ? 137345 ; ???;
                 int startingTick = 0;
                 switch (message.Field5)
                 {
@@ -711,13 +903,13 @@ namespace Mooege.Core.GS.Effect
                         startingTick = actor.World.Game.Tick + (6 * 3);
                         break;
                     case 1:
-                        effectID = 98412;
-                        masterEffectID = 137346;
+                        effectID = 98412;//((actor as Player.Player).Properties.Gender == 0) ? 98412 : ???;
+                        masterEffectID = 137346;//((actor as Player.Player).Properties.Gender == 0) ? 137346 : ???;
                         break;
                     case 2:
                         startingTick = actor.World.Game.Tick + (6 * 2);
-                        masterEffectID = 137347;
-                        effectID = 98416;
+                        masterEffectID = 137347;//((actor as Player.Player).Properties.Gender == 0) ? 137347 : ???;
+                        effectID = 98416;//((actor as Player.Player).Properties.Gender == 0) ? 98416 : ???;
                         break;
                 }
                 actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = masterEffectID, StartingTick = startingTick });
