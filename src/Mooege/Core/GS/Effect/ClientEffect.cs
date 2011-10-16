@@ -38,7 +38,7 @@ namespace Mooege.Core.GS.Effect
          */
         public bool Process(int tick)
         {
-            if (this.Actor.World.GetActor(this.Actor.DynamicID) == null)
+            if ((this.Actor == null) || (this.Actor.World == null) || (this.Actor.World.GetActor(this.Actor.DynamicID) == null))
             {
                 // actor already left world, remove effect
                 return true;
@@ -129,7 +129,7 @@ namespace Mooege.Core.GS.Effect
             else
             {
                 // check if effect should end
-                if ((this.NeedsActor) && (this.ProxyActor.World.GetActor(this.ProxyActor.DynamicID) == null))
+                if ((this.NeedsActor) && ((this.ProxyActor == null) || (this.ProxyActor.World == null) || (this.ProxyActor.World.GetActor(this.ProxyActor.DynamicID) == null)))
                 {
                     // proxy actor already left world, remove effect
                     EffectEndingAction();
