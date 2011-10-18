@@ -324,7 +324,6 @@ namespace Mooege.Core.GS.Effect
             {
                 // doesn't work (exploding palm 2)
                 GameAttributeMap map = new GameAttributeMap();
-                map[GameAttribute.Buff_Active, 92225] = true;
                 map[GameAttribute.Bleeding] = true;
                 map[GameAttribute.Bleed_Duration] = DurationInTicks.Value;
                 map[GameAttribute.Buff_Visual_Effect, 92225] = true;
@@ -386,6 +385,12 @@ namespace Mooege.Core.GS.Effect
             }
             else if (EffectID == 2588)
             {
+                this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                {
+                    ActorID = Actor.DynamicID,
+                    Field1 = 32,
+                    Field2 = 137107,
+                }, Actor);
                 // blinding flash
                 List<Actor> actors = this.Actor.World.GetActorsInRange(Actor.Position, 20f);
                 for (int i = 0; i < actors.Count; i++)
@@ -399,12 +404,6 @@ namespace Mooege.Core.GS.Effect
             else if (EffectID == 137107)
             {
                 // blind flash contact
-                this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
-                {
-                    ActorID = Actor.DynamicID,
-                    Field1 = 32,
-                    Field2 = 137107,
-                }, Actor);
                 Actor.Attributes[GameAttribute.Hit_Chance] -= 0.4f;
                 if (Actor.Attributes[GameAttribute.Hit_Chance] < 0.05)
                 {
@@ -474,7 +473,6 @@ namespace Mooege.Core.GS.Effect
             {
                 // doesn't work (exploding palm 2)
                 GameAttributeMap map = new GameAttributeMap();
-                map[GameAttribute.Buff_Active, 92225] = false;
                 map[GameAttribute.Bleeding] = false;
                 map[GameAttribute.Bleed_Duration] = 0;
                 map[GameAttribute.Buff_Visual_Effect, 92225] = false;
@@ -1161,7 +1159,7 @@ namespace Mooege.Core.GS.Effect
             }
             else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.BlindingFlash)
             {
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 2588});
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 2588 });
             }
             else if (message.PowerSNO == Skills.Skills.Wizard.Utility.Archon)
             {

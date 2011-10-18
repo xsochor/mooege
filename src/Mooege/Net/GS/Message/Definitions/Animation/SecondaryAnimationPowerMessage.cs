@@ -31,8 +31,9 @@ namespace Mooege.Net.GS.Message.Definitions.Animation
         public AnimPreplayData Field1;
 
         public void Handle(GameClient client)
-        { }
+        {
             ClientEffect.CreateVisualSkill(client.Player, this);
+        }
 
         public override void Parse(GameBitBuffer buffer)
         {
