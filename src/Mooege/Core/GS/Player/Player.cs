@@ -469,29 +469,6 @@ namespace Mooege.Core.GS.Player
             }
             else
             {
-                if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.DashingStrike)
-                {
-                    // TODO: add player going to auto-pilot: movement to place/target
-                    this.Position = message.Field2.Position;
-                    client.SendMessage(new ACDWorldPositionMessage
-                    {
-                        ActorID = this.DynamicID,
-                        WorldLocation = new WorldLocationMessageData
-                        {
-                            Scale = 1f,
-                            Transform = new PRTransform
-                            {
-                                Rotation = new Quaternion
-                                {
-                                    Amount = this.RotationAmount,
-                                    Axis = this.RotationAxis
-                                },
-                                ReferencePoint = message.Field2.Position
-                            },
-                            WorldID = this.World.DynamicID
-                        }
-                    });
-                }
                 //Logger.Warn("Player targeted an invalid object (ID = {0})", message.TargetID);
             }
         }

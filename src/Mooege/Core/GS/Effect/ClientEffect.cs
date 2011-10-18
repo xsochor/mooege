@@ -20,6 +20,7 @@ namespace Mooege.Core.GS.Effect
 {
     public class ActorEffect
     {
+        protected static readonly Logger Logger = LogManager.CreateLogger();
         // TODO: deal with repeated casting of the same overlapping effect with actor (e. g. lethal decoy)
         // TODO: after ComplexEffectAddMessage is decyphered switch from sending multiple effect to sending one complex
 
@@ -31,6 +32,7 @@ namespace Mooege.Core.GS.Effect
         public int? DurationInTicks { get; set; } // longetivity of effect 
         public bool NeedsActor { get; set; } // proxy actor - some effects (mainly those lingering in world for time) need actor
         public Vector3D Position { get; set; } // some effects are cast on Position
+        public float Angle { get; set; } // some effects need angle
         public bool Attached { get; set; } // some lingering effects are attached to other actors
 
         private Boolean _started = false;
@@ -276,6 +278,21 @@ namespace Mooege.Core.GS.Effect
             else if ((EffectID == 99241) || (EffectID == 208435))
             {
                 // LethalDecoy
+                //                Actor.Attributes[GameAttribute.Custom_Target_Weight] = 100f; // on decoy 
+                //                 map[GameAttribute.Forced_Enemy_ACDID]
+                //                map[GameAttribute.Is_Player_Decoy] = true; // on decoy
+                List<Actor> actors = this.Actor.World.GetActorsInRange(Actor.Position, 8f);
+                Monster monster = null;
+                for (int i = 0; i < actors.Count; i++)
+                {
+                    if ((actors[i].World != null) && (actors[i].ActorType == ActorType.Monster))
+                    {
+                        monster = (actors[i] as Monster);
+                        monster.Attributes[GameAttribute.Forced_Enemy_ACDID] = unchecked((int)ProxyActor.DynamicID); // redying monsters
+                        monster.Attributes[GameAttribute.Last_ACD_Attacked] = unchecked((int)ProxyActor.DynamicID);
+                    }
+                }
+
             }
             else if (EffectID == 143230)
             {
@@ -309,6 +326,7 @@ namespace Mooege.Core.GS.Effect
                 GameAttributeMap map = new GameAttributeMap();
                 map[GameAttribute.Buff_Active, 92225] = true;
                 map[GameAttribute.Bleeding] = true;
+                map[GameAttribute.Bleed_Duration] = DurationInTicks.Value;
                 map[GameAttribute.Buff_Visual_Effect, 92225] = true;
                 foreach (var msg in map.GetMessageList(Actor.DynamicID))
                     this.Actor.World.BroadcastIfRevealed(msg, Actor);
@@ -319,6 +337,17 @@ namespace Mooege.Core.GS.Effect
                 GameAttributeMap map = new GameAttributeMap();
                 map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = true; // switch on effect
                 map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+                Actor.World.BroadcastIfRevealed(new NotifyActorMovementMessage
+                {
+                    ActorId = unchecked((int)Actor.DynamicID),
+                    Position = Position,
+                    Angle = Angle,
+                    Field3 = false,
+                    Field4 = Effect.GetDistance(Actor.Position, Position) / DurationInTicks, // speed, distance per tick
+                    //Field5 = 0x00220008, // ???
+                    Field6 = (Actor as Player.Player).Properties.Gender == 0 ? 69840 : 90432// animation TAG, 0xFFFFFFFF - actor stopped (use idle?)
+                }, Actor);
+                Actor.Position = Position; // update position on server
             }
             else if (EffectID == 143782)
             {
@@ -344,6 +373,58 @@ namespace Mooege.Core.GS.Effect
                 map[GameAttribute.Power_Cooldown, PowerSNO] = Actor.World.Game.Tick + (60 * 15);
                 map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
             }
+            else if (EffectID == 162301)
+            {
+                // Archon TEST
+                /* // not working
+                Actor.World.BroadcastIfRevealed(new ACDChangeActorMessage
+                {
+                    Field0 = unchecked((int)Actor.DynamicID),
+                    Field1 = EffectID
+                }, Actor);
+                 */
+            }
+            else if (EffectID == 2588)
+            {
+                // blinding flash
+                List<Actor> actors = this.Actor.World.GetActorsInRange(Actor.Position, 20f);
+                for (int i = 0; i < actors.Count; i++)
+                {
+                    if ((actors[i].World != null) && (actors[i].ActorType == ActorType.Monster))
+                    {
+                        this.Actor.World.AddEffect(new ActorEffect { Actor = actors[i], EffectID = 137107, DurationInTicks = (60 * 5) });
+                    }
+                }
+            }
+            else if (EffectID == 137107)
+            {
+                // blind flash contact
+                this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                {
+                    ActorID = Actor.DynamicID,
+                    Field1 = 32,
+                    Field2 = 137107,
+                }, Actor);
+                Actor.Attributes[GameAttribute.Hit_Chance] -= 0.4f;
+                if (Actor.Attributes[GameAttribute.Hit_Chance] < 0.05)
+                {
+                    Actor.Attributes[GameAttribute.Hit_Chance] = 0.05f;
+                }
+                GameAttributeMap map = new GameAttributeMap();
+                map[GameAttribute.Blind] = true;
+                map[GameAttribute.Buff_Visual_Effect, 2032] = true;
+                map[GameAttribute.Hit_Chance] = Actor.Attributes[GameAttribute.Hit_Chance]; 
+                foreach (var msg in map.GetMessageList(Actor.DynamicID))
+                    this.Actor.World.BroadcastIfRevealed(msg, Actor);
+            }
+            // Tempest rush               map[GameAttribute.Skill_Toggled_State]
+            //map[GameAttribute.Spawned_by_ACDID]
+            //map[GameAttribute.Spawner_Concurrent_Count_ID]
+            //map[GameAttribute.Summon_Count]
+            //map[GameAttribute.Summon_Expiration_Tick]
+            //map[GameAttribute.Summoned_By_ACDID]
+            //map[GameAttribute.Summoned_By_SNO]
+            //map[GameAttribute.Summoner_ID]
         }
 
         // effect end actions
@@ -380,6 +461,14 @@ namespace Mooege.Core.GS.Effect
                         Field1 = 32,
                         Field2 = 99504
                     }, this.ProxyActor);
+                List<Actor> actors = this.Actor.World.GetActorsInRange(ProxyActor.Position, 20f);
+                for (int i = 0; i < actors.Count; i++)
+                {
+                    if ((actors[i].World != null) && (actors[i].ActorType == ActorType.Monster))
+                    {
+                        (actors[i] as Monster).Die((Actor as Player.Player));
+                    }
+                }
             }
             else if (EffectID == 92225)
             {
@@ -387,7 +476,7 @@ namespace Mooege.Core.GS.Effect
                 GameAttributeMap map = new GameAttributeMap();
                 map[GameAttribute.Buff_Active, 92225] = false;
                 map[GameAttribute.Bleeding] = false;
-                map[GameAttribute.Bleeding] = false;
+                map[GameAttribute.Bleed_Duration] = 0;
                 map[GameAttribute.Buff_Visual_Effect, 92225] = false;
                 foreach (var msg in map.GetMessageList(Actor.DynamicID))
                     this.Actor.World.BroadcastIfRevealed(msg, Actor);
@@ -408,15 +497,15 @@ namespace Mooege.Core.GS.Effect
                 map[GameAttribute.Root_Immune] = false;
                 Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] = 0; // update attributes on server too
                 map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
-                    this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
-                    {
-                        Id = 0x7a,
-                        ActorID = this.Actor.DynamicID,
-                        Field1 = 32,
-                        Field2 = 143230,
-                    }, this.Actor);
-                    map[GameAttribute.Buff_Active, PowerSNO] = false;
-                    map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
+                this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                {
+                    Id = 0x7a,
+                    ActorID = this.Actor.DynamicID,
+                    Field1 = 32,
+                    Field2 = 143230,
+                }, this.Actor);
+                map[GameAttribute.Buff_Active, PowerSNO] = false;
+                map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
                 map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
             }
             else if (EffectID == 140190)
@@ -425,7 +514,8 @@ namespace Mooege.Core.GS.Effect
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfHealing;
                 Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] -= 1; // update attributes on server too
                 map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
-                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0) {
+                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
+                {
                     // last mantra casted expired
                     this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
@@ -445,7 +535,8 @@ namespace Mooege.Core.GS.Effect
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfConviction;
                 Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] -= 1; // update attributes on server too
                 map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
-                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0) {
+                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
+                {
                     // last mantra casted expired
                     this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
@@ -465,7 +556,8 @@ namespace Mooege.Core.GS.Effect
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfRetribution;
                 Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] -= 1; // update attributes on server too
                 map[GameAttribute.Buff_Icon_Count0, PowerSNO] = Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO];
-                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0) {
+                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
+                {
                     // last mantra casted expired
                     this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
@@ -495,13 +587,50 @@ namespace Mooege.Core.GS.Effect
                 GameAttributeMap map = new GameAttributeMap();
                 map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
                 map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
+                this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
+                {
+                    ActorID = this.Actor.DynamicID,
+                    Field1 = 32,
+                    Field2 = 113720
+                }, this.Actor);
+                List<Actor> actors = this.Actor.World.GetActorsInRange(Actor.Position, 8f);
+                for (int i = 0; i < actors.Count; i++)
+                {
+                    if ((actors[i].World != null) && (actors[i].ActorType == ActorType.Monster))
+                    {
+                        (actors[i] as Monster).Die((Actor as Player.Player));
+                    }
+                }
+            }
+            else if (EffectID == 162301)
+            {
+                int sno = ((Actor as Player.Player).Properties.Gender == 0) ? 6544 : 6526;
+                Actor.World.BroadcastIfRevealed(new ACDChangeActorMessage
+                {
+                    Field0 = unchecked((int)Actor.DynamicID),
+                    Field1 = sno
+                }, Actor);
+            }
+            else if (EffectID == 137107)
+            {
+                // stop blind
+                Actor.Attributes[GameAttribute.Hit_Chance] += 0.4f;
+                if (Actor.Attributes[GameAttribute.Hit_Chance] > 0.95)
+                {
+                    Actor.Attributes[GameAttribute.Hit_Chance] = 0.95f;
+                }
+                GameAttributeMap map = new GameAttributeMap();
+                map[GameAttribute.Blind] = false;
+                map[GameAttribute.Buff_Visual_Effect, 2032] = false;
+                foreach (var msg in map.GetMessageList(Actor.DynamicID))
+                    this.Actor.World.BroadcastIfRevealed(msg, Actor);
             }
         }
     }
 
     public class Effect : Actor
     {
-        private static readonly Logger Logger = LogManager.CreateLogger();
+        protected static readonly Logger Logger = LogManager.CreateLogger();
 
         public const int GenericPowerProxyID = 4176;
 
@@ -511,7 +640,7 @@ namespace Mooege.Core.GS.Effect
 
         protected int ticksBetweenActions = 6;
 
-        protected float walkDistance = 1f;
+        protected float walkDistance = 0.1f; // disatnce per 1 Tick
 
         public Effect(World world, int actorSNO, Vector3D position)
             : base(world, world.NewActorID)
@@ -571,29 +700,29 @@ namespace Mooege.Core.GS.Effect
             this.Destroy();
         }
 
-        protected bool CheckRange(Actor target, float range)
+        public static bool CheckRange(Actor actor, Actor target, float range)
         {
             if (target == null) return false;
-            return (Math.Sqrt(Math.Pow(this.Position.X - target.Position.X,2) + Math.Pow(this.Position.Y - target.Position.Y, 2)) < range);
+            return (Math.Sqrt(Math.Pow(actor.Position.X - target.Position.X, 2) + Math.Pow(actor.Position.Y - target.Position.Y, 2)) < range);
         }
 
-        protected float GetDistance(Actor target)
+        public static float GetDistance(Vector3D startPosition, Vector3D targetPosition)
         {
-            if (target == null) return 0;
-            return (float)Math.Sqrt(Math.Pow(this.Position.X - target.Position.X,2) + Math.Pow(this.Position.Y - target.Position.Y, 2));
+            if (targetPosition == null) return 0;
+            return (float)Math.Sqrt(Math.Pow(startPosition.X - targetPosition.X, 2) + Math.Pow(startPosition.Y - targetPosition.Y, 2));
         }
 
         protected float[] GetDistanceDelta(float facingAngle)
         {
             float[] res = new float[2];
-            res[0] = walkDistance * (float)Math.Sin(facingAngle + 20); // TODO: find more precise
-            res[1] = walkDistance * (float)Math.Cos(-facingAngle + 20);
+            res[0] = (walkDistance * 6) * (float)Math.Cos(facingAngle); // sending this in 100ms (6 Ticks) -> walkDistance * 6 Ticks
+            res[1] = (walkDistance * 6) * (float)Math.Sin(facingAngle);
             return res;
         }
 
-        protected float GetFacingAngle(Actor target)
+        public static float GetFacingAngle(Vector3D lookerPosition, Vector3D targetPosition)
         {
-            return -1.0f * (float)Math.Atan2(this.Position.X - target.Position.X, this.Position.Y - target.Position.Y) - 20; // TODO: find more precise
+            return (float)Math.Atan2((targetPosition.Y - lookerPosition.Y), (targetPosition.X - lookerPosition.X));
         }
     }
 
@@ -601,15 +730,17 @@ namespace Mooege.Core.GS.Effect
     {
         public override ActorType ActorType { get { return ActorType.NPC; } }
 
-        private Actor _target = null;
-        private Actor _spawner = null;
         private int walkAnimationSNO;
         private int attackAnimationSNO;
 
-        public MysticAllyEffect(World world, int actorSNO, Vector3D position, Actor spawner) :
+        public MysticAllyEffect(World world, int actorSNO, Vector3D position, Actor owner) :
             base(world, actorSNO, position)
         {
-            this._spawner = spawner;
+            this.Attributes[GameAttribute.Summoned_By_ACDID] = unchecked((int)owner.DynamicID);
+            this.Attributes[GameAttribute.Summoned_By_SNO] = Skills.Skills.Monk.SpiritSpenders.MysticAlly;
+            this.Attributes[GameAttribute.Summoner_ID] = unchecked((int)owner.DynamicID);
+            this.Attributes[GameAttribute.Follow_Target_ACDID] = unchecked((int)owner.DynamicID);
+            this.Attributes[GameAttribute.Last_ACD_Attacked] = 0;
         }
 
         public override void setAdditionalAttributes()
@@ -626,7 +757,6 @@ namespace Mooege.Core.GS.Effect
             this.Attributes[GameAttribute.Hitpoints_Max] = 100f;
             this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f;
             this.Attributes[GameAttribute.Hitpoints_Cur] = 100f;
-            this.Attributes[GameAttribute.Invulnerable] = false;
             this.Attributes[GameAttribute.TeamID] = 1;
             this.Attributes[GameAttribute.Level] = 1;
 
@@ -635,58 +765,67 @@ namespace Mooege.Core.GS.Effect
             this.walkAnimationSNO = (this.ActorSNO == 169904) ? 69728 : 69728; // TODO: find tags
             this.attackAnimationSNO = (this.ActorSNO == 169904) ? 69776 : 69776; // TODO: find tags
             this.Scale = 1.22f;
-            this.ticksBetweenActions = 30; // 500 ms
-            this.walkDistance = 2f;
+            this.ticksBetweenActions = 6 * 9; // 900 ms
+            this.walkDistance = 0.23f;
+
         }
 
         public override void Update()
         {
-            if (_target == _spawner)
+            Player.Player owner = this.World.GetPlayer((uint)this.Attributes[GameAttribute.Summoner_ID]);
+            if (GetDistance(this.Position, owner.Position) > 200)
             {
-                // following player, try to get monsters nearby
-                _target = null;
-            }
-            // player is too far away, warp to his position
-            if (GetDistance(_spawner) > 200)
-            {
-                this.Position = _spawner.Position;
-                this._target = null;
+                // player is too far away, warp to his position
+                this.Position = owner.Position;
+                this.Attributes[GameAttribute.Last_ACD_Attacked] = 0;
                 this.World.BroadcastIfRevealed(ACDWorldPositionMessage, this);
                 return;
             }
-            if ((_target == null) || (_target.World == null) || (this.World.GetActor(_target.DynamicID) == null))
+            Actor target = null;
+            if (this.Attributes[GameAttribute.Last_ACD_Attacked] != 0)
             {
-                _target = getTarget(50f);
+                target = this.World.GetActor((uint)this.Attributes[GameAttribute.Last_ACD_Attacked]);
             }
-            if (!CheckRange(_target, 3f))
+            if ((target == null) || (target.World == null))
             {
-                MoveTo(_target);
-            }
-            else if ((_target.ActorType == Actors.ActorType.Monster))
-            {
-                if (this.World.Game.Tick > this.Attributes[GameAttribute.Last_Action_Timestamp] + this.ticksBetweenActions)
+                target = GetTarget(50f);
+                if (target != null)
                 {
-                    this.Attributes[GameAttribute.Last_Action_Timestamp] = this.World.Game.Tick;
-                    if (_target.World != null)
-                    {
-                        Attack(_target);
-                        (_target as Monster).Die((_spawner as Player.Player));
-                        _target = null;
-                    }
-                    else
-                    {
-                        _target = null;
-                    }
+                    this.Attributes[GameAttribute.Last_ACD_Attacked] = unchecked((int)target.DynamicID);
+                }
+            }
+            if (!CheckRange(this, target != null ? target : owner, 8f))
+            {
+                MoveTo(target != null ? target : owner);
+            }
+            else if (target != null)
+            {
+                if (this.World.Game.Tick < this.Attributes[GameAttribute.Last_Action_Timestamp] + this.ticksBetweenActions)
+                {
+                    return;
+                }
+                this.Attributes[GameAttribute.Last_Action_Timestamp] = this.World.Game.Tick;
+                if (target.World != null)
+                {
+                    Attack(target);
+                    (target as Monster).Die((owner as Player.Player));
+                    this.Attributes[GameAttribute.Last_ACD_Attacked] = 0;
+                }
+                else
+                {
+                    this.Attributes[GameAttribute.Last_ACD_Attacked] = 0;
                 }
             }
         }
 
-        private Actor getTarget(float range)
+        private Actor GetTarget(float range)
         {
             Actor result = null;
-            List<Actor> actors = this.World.GetActorsInRange(this.Position, 50f);
+            List<Actor> actors = this.World.GetActorsInRange(this.Position, range);
             if (actors.Count > 1)
             {
+                float distanceNearest = range; // max. range
+                float distance = 0f;
                 // TODO: get nearest monster
                 for (int i = 0; i < actors.Count; i++)
                 {
@@ -699,16 +838,17 @@ namespace Mooege.Core.GS.Effect
                     {
                         if ((actors[i].World == null) || (this.World.GetActor(actors[i].DynamicID) == null))
                         {
+                            // leaving world
                             continue;
                         }
-                        result = actors[i];
-                        break;
+                        distance = GetDistance(this.Position, actors[i].Position);
+                        if ((result == null) || (distance < distanceNearest))
+                        {
+                            result = actors[i];
+                            distanceNearest = distance;
+                        }
                     }
                 }
-            }
-            if (result == null)
-            {
-                return _spawner;
             }
             return result;
         }
@@ -723,16 +863,16 @@ namespace Mooege.Core.GS.Effect
             this.World.BroadcastIfRevealed(new PlayAnimationMessage()
             {
                 ActorID = this.DynamicID,
-                Field1 = 0xb,
+                Field1 = 0x3,
                 Field2 = 0,
                 tAnim = new PlayAnimationMessageSpec[1]
                 {
                     new PlayAnimationMessageSpec()
                     {
-                        Field0 = 0x20,
+                        Field0 = 0x26,
                         Field1 = attackAnimationSNO,
                         Field2 = 0x0,
-                        Field3 = 0.174f
+                        Field3 = 1.235224f
                     }
                 }
             }, this);
@@ -746,11 +886,11 @@ namespace Mooege.Core.GS.Effect
                 return;
             }
 
-            float angle = GetFacingAngle(target);
+            float angle = GetFacingAngle(this.Position, target.Position);
             float[] delta = GetDistanceDelta(angle);
             Position.X += delta[0];
             Position.Y += delta[1];
-            angle = GetFacingAngle(target);
+            angle = GetFacingAngle(this.Position, target.Position);
 
             if (_cLientKnowsWalkAnimation)
             {
@@ -770,7 +910,7 @@ namespace Mooege.Core.GS.Effect
                     Position = this.Position,
                     Angle = angle,
                     Field3 = false,
-                    Field4 = 0.174f,
+                    Field4 = walkDistance, // distance in Tick == speed
                     Field5 = 0,
                     Id = 0x006E,
                     Field6 = this.walkAnimationSNO,
@@ -917,9 +1057,21 @@ namespace Mooege.Core.GS.Effect
             }
             else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.DashingStrike)
             {
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = 111132, DurationInTicks = 24, StartingTick = actor.World.Game.Tick + (6 * 1) });
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = 192085, DurationInTicks = 30 });
-                
+                int duration = 6;
+                actor.World.AddEffect(new ActorEffect
+                {
+                    Actor = actor,
+                    EffectID = 192085,
+                    DurationInTicks = duration,
+                });
+                actor.World.AddEffect(new ActorEffect
+                {
+                    Actor = actor,
+                    EffectID = 111132,
+                    DurationInTicks = duration,
+                    Position = targetPosition,
+                    Angle = Effect.GetFacingAngle(actor.Position, targetPosition)
+                });
             }
             else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.LashingTailKick)
             {
@@ -1009,8 +1161,11 @@ namespace Mooege.Core.GS.Effect
             }
             else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.BlindingFlash)
             {
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 2588, });
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 137107, });
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 2588});
+            }
+            else if (message.PowerSNO == Skills.Skills.Wizard.Utility.Archon)
+            {
+                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 162301, DurationInTicks = (60 * 15) });
             }
         }
     }
