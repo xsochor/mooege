@@ -41,6 +41,7 @@ using Mooege.Net.GS.Message.Definitions.Tick;
 using Mooege.Net.GS.Message.Definitions.Conversation;
 using Mooege.Common.Helpers;
 using Mooege.Net.GS.Message.Definitions.Combat;
+using Mooege.Core.MooNet.Online;
 using System;
 
 
@@ -370,7 +371,7 @@ namespace Mooege.Core.GS.Player
 
         private void CollectGold()
         {
-            var actorList = this.World.GetActorsInRange(this.Position.X, this.Position.Y, this.Position.Z, 20f);
+            var actorList = this.World.GetActorsInRange(this.Position.X, this.Position.Y, this.Position.Z, 5f);
             foreach (var actor in actorList)
             {
                 Item item;
@@ -399,7 +400,7 @@ namespace Mooege.Core.GS.Player
 
         private void CollectHealthGlobe()
         {
-            var actorList = this.World.GetActorsInRange(this.Position.X, this.Position.Y, this.Position.Z, 20f);
+            var actorList = this.World.GetActorsInRange(this.Position.X, this.Position.Y, this.Position.Z, 5f);
             foreach (Actor actor in actorList)
             {
                 Item item;
@@ -407,29 +408,35 @@ namespace Mooege.Core.GS.Player
                 item = (Item)actor;
                 if (item.ItemType != ItemType.HealthGlobe) continue;
 
-                //This animation isn't the correct for collecting orbs, since i dont know what's the correct, i'll just use this
-                this.InGameClient.SendMessage(new FloatingNumberMessage()
+                //Remember, for PlayEffectMessage, field1=7 are globes picking animation.
+                this.InGameClient.SendMessage(new PlayEffectMessage()
                 {
-
                     ActorID = this.DynamicID,
-                    Number = item.Attributes[GameAttribute.Health_Globe_Bonus_Health], //for here, we need some customization on health orbs amounts
-                    Type = FloatingNumberMessage.FloatType.Green,
+                    Field1=7
                 });
 
-                this.AddHP(item.Attributes[GameAttribute.Health_Globe_Bonus_Health]);
+                foreach (var player in PlayerManager.OnlinePlayers)
+                {
+                    if (player.CurrentToon.Name != "Server")
+                    {
+                        player.InGameClient.Player.AddPercentageHP((int)item.Attributes[GameAttribute.Health_Globe_Bonus_Health]);
+                    }
+                }
 
                 item.Destroy();
 
             }
         }
 
+        public void AddPercentageHP(int percentage)
+        {
+            float quantity = (percentage * this.Attributes[GameAttribute.Hitpoints_Max]) / 100;
+            this.AddHP(quantity);
+        }
+
         public void AddHP(float quantity)
         {
             if (this.Attributes[GameAttribute.Hitpoints_Cur] + quantity >= this.Attributes[GameAttribute.Hitpoints_Max])
-                this.Attributes[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Max];
-            else
-                this.Attributes[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Cur] + quantity;
-            if (this.Attributes[GameAttribute.Hitpoints_Cur] + quantity > this.Attributes[GameAttribute.Hitpoints_Max])
                 this.Attributes[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Max];
             else
                 this.Attributes[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Cur] + quantity;
