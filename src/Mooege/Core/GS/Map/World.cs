@@ -80,9 +80,6 @@ namespace Mooege.Core.GS.Map
             // update players.
             foreach (var pair in this._players) { pair.Value.Update(); }
 
-            // update actors.
-            foreach (var pair in this._actors) { if (!(pair.Value is Player.Player)) { pair.Value.Update(); } }
-
             // update effects.
             int tick = this.Game.Tick;
             if (this._effects.Count != 0)
@@ -98,6 +95,10 @@ namespace Mooege.Core.GS.Map
                     }
                 }
             }
+
+            // update actors.
+            foreach (var pair in this._actors) { if (!(pair.Value is Player.Player)) { pair.Value.Update(); } } // don't update players twice
+
         }
 
         public void BroadcastIfRevealed(GameMessage message, Actor actor)

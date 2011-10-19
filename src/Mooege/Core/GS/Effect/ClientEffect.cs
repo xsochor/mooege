@@ -1,4 +1,22 @@
-﻿using System;
+﻿/*
+* Copyright (C) 2011 mooege project
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -761,11 +779,12 @@ namespace Mooege.Core.GS.Effect
             this.GBHandle.Type = (int)GBHandleType.CustomBrain;
             this.idleAnimationSNO = (this.ActorSNO == 169904) ? 69968 : 69632;
             this.walkAnimationSNO = (this.ActorSNO == 169904) ? 69728 : 69728; // TODO: find tags
-            this.attackAnimationSNO = (this.ActorSNO == 169904) ? 69776 : 69776; // TODO: find tags
+            this.attackAnimationSNO = (this.ActorSNO == 169904) ? 69776 : 130509; // TODO: find tags
             this.Scale = 1.22f;
             this.ticksBetweenActions = 6 * 9; // 900 ms
             this.walkDistance = 0.23f;
-
+            // TEST
+            this.Attributes[GameAttribute.Pet_Type] = 4;
         }
 
         public override void Update()
@@ -867,10 +886,10 @@ namespace Mooege.Core.GS.Effect
                 {
                     new PlayAnimationMessageSpec()
                     {
-                        Field0 = 0x26,
+                        Field0 = 0x2,
                         Field1 = attackAnimationSNO,
                         Field2 = 0x0,
-                        Field3 = 1.235224f
+                        Field3 = 1f
                     }
                 }
             }, this);
