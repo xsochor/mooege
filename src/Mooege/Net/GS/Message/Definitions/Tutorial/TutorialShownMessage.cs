@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2011 mooege project
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,58 +17,52 @@
  */
 
 using System.Text;
-using Mooege.Common.Helpers;
-using Mooege.Core.GS.Skills;
-using Mooege.Net.GS.Message.Fields;
-using Mooege.Core.GS.FXEffect;
 
-namespace Mooege.Net.GS.Message.Definitions.Animation
+namespace Mooege.Net.GS.Message.Definitions.Tutorial
 {
-    [Message(Opcodes.SecondaryAnimationPowerMessage)]
-    public class SecondaryAnimationPowerMessage : GameMessage,ISelfHandler
+    /// <summary>
+    /// Sent by the client after it has shown a tutorial
+    /// </summary>
+    [Message(Opcodes.TutorialShownMessage)]
+    public class TutorialShownMessage : GameMessage, ISelfHandler
     {
-        public int /* sno */ PowerSNO;
-        public AnimPreplayData Field1;
-
-        public void Handle(GameClient client)
-        {
-            ClientEffect.ProcessSkillPlayer(client.Player, this);
-        }
+        public int SNOTutorial;
 
         public override void Parse(GameBitBuffer buffer)
         {
-            PowerSNO = buffer.ReadInt(32);
-            if (buffer.ReadBool())
-            {
-                Field1 = new AnimPreplayData();
-                Field1.Parse(buffer);
-            }
+            SNOTutorial = buffer.ReadInt(32);
         }
 
         public override void Encode(GameBitBuffer buffer)
         {
-            buffer.WriteInt(32, PowerSNO);
-            buffer.WriteBool(Field1 != null);
-            if (Field1 != null)
-            {
-                Field1.Encode(buffer);
-            }
+            buffer.WriteInt(32, SNOTutorial);
         }
 
         public override void AsText(StringBuilder b, int pad)
         {
             b.Append(' ', pad);
-            b.AppendLine("SecondaryAnimationPowerMessage:");
+            b.AppendLine("TutorialShownMessage:");
             b.Append(' ', pad++);
             b.AppendLine("{");
-            b.Append(' ', pad); b.AppendLine("PowerSNO: 0x" + PowerSNO.ToString("X8"));
-            if (Field1 != null)
-            {
-                Field1.AsText(b, pad);
-            }
+            b.Append(' ', pad); b.AppendLine("SNOTutorial: 0x" + SNOTutorial.ToString("X8"));
             b.Append(' ', --pad);
             b.AppendLine("}");
         }
-    }
 
+
+        /// <summary>
+        /// Server only has to save what tutorials are shown, so the player
+        /// does not have to see them over and over...
+        /// </summary>
+        /// <param name="client"></param>
+        public void Handle(GameClient client)
+        {
+            for (int i = 0; i < client.Player.SeenTutorials.Length; i++)
+                if (client.Player.SeenTutorials[i] == -1)
+                {
+                    client.Player.SeenTutorials[i] = SNOTutorial;
+                    break;
+                }
+        }
+    }
 }

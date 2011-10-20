@@ -29,7 +29,7 @@ using Mooege.Net.GS.Message;
 using Mooege.Net.GS.Message.Fields;
 using Mooege.Net.GS.Message.Definitions.World;
 using Mooege.Core.GS.Test;
-using Mooege.Core.GS.Effect;
+using Mooege.Core.GS.FXEffect;
 
 // NOTE: Scenes are actually laid out in cells with Subscenes filling in certain areas under a Scene.
 //  We can use this design feature to track Actors' current scene and send updates to it and neighboring
@@ -47,7 +47,7 @@ namespace Mooege.Core.GS.Map
         private readonly ConcurrentDictionary<uint, Actor> _actors;
         private readonly ConcurrentDictionary<uint, Player.Player> _players; // Temporary for fast iteration for now since move/enter/leave handling is currently at the world level instead of the scene level
 
-        private readonly List<Effect.Effect> _effects;
+        private readonly List<FXEffect.FXEffect> _effects;
 
         public bool HasPlayersIn { get { return this._players.Count > 0; } }
 
@@ -67,7 +67,7 @@ namespace Mooege.Core.GS.Map
             //this.Scenes = new List<Scene>();
             this._actors = new ConcurrentDictionary<uint, Actor>();
             this._players = new ConcurrentDictionary<uint, Player.Player>();
-            this._effects = new List<Effect.Effect>();
+            this._effects = new List<FXEffect.FXEffect>();
             // NOTE: WorldSNO must be valid before adding it to the game
             this.WorldSNO = worldSNO;
             this.StartPosition = new Vector3D();
@@ -266,7 +266,7 @@ namespace Mooege.Core.GS.Map
 
         #region Collections
 
-        public void AddEffect(Effect.Effect effect)
+        public void AddEffect(FXEffect.FXEffect effect)
         {
             bool notAdding = false;
             int tick = this.Game.Tick;

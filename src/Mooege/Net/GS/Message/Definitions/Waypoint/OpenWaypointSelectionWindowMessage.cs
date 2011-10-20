@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (C) 2011 mooege project
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,58 +17,39 @@
  */
 
 using System.Text;
-using Mooege.Common.Helpers;
-using Mooege.Core.GS.Skills;
-using Mooege.Net.GS.Message.Fields;
-using Mooege.Core.GS.FXEffect;
 
-namespace Mooege.Net.GS.Message.Definitions.Animation
+namespace Mooege.Net.GS.Message.Definitions.Waypoint
 {
-    [Message(Opcodes.SecondaryAnimationPowerMessage)]
-    public class SecondaryAnimationPowerMessage : GameMessage,ISelfHandler
+    /// <summary>
+    /// Sent to the client to open the window that allows him to select his target waypoint
+    /// </summary>
+    [Message(Opcodes.OpenWaypointSelectionWindowMessage)]
+    public class OpenWaypointSelectionWindowMessage : GameMessage
     {
-        public int /* sno */ PowerSNO;
-        public AnimPreplayData Field1;
+        public uint ActorID;            // Actor's DynamicID
 
-        public void Handle(GameClient client)
-        {
-            ClientEffect.ProcessSkillPlayer(client.Player, this);
-        }
+        public OpenWaypointSelectionWindowMessage() : base(Opcodes.OpenWaypointSelectionWindowMessage) { }
 
         public override void Parse(GameBitBuffer buffer)
         {
-            PowerSNO = buffer.ReadInt(32);
-            if (buffer.ReadBool())
-            {
-                Field1 = new AnimPreplayData();
-                Field1.Parse(buffer);
-            }
+            ActorID = buffer.ReadUInt(32);
         }
 
         public override void Encode(GameBitBuffer buffer)
         {
-            buffer.WriteInt(32, PowerSNO);
-            buffer.WriteBool(Field1 != null);
-            if (Field1 != null)
-            {
-                Field1.Encode(buffer);
-            }
+            buffer.WriteUInt(32, ActorID);
         }
 
         public override void AsText(StringBuilder b, int pad)
         {
             b.Append(' ', pad);
-            b.AppendLine("SecondaryAnimationPowerMessage:");
+            b.AppendLine("OpenWaypointSelectionWindowMessage:");
             b.Append(' ', pad++);
             b.AppendLine("{");
-            b.Append(' ', pad); b.AppendLine("PowerSNO: 0x" + PowerSNO.ToString("X8"));
-            if (Field1 != null)
-            {
-                Field1.AsText(b, pad);
-            }
+            b.Append(' ', pad); b.AppendLine("ActorID: 0x" + ActorID.ToString("X8") + " (" + ActorID + ")");
             b.Append(' ', --pad);
             b.AppendLine("}");
         }
-    }
 
+    }
 }

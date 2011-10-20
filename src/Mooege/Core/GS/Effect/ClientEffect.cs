@@ -34,9 +34,9 @@ using Mooege.Net.GS.Message.Definitions.Animation;
 using Mooege.Net.GS.Message.Definitions.Actor;
 using Mooege.Common;
 
-namespace Mooege.Core.GS.Effect
+namespace Mooege.Core.GS.FXEffect
 {
-    public class Effect
+    public class FXEffect
     {
         protected static readonly Logger Logger = LogManager.CreateLogger();
         // TODO: deal with repeated casting of the same overlapping effect with actor (e. g. lethal decoy)
@@ -80,9 +80,9 @@ namespace Mooege.Core.GS.Effect
                             this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                             {
                                 Id = 0x7a,
-                                ActorID = this.Actor.DynamicID,
-                                Field1 = 32,
-                                Field2 = this.EffectID,
+                                ActorId = this.Actor.DynamicID,
+                                Effect = Effect.PlayEffectGroup,
+                                OptionalParameter = this.EffectID,
                             }, this.Actor);
                         }
                         else
@@ -133,9 +133,9 @@ namespace Mooege.Core.GS.Effect
                             this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                             {
                                 Id = 0x7a,
-                                ActorID = this.ProxyActor.DynamicID,
-                                Field1 = 32,
-                                Field2 = this.EffectID,
+                                ActorId = this.ProxyActor.DynamicID,
+                                Effect = Effect.PlayEffectGroup,
+                                OptionalParameter = this.EffectID,
                             }, this.ProxyActor);
                         }
                         EffectStartingAction();
@@ -360,9 +360,9 @@ namespace Mooege.Core.GS.Effect
                     Position = Position,
                     Angle = Angle,
                     Field3 = false,
-                    Field4 = EffectActor.GetDistance(Actor.Position, Position) / DurationInTicks, // speed, distance per tick
+                    Speed = EffectActor.GetDistance(Actor.Position, Position) / DurationInTicks, // speed, distance per tick
                     //Field5 = 0x00220008, // ???
-                    Field6 = (Actor as Player.Player).Properties.Gender == 0 ? 69840 : 90432// animation TAG, 0xFFFFFFFF - actor stopped (use idle?)
+                    AnimationTag = (Actor as Player.Player).Properties.Gender == 0 ? 69840 : 90432// animation TAG, 0xFFFFFFFF - actor stopped (use idle?)
                 }, Actor);
                 Actor.Position = Position; // update position on server
             }
@@ -405,9 +405,9 @@ namespace Mooege.Core.GS.Effect
             {
                 this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                 {
-                    ActorID = Actor.DynamicID,
-                    Field1 = 32,
-                    Field2 = 137107,
+                    ActorId = Actor.DynamicID,
+                    Effect = Effect.PlayEffectGroup,
+                    OptionalParameter = 137107,
                 }, Actor);
                 // blinding flash
                 List<Actor> actors = this.Actor.World.GetActorsInRange(Actor.Position, 20f);
@@ -415,7 +415,7 @@ namespace Mooege.Core.GS.Effect
                 {
                     if ((actors[i].World != null) && (actors[i].ActorType == ActorType.Monster))
                     {
-                        this.Actor.World.AddEffect(new Effect { Actor = actors[i], EffectID = 137107, DurationInTicks = (60 * 5) });
+                        this.Actor.World.AddEffect(new FXEffect { Actor = actors[i], EffectID = 137107, DurationInTicks = (60 * 5) });
                     }
                 }
             }
@@ -459,9 +459,9 @@ namespace Mooege.Core.GS.Effect
                     this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
                         Id = 0x7a,
-                        ActorID = this.Actor.DynamicID,
-                        Field1 = 32,
-                        Field2 = 199677,
+                        ActorId = this.Actor.DynamicID,
+                        Effect = Effect.PlayEffectGroup,
+                        OptionalParameter = 199677,
                     }, this.Actor);
                     map[GameAttribute.Dodge_Chance_Bonus] -= 0.3f;
                     map[GameAttribute.Buff_Active, PowerSNO] = false;
@@ -474,9 +474,9 @@ namespace Mooege.Core.GS.Effect
                 // LethalDecoy
                 this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
-                        ActorID = this.ProxyActor.DynamicID,
-                        Field1 = 32,
-                        Field2 = 99504
+                        ActorId = this.ProxyActor.DynamicID,
+                        Effect = Effect.PlayEffectGroup,
+                        OptionalParameter = 99504
                     }, this.ProxyActor);
                 List<Actor> actors = this.Actor.World.GetActorsInRange(ProxyActor.Position, 20f);
                 for (int i = 0; i < actors.Count; i++)
@@ -516,9 +516,9 @@ namespace Mooege.Core.GS.Effect
                 this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                 {
                     Id = 0x7a,
-                    ActorID = this.Actor.DynamicID,
-                    Field1 = 32,
-                    Field2 = 143230,
+                    ActorId = this.Actor.DynamicID,
+                    Effect = Effect.PlayEffectGroup,
+                    OptionalParameter = 143230,
                 }, this.Actor);
                 map[GameAttribute.Buff_Active, PowerSNO] = false;
                 map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
@@ -536,9 +536,9 @@ namespace Mooege.Core.GS.Effect
                     this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
                         Id = 0x7a,
-                        ActorID = this.Actor.DynamicID,
-                        Field1 = 32,
-                        Field2 = 199677,
+                        ActorId = this.Actor.DynamicID,
+                        Effect = Effect.PlayEffectGroup,
+                        OptionalParameter = 199677,
                     }, this.Actor);
                     map[GameAttribute.Buff_Active, PowerSNO] = false;
                     map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
@@ -557,9 +557,9 @@ namespace Mooege.Core.GS.Effect
                     this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
                         Id = 0x7a,
-                        ActorID = this.Actor.DynamicID,
-                        Field1 = 32,
-                        Field2 = 199677,
+                        ActorId = this.Actor.DynamicID,
+                        Effect = Effect.PlayEffectGroup,
+                        OptionalParameter = 199677,
                     }, this.Actor);
                     map[GameAttribute.Buff_Active, PowerSNO] = false;
                     map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
@@ -578,9 +578,9 @@ namespace Mooege.Core.GS.Effect
                     this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
                         Id = 0x7a,
-                        ActorID = this.Actor.DynamicID,
-                        Field1 = 32,
-                        Field2 = 199677,
+                        ActorId = this.Actor.DynamicID,
+                        Effect = Effect.PlayEffectGroup,
+                        OptionalParameter = 199677,
                     }, this.Actor);
                     map[GameAttribute.Buff_Active, PowerSNO] = false;
                     map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = false; // switch off effect
@@ -592,9 +592,9 @@ namespace Mooege.Core.GS.Effect
                 // inner sanct
                 this.ProxyActor.World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
-                        ActorID = this.ProxyActor.DynamicID,
-                        Field1 = 32,
-                        Field2 = 98556
+                        ActorId = this.ProxyActor.DynamicID,
+                        Effect = Effect.PlayEffectGroup,
+                        OptionalParameter = 98556
                     }, this.ProxyActor);
             }
             else if (EffectID == 111132)
@@ -605,9 +605,9 @@ namespace Mooege.Core.GS.Effect
                 map.SendMessage((Actor as Player.Player).InGameClient, Actor.DynamicID);
                 this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
                 {
-                    ActorID = this.Actor.DynamicID,
-                    Field1 = 32,
-                    Field2 = 113720
+                    ActorId = this.Actor.DynamicID,
+                    Effect = Effect.PlayEffectGroup,
+                    OptionalParameter = 113720
                 }, this.Actor);
                 List<Actor> actors = this.Actor.World.GetActorsInRange(Actor.Position, 8f);
                 for (int i = 0; i < actors.Count; i++)
@@ -810,7 +810,7 @@ namespace Mooege.Core.GS.Effect
                     this.Attributes[GameAttribute.Last_ACD_Attacked] = unchecked((int)target.DynamicID);
                 }
             }
-            if (!CheckRange(this, target != null ? target : owner, 8f))
+            if (!CheckRange(this, target != null ? target : owner, 12f))
             {
                 MoveTo(target != null ? target : owner);
             }
@@ -953,10 +953,10 @@ namespace Mooege.Core.GS.Effect
                     Position = this.Position,
                     Angle = angle,
                     Field3 = false,
-                    Field4 = this.speed, // distance in Tick == speed
+                    Speed = this.speed, // distance in Tick == speed
                     Field5 = 0,
                     Id = 0x006E,
-                    Field6 = this.walkAnimationSNO,
+                    AnimationTag = this.walkAnimationSNO,
 
                 }, this);
                 _cLientKnowsWalkAnimation = true;
@@ -971,7 +971,7 @@ namespace Mooege.Core.GS.Effect
         public HydraEffectActor(World world, int actorSNO, Vector3D position) : base(world, actorSNO, position) { }
     }
 
-    public class HydraEffect : Effect
+    public class HydraEffect : FXEffect
     {
     }
 
@@ -1042,8 +1042,8 @@ namespace Mooege.Core.GS.Effect
                             startingTick += (6 * 3);
                             break;
                     }
-                    world.AddEffect(new Effect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
-                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = startingTick });
                     break;
                 case Skills.Skills.Monk.SpiritGenerator.ExplodingPalm:
                     effectID = 142471;
@@ -1060,8 +1060,8 @@ namespace Mooege.Core.GS.Effect
                             startingTick += (6 * 2);
                             break;
                     }
-                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
-                    world.AddEffect(new Effect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
                     /* // to effect
                     if ((target != null) & (message.Field5 == 2))
                     {
@@ -1085,7 +1085,7 @@ namespace Mooege.Core.GS.Effect
                             startingTick += (6 * 3);
                             break;
                     }
-                    world.AddEffect(new Effect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
                     break;
                 case Skills.Skills.Monk.SpiritGenerator.CripplingWave:
                     effectID = 2603;
@@ -1100,7 +1100,7 @@ namespace Mooege.Core.GS.Effect
                             effectID = 147929;
                             break;
                     }
-                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, });
                     break;
                 case Skills.Skills.Monk.SpiritGenerator.SweepingWind:
                     effectID = 196981;
@@ -1115,7 +1115,7 @@ namespace Mooege.Core.GS.Effect
                             effectID = 196984;
                             break;
                     }
-                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, });
                     break;
                 case Skills.Skills.Monk.SpiritGenerator.WayOfTheHundredFists:
                     effectID = 2612;//(player.Properties.Gender == 0) ? 2612 : ???;
@@ -1135,17 +1135,17 @@ namespace Mooege.Core.GS.Effect
                             effectID = 98416;//(player.Properties.Gender == 0) ? 98416 : ???;
                             break;
                     }
-                    world.AddEffect(new Effect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
-                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = startingTick });
                     break;
                 case Skills.Skills.Monk.SpiritSpenders.DashingStrike:
-                    world.AddEffect(new Effect
+                    world.AddEffect(new FXEffect
                     {
                         Actor = player,
                         EffectID = 192085,
                         DurationInTicks = 6,
                     });
-                    world.AddEffect(new Effect
+                    world.AddEffect(new FXEffect
                     {
                         Actor = player,
                         EffectID = 111132,
@@ -1155,23 +1155,23 @@ namespace Mooege.Core.GS.Effect
                     });
                     break;
                 case Skills.Skills.Monk.SpiritSpenders.LashingTailKick:
-                    world.AddEffect(new Effect { Actor = player, EffectID = 143782 });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 143782 });
                     break;
                 case Skills.Skills.Monk.SpiritSpenders.WaveOfLight:
-                    world.AddEffect(new Effect { Actor = player, EffectID = 145011, });
-                    world.AddEffect(new Effect { Actor = player, EffectID = 144079, });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 145011, });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 144079, });
                     break;
                 case Skills.Skills.Monk.SpiritSpenders.SevenSidedStrike:
                     // TODO: find targets for effects, now targetting self
                     effectID = 98826;
                     startingTick += 12;
-                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = startingTick });
                     effectID = 98831;
                     startingTick += 12;
-                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = startingTick });
                     effectID = 98842;
                     startingTick += 12;
-                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = startingTick });
                     break;
             }
         }
@@ -1201,27 +1201,27 @@ namespace Mooege.Core.GS.Effect
             switch (message.PowerSNO)
             {
                 case Skills.Skills.Monk.Mantras.MantraOfEvasion:
-                    world.AddEffect(new Effect { Actor = player, EffectID = 143964, });
-                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 120), EffectID = 99694, Attached = true }); // 60 ticks/s * 120 = 120s
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 143964, });
+                    world.AddEffect(new FXEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 99694, Attached = true }); // 60 ticks/s * 120 = 120s
                     break;
                 case Skills.Skills.Monk.Mantras.MantraOfHealing:
-                    world.AddEffect(new Effect { Actor = player, EffectID = 99948, });
-                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 120), EffectID = 140190, Attached = true }); // 60 ticks/s * 120 = 120s
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 99948, });
+                    world.AddEffect(new FXEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 140190, Attached = true }); // 60 ticks/s * 120 = 120s
                     break;
                 case Skills.Skills.Monk.Mantras.MantraOfConviction:
-                    world.AddEffect(new Effect { Actor = player, EffectID = 95955, });
-                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 120), EffectID = 146990, Attached = true }); // 60 ticks/s * 120 = 120s
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 95955, });
+                    world.AddEffect(new FXEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 146990, Attached = true }); // 60 ticks/s * 120 = 120s
                     break;
                 case Skills.Skills.Monk.Mantras.MantraOfRetribution:
-                    world.AddEffect(new Effect { Actor = player, EffectID = 142974, });
-                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 120), EffectID = 142987, Attached = true }); // 60 ticks/s * 120 = 120s
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 142974, });
+                    world.AddEffect(new FXEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 142987, Attached = true }); // 60 ticks/s * 120 = 120s
                     break;
                 case Skills.Skills.Monk.SpiritSpenders.LethalDecoy:
                     effectID = (player.Properties.Gender == 0) ? 99241 : 208435;
-                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 5), EffectID = effectID, NeedsActor = true }); // 60 ticks/s * 5 = 5s
+                    world.AddEffect(new FXEffect { Actor = player, DurationInTicks = (60 * 5), EffectID = effectID, NeedsActor = true }); // 60 ticks/s * 5 = 5s
                     break;
                 case Skills.Skills.Monk.SpiritSpenders.BreathOfHeaven:
-                    world.AddEffect(new Effect { Actor = player, EffectID = 101174, });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 101174, });
                     /*
                      * move to effect
                     Actor.Attributes[GameAttribute.Resource_Cur, player.ResourceID] -= 75f;
@@ -1231,19 +1231,19 @@ namespace Mooege.Core.GS.Effect
                      * */
                     break;
                 case Skills.Skills.Monk.SpiritSpenders.InnerSanctuary:
-                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 8), EffectID = 98557, NeedsActor = true });
+                    world.AddEffect(new FXEffect { Actor = player, DurationInTicks = (60 * 8), EffectID = 98557, NeedsActor = true });
                     break;
                 case Skills.Skills.Monk.SpiritSpenders.Serenity:
-                    world.AddEffect(new Effect { Actor = player, EffectID = 123156, });
-                    world.AddEffect(new Effect { Actor = player, EffectID = 142890, });
-                    world.AddEffect(new Effect { Actor = player, EffectID = 143230, DurationInTicks = (60 * 3) });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 123156, });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 142890, });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 143230, DurationInTicks = (60 * 3) });
                     break;
                 case Skills.Skills.Monk.SpiritSpenders.MysticAlly:
                     effectID = (player.Properties.Gender == 0) ? 169904 : 123885;
-                    world.AddEffect(new Effect { Actor = player, DurationInTicks = -1, EffectID = effectID, NeedsActor = true }); // until is destroyed
+                    world.AddEffect(new FXEffect { Actor = player, DurationInTicks = -1, EffectID = effectID, NeedsActor = true }); // until is destroyed
                     break;
                 case Skills.Skills.Monk.SpiritSpenders.BlindingFlash:
-                    world.AddEffect(new Effect { Actor = player, EffectID = 2588 });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 2588 });
                     break;
             }
         }
@@ -1253,7 +1253,7 @@ namespace Mooege.Core.GS.Effect
             switch (message.PowerSNO)
             {
                 case Skills.Skills.Wizard.Utility.Archon:
-                    world.AddEffect(new Effect { Actor = player, EffectID = 162301, DurationInTicks = (60 * 15) });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 162301, DurationInTicks = (60 * 15) });
                     break;
                 case Skills.Skills.Wizard.Offensive.Hydra:
                     world.AddEffect(new HydraEffect { Actor = player});

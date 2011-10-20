@@ -179,18 +179,18 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            world.BroadcastGlobal(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            world.BroadcastGlobal(new ACDCreateActorMessage
             {
                 Id = 0x003E,
-                ActorID = aID,
+                ActorId = aID,
             });
 
             world.BroadcastGlobal(new ACDTranslateFacingMessage()
             {
                 Id = 0x0070,
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 4.884459f,
-                Field2 = false,
+                Immediately = false,
             });
 
             world.BroadcastGlobal(new SNONameDataMessage()
@@ -368,18 +368,18 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            player.InGameClient.SendMessage(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            player.InGameClient.SendMessage(new ACDCreateActorMessage
             {
                 Id = 0x003E,
-                ActorID = aID,
+                ActorId = aID,
             });
 
             player.InGameClient.SendMessage(new ACDTranslateFacingMessage()
             {
                 Id = 0x0070,
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 0.04497663f,
-                Field2 = false,
+                Immediately = false,
             });
             #endregion
 //            player.Inventory.AssignSharedStash(aID);
@@ -515,18 +515,18 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            world.BroadcastGlobal(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            world.BroadcastGlobal(new ACDCreateActorMessage
             {
                 Id = 0x003E,
-                ActorID = aID,
+                ActorId = aID,
             });
 
             world.BroadcastGlobal(new ACDTranslateFacingMessage()
             {
                 Id = 0x0070,
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 5.492608f,
-                Field2 = false,
+                Immediately = false,
             });
             #endregion
         }
@@ -654,16 +654,16 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            world.BroadcastGlobal(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            world.BroadcastGlobal(new ACDCreateActorMessage
             {
-                ActorID = aID,
+                ActorId = aID,
             });
 
             world.BroadcastGlobal(new ACDTranslateFacingMessage()
             {
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 3.163388f,
-                Field2 = false,
+                Immediately = false,
             });
 
             world.BroadcastGlobal(new SNONameDataMessage()
@@ -854,18 +854,18 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            world.BroadcastGlobal(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            world.BroadcastGlobal(new ACDCreateActorMessage
             {
                 Id = 0x003E,
-                ActorID = aID,
+                ActorId = aID,
             });
 
             world.BroadcastGlobal(new ACDTranslateFacingMessage()
             {
                 Id = 0x0070,
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 2.888546f,
-                Field2 = false,
+                Immediately = false,
             });
 
             world.BroadcastGlobal(new SetIdleAnimationMessage()
@@ -887,9 +887,9 @@ namespace Mooege.Core.GS.Test
             world.BroadcastGlobal(new TrickleMessage()
             {
                 Id = 0x0042,
-                ActorID = aID,
-                Field1 = 0x000255BB,
-                Field2 = new WorldPlace()
+                ActorId = aID,
+                ActorSNO = 0x000255BB,
+                WorldLocation = new WorldPlace()
                 {
                     Position = new Vector3D()
                     {
@@ -899,12 +899,12 @@ namespace Mooege.Core.GS.Test
                     },
                     WorldID = world.DynamicID,
                 },
-                Field4 = 0x00004DEB,
+                LevelAreaSNO = 0x00004DEB,
                 Field5 = 1f,
                 Field6 = 0x00000008,
                 Field7 = 0x00000024,
                 Field10 = 0x0AF96544,
-                Field12 = 0x0000F063,
+                StringListSNO = 0x0000F063,
             });
             #endregion
         }
@@ -1085,18 +1085,18 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            world.BroadcastGlobal(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            world.BroadcastGlobal(new ACDCreateActorMessage
             {
                 Id = 0x003E,
-                ActorID = aID,
+                ActorId = aID,
             });
 
             world.BroadcastGlobal(new ACDTranslateFacingMessage()
             {
                 Id = 0x0070,
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 2.888546f,
-                Field2 = false,
+                Immediately = false,
             });
 
             world.BroadcastGlobal(new SetIdleAnimationMessage()
@@ -1118,9 +1118,9 @@ namespace Mooege.Core.GS.Test
             world.BroadcastGlobal(new TrickleMessage()
             {
                 Id = 0x0042,
-                ActorID = aID,
-                Field1 = 56948,
-                Field2 = new WorldPlace()
+                ActorId = aID,
+                ActorSNO = 56948,
+                WorldLocation = new WorldPlace()
                 {
                     Position = new Vector3D()
                     {
@@ -1130,12 +1130,12 @@ namespace Mooege.Core.GS.Test
                     },
                     WorldID = world.DynamicID,
                 },
-                Field4 = 0x00004DEB,
+                LevelAreaSNO = 0x00004DEB,
                 Field5 = 1f,
                 Field6 = 0x00000008,
                 Field7 = 0x00000024,
                 Field10 = 0x0AF96544,
-                Field12 = 0x0000F063,
+                StringListSNO = 0x0000F063,
             });
             #endregion
         }
@@ -1316,18 +1316,18 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            world.BroadcastGlobal(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            world.BroadcastGlobal(new ACDCreateActorMessage
             {
                 Id = 0x003E,
-                ActorID = aID,
+                ActorId = aID,
             });
 
             world.BroadcastGlobal(new ACDTranslateFacingMessage()
             {
                 Id = 0x0070,
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 2.888546f,
-                Field2 = false,
+                Immediately = false,
             });
 
             world.BroadcastGlobal(new SetIdleAnimationMessage()
@@ -1349,9 +1349,9 @@ namespace Mooege.Core.GS.Test
             world.BroadcastGlobal(new TrickleMessage()
             {
                 Id = 0x0042,
-                ActorID = aID,
-                Field1 = 56947,
-                Field2 = new WorldPlace()
+                ActorId = aID,
+                ActorSNO = 56947,
+                WorldLocation = new WorldPlace()
                 {
                     Position = new Vector3D()
                     {
@@ -1361,12 +1361,12 @@ namespace Mooege.Core.GS.Test
                     },
                     WorldID = world.DynamicID,
                 },
-                Field4 = 0x00004DEB,
+                LevelAreaSNO = 0x00004DEB,
                 Field5 = 1f,
                 Field6 = 0x00000008,
                 Field7 = 0x00000024,
                 Field10 = 0x0AF96544,
-                Field12 = 0x0000F063,
+                StringListSNO = 0x0000F063,
             });
             #endregion
         }
@@ -1547,18 +1547,18 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            world.BroadcastGlobal(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            world.BroadcastGlobal(new ACDCreateActorMessage
             {
                 Id = 0x003E,
-                ActorID = aID,
+                ActorId = aID,
             });
 
             world.BroadcastGlobal(new ACDTranslateFacingMessage()
             {
                 Id = 0x0070,
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 2.888546f,
-                Field2 = false,
+                Immediately = false,
             });
 
             world.BroadcastGlobal(new SetIdleAnimationMessage()
@@ -1580,9 +1580,9 @@ namespace Mooege.Core.GS.Test
             world.BroadcastGlobal(new TrickleMessage()
             {
                 Id = 0x0042,
-                ActorID = aID,
-                Field1 = 56949,
-                Field2 = new WorldPlace()
+                ActorId = aID,
+                ActorSNO = 56949,
+                WorldLocation = new WorldPlace()
                 {
                     Position = new Vector3D()
                     {
@@ -1592,12 +1592,12 @@ namespace Mooege.Core.GS.Test
                     },
                     WorldID = world.DynamicID,
                 },
-                Field4 = 0x00004DEB,
+                LevelAreaSNO = 0x00004DEB,
                 Field5 = 1f,
                 Field6 = 0x00000008,
                 Field7 = 0x00000024,
                 Field10 = 0x0AF96544,
-                Field12 = 0x0000F063,
+                StringListSNO = 0x0000F063,
             });
             #endregion
         }
@@ -1778,18 +1778,18 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            world.BroadcastGlobal(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            world.BroadcastGlobal(new ACDCreateActorMessage
             {
                 Id = 0x003E,
-                ActorID = aID,
+                ActorId = aID,
             });
 
             world.BroadcastGlobal(new ACDTranslateFacingMessage()
             {
                 Id = 0x0070,
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 2.888546f,
-                Field2 = false,
+                Immediately = false,
             });
 
             world.BroadcastGlobal(new SetIdleAnimationMessage()
@@ -1811,9 +1811,9 @@ namespace Mooege.Core.GS.Test
             world.BroadcastGlobal(new TrickleMessage()
             {
                 Id = 0x0042,
-                ActorID = aID,
-                Field1 = 81610,//0x00001243,
-                Field2 = new WorldPlace()
+                ActorId = aID,
+                ActorSNO = 81610,//0x00001243,
+                WorldLocation = new WorldPlace()
                 {
                     Position = new Vector3D()
                     {
@@ -1823,12 +1823,12 @@ namespace Mooege.Core.GS.Test
                     },
                     WorldID = world.DynamicID,
                 },
-                Field4 = 0x00004DEB,
+                LevelAreaSNO = 0x00004DEB,
                 Field5 = 1f,
                 Field6 = 0x00000008,
                 Field7 = 0x00000024,
                 Field10 = 0x0AF96544,
-                Field12 = 0x0000F063,
+                StringListSNO = 0x0000F063,
             });
             #endregion
         }
@@ -2009,18 +2009,18 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            world.BroadcastGlobal(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            world.BroadcastGlobal(new ACDCreateActorMessage
             {
                 Id = 0x003E,
-                ActorID = aID,
+                ActorId = aID,
             });
 
             world.BroadcastGlobal(new ACDTranslateFacingMessage()
             {
                 Id = 0x0070,
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 2.888546f,
-                Field2 = false,
+                Immediately = false,
             });
 
             world.BroadcastGlobal(new SetIdleAnimationMessage()
@@ -2042,9 +2042,9 @@ namespace Mooege.Core.GS.Test
             world.BroadcastGlobal(new TrickleMessage()
             {
                 Id = 0x0042,
-                ActorID = aID,
-                Field1 = 4062,
-                Field2 = new WorldPlace()
+                ActorId = aID,
+                ActorSNO = 4062,
+                WorldLocation = new WorldPlace()
                 {
                     Position = new Vector3D()
                     {
@@ -2054,12 +2054,12 @@ namespace Mooege.Core.GS.Test
                     },
                     WorldID = world.DynamicID,
                 },
-                Field4 = 0x00004DEB,
+                LevelAreaSNO = 0x00004DEB,
                 Field5 = 1f,
                 Field6 = 0x00000008,
                 Field7 = 0x00000024,
                 Field10 = 0x0AF96544,
-                Field12 = 0x0000F063,
+                StringListSNO = 0x0000F063,
             });
             #endregion
         }
@@ -2240,18 +2240,18 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            world.BroadcastGlobal(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            world.BroadcastGlobal(new ACDCreateActorMessage
             {
                 Id = 0x003E,
-                ActorID = aID,
+                ActorId = aID,
             });
 
             world.BroadcastGlobal(new ACDTranslateFacingMessage()
             {
                 Id = 0x0070,
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 2.888546f,
-                Field2 = false,
+                Immediately = false,
             });
 
             world.BroadcastGlobal(new SetIdleAnimationMessage()
@@ -2273,9 +2273,9 @@ namespace Mooege.Core.GS.Test
             world.BroadcastGlobal(new TrickleMessage()
             {
                 Id = 0x0042,
-                ActorID = aID,
-                Field1 = 87037,
-                Field2 = new WorldPlace()
+                ActorId = aID,
+                ActorSNO = 87037,
+                WorldLocation = new WorldPlace()
                 {
                     Position = new Vector3D()
                     {
@@ -2285,12 +2285,12 @@ namespace Mooege.Core.GS.Test
                     },
                     WorldID = world.DynamicID,
                 },
-                Field4 = 0x00004DEB,
+                LevelAreaSNO = 0x00004DEB,
                 Field5 = 1f,
                 Field6 = 0x00000008,
                 Field7 = 0x00000024,
                 Field10 = 0x0AF96544,
-                Field12 = 0x0000F063,
+                StringListSNO = 0x0000F063,
             });
             #endregion
         }
@@ -2471,18 +2471,18 @@ namespace Mooege.Core.GS.Test
                 Field2 = -1,
             });
 
-            world.BroadcastGlobal(new ANNDataMessage(Opcodes.ANNDataMessage7)
+            world.BroadcastGlobal(new ACDCreateActorMessage
             {
                 Id = 0x003E,
-                ActorID = aID,
+                ActorId = aID,
             });
 
             world.BroadcastGlobal(new ACDTranslateFacingMessage()
             {
                 Id = 0x0070,
-                ActorID = aID,
+                ActorId = aID,
                 Angle = 2.888546f,
-                Field2 = false,
+                Immediately = false,
             });
 
             world.BroadcastGlobal(new SetIdleAnimationMessage()
@@ -2504,9 +2504,9 @@ namespace Mooege.Core.GS.Test
             world.BroadcastGlobal(new TrickleMessage()
             {
                 Id = 0x0042,
-                ActorID = aID,
-                Field1 = 4644,
-                Field2 = new WorldPlace()
+                ActorId = aID,
+                ActorSNO = 4644,
+                WorldLocation = new WorldPlace()
                 {
                     Position = new Vector3D()
                     {
@@ -2516,12 +2516,12 @@ namespace Mooege.Core.GS.Test
                     },
                     WorldID = world.DynamicID,
                 },
-                Field4 = 0x00004DEB,
+                LevelAreaSNO = 0x00004DEB,
                 Field5 = 1f,
                 Field6 = 0x00000008,
                 Field7 = 0x00000024,
                 Field10 = 0x0AF96544,
-                Field12 = 0x0000F063,
+                StringListSNO = 0x0000F063,
             });
             #endregion
         }
