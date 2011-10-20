@@ -497,7 +497,7 @@ namespace Mooege.Core.GS.Player
         {
             if (message.PowerSNO != 0)
             {
-                Mooege.Core.GS.Effect.ClientEffect.CreateVisualSkill(this, message);
+                Mooege.Core.GS.Effect.ClientEffect.ProcessSkill(this, message);
             }
             Actor actor = this.World.GetActor(message.TargetID);
             if (actor != null)

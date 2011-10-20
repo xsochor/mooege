@@ -36,7 +36,7 @@ using Mooege.Common;
 
 namespace Mooege.Core.GS.Effect
 {
-    public class ActorEffect
+    public class Effect
     {
         protected static readonly Logger Logger = LogManager.CreateLogger();
         // TODO: deal with repeated casting of the same overlapping effect with actor (e. g. lethal decoy)
@@ -127,7 +127,7 @@ namespace Mooege.Core.GS.Effect
                                     this.ProxyActor.World.BroadcastIfRevealed(msg, a);
                             }
                         }
-                        if (this.NeedsActor && ProxyActor.DynamicID == Effect.GenericPowerProxyID) // generic power proxy
+                        if (this.NeedsActor && ProxyActor.DynamicID == EffectActor.GenericPowerProxyID) // generic power proxy
                         {
                             // not sure if needed
                             this.Actor.World.BroadcastIfRevealed(new PlayEffectMessage()
@@ -177,19 +177,19 @@ namespace Mooege.Core.GS.Effect
             
             if ((EffectID == 99241) || (EffectID == 208435))
             {
-                return new Effect(Actor.World, EffectID, Actor.Position);
+                return new EffectActor(Actor.World, EffectID, Actor.Position);
             }
             else if ((EffectID == 169904) || (EffectID == 123885))
             {
-                return new MysticAllyEffect(Actor.World, EffectID, Actor.Position, Actor);
+                return new MysticAllyEffectActor(Actor.World, EffectID, Actor.Position, Actor);
             }
             else if (EffectID == 98557)
             {
-                return new Effect(Actor.World, EffectID, Actor.Position);
+                return new EffectActor(Actor.World, EffectID, Actor.Position);
             }
             else
             {
-                return new Effect(Actor.World, Effect.GenericPowerProxyID, Actor.Position);
+                return new EffectActor(Actor.World, EffectActor.GenericPowerProxyID, Actor.Position);
             }
         }
 
@@ -360,7 +360,7 @@ namespace Mooege.Core.GS.Effect
                     Position = Position,
                     Angle = Angle,
                     Field3 = false,
-                    Field4 = Effect.GetDistance(Actor.Position, Position) / DurationInTicks, // speed, distance per tick
+                    Field4 = EffectActor.GetDistance(Actor.Position, Position) / DurationInTicks, // speed, distance per tick
                     //Field5 = 0x00220008, // ???
                     Field6 = (Actor as Player.Player).Properties.Gender == 0 ? 69840 : 90432// animation TAG, 0xFFFFFFFF - actor stopped (use idle?)
                 }, Actor);
@@ -415,7 +415,7 @@ namespace Mooege.Core.GS.Effect
                 {
                     if ((actors[i].World != null) && (actors[i].ActorType == ActorType.Monster))
                     {
-                        this.Actor.World.AddEffect(new ActorEffect { Actor = actors[i], EffectID = 137107, DurationInTicks = (60 * 5) });
+                        this.Actor.World.AddEffect(new Effect { Actor = actors[i], EffectID = 137107, DurationInTicks = (60 * 5) });
                     }
                 }
             }
@@ -644,7 +644,7 @@ namespace Mooege.Core.GS.Effect
         }
     }
 
-    public class Effect : Actor
+    public class EffectActor : Actor
     {
         protected static readonly Logger Logger = LogManager.CreateLogger();
 
@@ -654,18 +654,16 @@ namespace Mooege.Core.GS.Effect
 
         protected int? idleAnimationSNO;
 
-        protected int ticksBetweenActions = 6;
+        protected int ticksBetweenActions = 30; // 500 ms
 
-        protected float walkDistance = 0.1f; // disatnce per 1 Tick
-
-        public Effect(World world, int actorSNO, Vector3D position)
+        public EffectActor(World world, int actorSNO, Vector3D position)
             : base(world, world.NewActorID)
         {
             this.ActorSNO = actorSNO;
             // FIXME: This is hardcoded crap
             this.Field2 = 0x8;
             this.Field3 = 0x0;
-            this.Scale = 1.35f;
+            this.Scale = 1f;
             this.Position.Set(position);
             this.RotationAmount = (float)(RandomHelper.NextDouble() * 2.0f * Math.PI);
             this.RotationAxis.X = 0f; this.RotationAxis.Y = 0f; this.RotationAxis.Z = 1f;
@@ -716,40 +714,43 @@ namespace Mooege.Core.GS.Effect
             this.Destroy();
         }
 
+        //  should go to some Utils
         public static bool CheckRange(Actor actor, Actor target, float range)
         {
             if (target == null) return false;
-            return (Math.Sqrt(Math.Pow(actor.Position.X - target.Position.X, 2) + Math.Pow(actor.Position.Y - target.Position.Y, 2)) < range);
+            return (Math.Sqrt(Math.Pow(actor.Position.X - target.Position.X, 2) + Math.Pow(actor.Position.Y - target.Position.Y, 2) + Math.Pow(actor.Position.Z - target.Position.Z, 2)) < range);
         }
 
+        //  should go to some Utils
         public static float GetDistance(Vector3D startPosition, Vector3D targetPosition)
         {
             if (targetPosition == null) return 0;
-            return (float)Math.Sqrt(Math.Pow(startPosition.X - targetPosition.X, 2) + Math.Pow(startPosition.Y - targetPosition.Y, 2));
+            return (float)Math.Sqrt(Math.Pow(startPosition.X - targetPosition.X, 2) + Math.Pow(startPosition.Y - targetPosition.Y, 2) + Math.Pow(startPosition.Z - targetPosition.Z, 2));
         }
 
-        protected float[] GetDistanceDelta(float facingAngle)
+        //  should go to some Utils
+        public static float[] GetDistanceDelta(float speed, float facingAngle)
         {
             float[] res = new float[2];
-            res[0] = (walkDistance * 6) * (float)Math.Cos(facingAngle); // sending this in 100ms (6 Ticks) -> walkDistance * 6 Ticks
-            res[1] = (walkDistance * 6) * (float)Math.Sin(facingAngle);
+            res[0] = (speed * 6) * (float)Math.Cos(facingAngle); // sending this in 100ms (6 Ticks) -> walkDistance * 6 Ticks
+            res[1] = (speed * 6) * (float)Math.Sin(facingAngle);
+            // omitting Z axis
             return res;
         }
 
+        //  should go to some Utils
         public static float GetFacingAngle(Vector3D lookerPosition, Vector3D targetPosition)
         {
             return (float)Math.Atan2((targetPosition.Y - lookerPosition.Y), (targetPosition.X - lookerPosition.X));
         }
     }
 
-    public class MysticAllyEffect : Effect
+    public class MysticAllyEffectActor : MovableEffectActor
     {
         public override ActorType ActorType { get { return ActorType.NPC; } }
 
-        private int walkAnimationSNO;
-        private int attackAnimationSNO;
 
-        public MysticAllyEffect(World world, int actorSNO, Vector3D position, Actor owner) :
+        public MysticAllyEffectActor(World world, int actorSNO, Vector3D position, Actor owner) :
             base(world, actorSNO, position)
         {
             this.Attributes[GameAttribute.Summoned_By_ACDID] = unchecked((int)owner.DynamicID);
@@ -780,11 +781,9 @@ namespace Mooege.Core.GS.Effect
             this.idleAnimationSNO = (this.ActorSNO == 169904) ? 69968 : 69632;
             this.walkAnimationSNO = (this.ActorSNO == 169904) ? 69728 : 69728; // TODO: find tags
             this.attackAnimationSNO = (this.ActorSNO == 169904) ? 69776 : 130509; // TODO: find tags
+            this.speed = 0.23f;
             this.Scale = 1.22f;
             this.ticksBetweenActions = 6 * 9; // 900 ms
-            this.walkDistance = 0.23f;
-            // TEST
-            this.Attributes[GameAttribute.Pet_Type] = 4;
         }
 
         public override void Update()
@@ -835,7 +834,45 @@ namespace Mooege.Core.GS.Effect
             }
         }
 
-        private Actor GetTarget(float range)
+    }
+
+    /*
+     * Actor attacking
+     */
+    public class AtackingEffectActor : EffectActor
+    {
+        protected int attackAnimationSNO;
+
+        public AtackingEffectActor(World world, int actorSNO, Vector3D position) : base(world, actorSNO, position) { }
+
+        protected virtual void Attack(Actor target)
+        {
+            if (target == null)
+            {
+                return;
+            }
+            if (attackAnimationSNO != 0)
+            {
+                this.World.BroadcastIfRevealed(new PlayAnimationMessage()
+                {
+                    ActorID = this.DynamicID,
+                    Field1 = 0x3,
+                    Field2 = 0,
+                    tAnim = new PlayAnimationMessageSpec[1]
+                {
+                    new PlayAnimationMessageSpec()
+                    {
+                        Field0 = 0x2,
+                        Field1 = attackAnimationSNO,
+                        Field2 = 0x0,
+                        Field3 = 1f
+                    }
+                }
+                }, this);
+            }
+        }
+
+        protected virtual Actor GetTarget(float range)
         {
             Actor result = null;
             List<Actor> actors = this.World.GetActorsInRange(this.Position, range);
@@ -870,41 +907,30 @@ namespace Mooege.Core.GS.Effect
             return result;
         }
 
-        private void Attack(Actor target)
-        {
-            if (target == null)
-            {
-                return;
-            }
+    }
 
-            this.World.BroadcastIfRevealed(new PlayAnimationMessage()
-            {
-                ActorID = this.DynamicID,
-                Field1 = 0x3,
-                Field2 = 0,
-                tAnim = new PlayAnimationMessageSpec[1]
-                {
-                    new PlayAnimationMessageSpec()
-                    {
-                        Field0 = 0x2,
-                        Field1 = attackAnimationSNO,
-                        Field2 = 0x0,
-                        Field3 = 1f
-                    }
-                }
-            }, this);
-        }
+    /*
+     * Actor attacking and moving
+     */
+    public class MovableEffectActor : AtackingEffectActor
+    {
+        protected int walkAnimationSNO;
 
         private bool _cLientKnowsWalkAnimation = false;
-        private void MoveTo(Actor target)
+
+        protected float speed = 0.1f; // distance per 1 Tick
+
+        public MovableEffectActor(World world, int actorSNO, Vector3D position) : base(world, actorSNO, position) { }
+
+        protected virtual void MoveTo(Actor target)
         {
             if (target == null)
             {
                 return;
             }
 
-            float angle = GetFacingAngle(this.Position, target.Position);
-            float[] delta = GetDistanceDelta(angle);
+            float angle = EffectActor.GetFacingAngle(this.Position, target.Position);
+            float[] delta = EffectActor.GetDistanceDelta(this.speed, angle);
             Position.X += delta[0];
             Position.Y += delta[1];
             angle = GetFacingAngle(this.Position, target.Position);
@@ -927,7 +953,7 @@ namespace Mooege.Core.GS.Effect
                     Position = this.Position,
                     Angle = angle,
                     Field3 = false,
-                    Field4 = walkDistance, // distance in Tick == speed
+                    Field4 = this.speed, // distance in Tick == speed
                     Field5 = 0,
                     Id = 0x006E,
                     Field6 = this.walkAnimationSNO,
@@ -936,253 +962,302 @@ namespace Mooege.Core.GS.Effect
                 _cLientKnowsWalkAnimation = true;
             }
         }
+
+
+    }
+
+    public class HydraEffectActor : EffectActor
+    {
+        public HydraEffectActor(World world, int actorSNO, Vector3D position) : base(world, actorSNO, position) { }
+    }
+
+    public class HydraEffect : Effect
+    {
     }
 
     public class ClientEffect
     {
-        public static void CreateVisualSkill(Actor actor, TargetMessage message)
+        public static void ProcessSkill(Actor actor, TargetMessage message)
         {
-            // TODO: refactor to switches toonclass/power (or subclases)
+            switch (actor.ActorType)
+            {
+                case ActorType.Player:
+                    ProcessSkillPlayer((actor as Player.Player), message);
+                    break;
+                case ActorType.Monster:
+                    break;
+                case ActorType.NPC:
+                    break;
+            }
+        }
+
+        private static void ProcessSkillPlayer(Player.Player player, TargetMessage message) {
+            switch (player.Properties.Class)
+            {
+                case Common.Toons.ToonClass.Barbarian:
+                    break;
+                case Common.Toons.ToonClass.DemonHunter:
+                    break;
+                case Common.Toons.ToonClass.Monk:
+                    ProcessSkillMonk(player, player.World, message);
+                    break;
+                case Common.Toons.ToonClass.WitchDoctor:
+                    break;
+                case Common.Toons.ToonClass.Wizard:
+                    break;
+            }
+        }
+
+        private static void ProcessSkillMonk(Player.Player player, World world, TargetMessage message) {
             Vector3D targetPosition = message.Field2.Position;
             Actor target = null;
             if (message.TargetID != 0xFFFFFFFF)
             {
-                target = actor.World.GetActor(message.TargetID);
+                target = world.GetActor(message.TargetID);
                 if (target != null)
                 {
                     targetPosition = target.Position;
                 }
             }
-            if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.FistsOfThunder)
-            { // + effect on target
-                int effectID = 143570; // cast
-                int effectID2 = 96176; // projectile
-                int startingTick = 0;
-                switch (message.Field5)
-                {
-                    case 0:
-                        startingTick += actor.World.Game.Tick + (6 * 1);
-                        break;
-                    case 1:
-                        effectID =  143561;//143569; // cast
-                        effectID2 = 96176;//96177;
-                        break;
-                    case 2:
-                        effectID = 143566; // cast
-                        effectID2 = 96178;
-                        startingTick += actor.World.Game.Tick + (6 * 3);
-                        break;
-                }
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, StartingTick = startingTick });
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID2, StartingTick = startingTick });
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.ExplodingPalm)
-            { 
-                int effectID = 142471;
-                int masterEffectID = 143841;
-                switch (message.Field5)
-                {
-                    case 0:
-                        break;
-                    case 1:
-                        break;
-                    case 2:
-                        effectID = 142473;
-                        masterEffectID = 143473;
-                        break;
-                }
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, });
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = masterEffectID, });
-                if ((target != null) & (message.Field5 == 2))
-                {
-                    actor.World.AddEffect(new ActorEffect { Actor = target, EffectID = 92225, DurationInTicks = (60 * 3) });
-                }
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.DeadlyReach)
+            int startingTick = world.Game.Tick;
+            int effectID = 0;
+            int masterEffectID = 0;
+            switch (message.PowerSNO)
             {
-                int masterEffectID = 140870;
-                int startingTick = 0;
-                switch (message.Field5)
-                {
-                    case 0:
-                        startingTick += actor.World.Game.Tick + (6 * 1);
-                        break;
-                    case 1:
-                        masterEffectID = 140871;
-                        break;
-                    case 2:
-                        masterEffectID = 140872;
-                        startingTick += actor.World.Game.Tick + (6 * 3);
-                        break;
-                }
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = masterEffectID, StartingTick = startingTick });
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.CripplingWave)
-            {
-                int effectID = 2603;
-                switch (message.Field5)
-                {
-                    case 0:
-                        break;
-                    case 1:
-                        effectID = 147912;
-                        break;
-                    case 2:
-                        effectID = 147929;
-                        break;
-                }
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, });
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.SweepingWind)
-            {
-                int effectID = 196981;
-                switch (message.Field5)
-                {
-                    case 0:
-                        break;
-                    case 1:
-                        effectID = 196983;
-                        break;
-                    case 2:
-                        effectID = 196984;
-                        break;
-                }
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, });
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritGenerator.WayOfTheHundredFists)
-            {
-                int effectID = 2612;//((actor as Player.Player).Properties.Gender == 0) ? 2612 : ???;
-                int masterEffectID = 137345;//((actor as Player.Player).Properties.Gender == 0) ? 137345 ; ???;
-                int startingTick = 0;
-                switch (message.Field5)
-                {
-                    case 0:
-                        startingTick = actor.World.Game.Tick + (6 * 3);
-                        break;
-                    case 1:
-                        effectID = 98412;//((actor as Player.Player).Properties.Gender == 0) ? 98412 : ???;
-                        masterEffectID = 137346;//((actor as Player.Player).Properties.Gender == 0) ? 137346 : ???;
-                        break;
-                    case 2:
-                        startingTick = actor.World.Game.Tick + (6 * 2);
-                        masterEffectID = 137347;//((actor as Player.Player).Properties.Gender == 0) ? 137347 : ???;
-                        effectID = 98416;//((actor as Player.Player).Properties.Gender == 0) ? 98416 : ???;
-                        break;
-                }
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = masterEffectID, StartingTick = startingTick });
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, StartingTick = startingTick});
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.DashingStrike)
-            {
-                int duration = 6;
-                actor.World.AddEffect(new ActorEffect
-                {
-                    Actor = actor,
-                    EffectID = 192085,
-                    DurationInTicks = duration,
-                });
-                actor.World.AddEffect(new ActorEffect
-                {
-                    Actor = actor,
-                    EffectID = 111132,
-                    DurationInTicks = duration,
-                    Position = targetPosition,
-                    Angle = Effect.GetFacingAngle(actor.Position, targetPosition)
-                });
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.LashingTailKick)
-            {
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = 143782 });
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.WaveOfLight)
-            {
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = 145011, });
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = 144079, });
-                return;
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.SevenSidedStrike)
-            {
-                // TODO: find targets for effects, now targetting self
-                int effectID = 98826;
-                int startingTick = actor.World.Game.Tick + 12;
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, StartingTick = startingTick});
-                effectID = 98831;
-                startingTick += 12;
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, StartingTick = startingTick});
-                effectID = 98842;
-                startingTick += 12;
-                actor.World.AddEffect(new ActorEffect { Actor = actor, EffectID = effectID, StartingTick = startingTick});
+                case Skills.Skills.Monk.SpiritGenerator.FistsOfThunder:
+                    masterEffectID = 143570; // cast
+                    effectID = 96176; // projectile
+                    switch (message.Field5)
+                    {
+                        case 0:
+                            startingTick += (6 * 1);
+                            break;
+                        case 1:
+                            masterEffectID = 143561;//143569; // cast
+                            effectID = 96176;//96177;
+                            break;
+                        case 2:
+                            masterEffectID = 143566; // cast
+                            effectID = 96178;
+                            startingTick += (6 * 3);
+                            break;
+                    }
+                    world.AddEffect(new Effect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
+                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    break;
+                case Skills.Skills.Monk.SpiritGenerator.ExplodingPalm:
+                    effectID = 142471;
+                    masterEffectID = 143841;
+                    switch (message.Field5)
+                    {
+                        case 0:
+                            break;
+                        case 1:
+                            break;
+                        case 2:
+                            effectID = 142473;
+                            masterEffectID = 143473;
+                            startingTick += (6 * 2);
+                            break;
+                    }
+                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    world.AddEffect(new Effect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
+                    /* // to effect
+                    if ((target != null) & (message.Field5 == 2))
+                    {
+                        world.AddEffect(new Effect { Actor = target, EffectID = 92225, DurationInTicks = (60 * 3) });
+                    }
+                     */
+                    break;
+                case Skills.Skills.Monk.SpiritGenerator.DeadlyReach:
+                    masterEffectID = 140870;
+                    switch (message.Field5)
+                    {
+                        case 0:
+                            startingTick += (6 * 1);
+                            break;
+                        case 1:
+                            masterEffectID = 140871;
+                            startingTick += (6 * 1);
+                            break;
+                        case 2:
+                            masterEffectID = 140872;
+                            startingTick += (6 * 3);
+                            break;
+                    }
+                    world.AddEffect(new Effect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
+                    break;
+                case Skills.Skills.Monk.SpiritGenerator.CripplingWave:
+                    effectID = 2603;
+                    switch (message.Field5)
+                    {
+                        case 0:
+                            break;
+                        case 1:
+                            effectID = 147912;
+                            break;
+                        case 2:
+                            effectID = 147929;
+                            break;
+                    }
+                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, });
+                    break;
+                case Skills.Skills.Monk.SpiritGenerator.SweepingWind:
+                    effectID = 196981;
+                    switch (message.Field5)
+                    {
+                        case 0:
+                            break;
+                        case 1:
+                            effectID = 196983;
+                            break;
+                        case 2:
+                            effectID = 196984;
+                            break;
+                    }
+                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, });
+                    break;
+                case Skills.Skills.Monk.SpiritGenerator.WayOfTheHundredFists:
+                    effectID = 2612;//(player.Properties.Gender == 0) ? 2612 : ???;
+                    masterEffectID = 137345;//(player.Properties.Gender == 0) ? 137345 ; ???;
+                    switch (message.Field5)
+                    {
+                        case 0:
+                            startingTick += (6 * 3);
+                            break;
+                        case 1:
+                            effectID = 98412;//(player.Properties.Gender == 0) ? 98412 : ???;
+                            masterEffectID = 137346;//(player.Properties.Gender == 0) ? 137346 : ???;
+                            break;
+                        case 2:
+                            startingTick += (6 * 2);
+                            masterEffectID = 137347;//(player.Properties.Gender == 0) ? 137347 : ???;
+                            effectID = 98416;//(player.Properties.Gender == 0) ? 98416 : ???;
+                            break;
+                    }
+                    world.AddEffect(new Effect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
+                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    break;
+                case Skills.Skills.Monk.SpiritSpenders.DashingStrike:
+                    world.AddEffect(new Effect
+                    {
+                        Actor = player,
+                        EffectID = 192085,
+                        DurationInTicks = 6,
+                    });
+                    world.AddEffect(new Effect
+                    {
+                        Actor = player,
+                        EffectID = 111132,
+                        DurationInTicks = 6,
+                        Position = targetPosition,
+                        Angle = EffectActor.GetFacingAngle(player.Position, targetPosition)
+                    });
+                    break;
+                case Skills.Skills.Monk.SpiritSpenders.LashingTailKick:
+                    world.AddEffect(new Effect { Actor = player, EffectID = 143782 });
+                    break;
+                case Skills.Skills.Monk.SpiritSpenders.WaveOfLight:
+                    world.AddEffect(new Effect { Actor = player, EffectID = 145011, });
+                    world.AddEffect(new Effect { Actor = player, EffectID = 144079, });
+                    break;
+                case Skills.Skills.Monk.SpiritSpenders.SevenSidedStrike:
+                    // TODO: find targets for effects, now targetting self
+                    effectID = 98826;
+                    startingTick += 12;
+                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    effectID = 98831;
+                    startingTick += 12;
+                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    effectID = 98842;
+                    startingTick += 12;
+                    world.AddEffect(new Effect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    break;
             }
         }
 
-        public static void CreateVisualSkill(Player.Player player, SecondaryAnimationPowerMessage message) {
-            // TODO: refactor to switches  toonclass/power (or subclases)
-            if (message.PowerSNO == Skills.Skills.Monk.Mantras.MantraOfEvasion)
+        public static void ProcessSkillPlayer(Player.Player player, SecondaryAnimationPowerMessage message)
+        {
+            switch (player.Properties.Class)
             {
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 143964, });
-                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 99694, Attached = true }); // 60 ticks/s * 120 = 120s
-                return;
+                case Common.Toons.ToonClass.Barbarian:
+                    break;
+                case Common.Toons.ToonClass.DemonHunter:
+                    break;
+                case Common.Toons.ToonClass.Monk:
+                    ProcessSkillMonk(player, player.World, message);
+                    break;
+                case Common.Toons.ToonClass.WitchDoctor:
+                    break;
+                case Common.Toons.ToonClass.Wizard:
+                    ProcessSkillTEST(player, player.World, message);
+                    break;
             }
-            else if (message.PowerSNO == Skills.Skills.Monk.Mantras.MantraOfHealing)
+        }
+
+        private static void ProcessSkillMonk(Player.Player player, World world, SecondaryAnimationPowerMessage message)
+        {
+            int effectID = 0;
+            switch (message.PowerSNO)
             {
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 99948, });
-                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 140190, Attached = true }); // 60 ticks/s * 120 = 120s
-                return;
+                case Skills.Skills.Monk.Mantras.MantraOfEvasion:
+                    world.AddEffect(new Effect { Actor = player, EffectID = 143964, });
+                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 120), EffectID = 99694, Attached = true }); // 60 ticks/s * 120 = 120s
+                    break;
+                case Skills.Skills.Monk.Mantras.MantraOfHealing:
+                    world.AddEffect(new Effect { Actor = player, EffectID = 99948, });
+                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 120), EffectID = 140190, Attached = true }); // 60 ticks/s * 120 = 120s
+                    break;
+                case Skills.Skills.Monk.Mantras.MantraOfConviction:
+                    world.AddEffect(new Effect { Actor = player, EffectID = 95955, });
+                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 120), EffectID = 146990, Attached = true }); // 60 ticks/s * 120 = 120s
+                    break;
+                case Skills.Skills.Monk.Mantras.MantraOfRetribution:
+                    world.AddEffect(new Effect { Actor = player, EffectID = 142974, });
+                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 120), EffectID = 142987, Attached = true }); // 60 ticks/s * 120 = 120s
+                    break;
+                case Skills.Skills.Monk.SpiritSpenders.LethalDecoy:
+                    effectID = (player.Properties.Gender == 0) ? 99241 : 208435;
+                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 5), EffectID = effectID, NeedsActor = true }); // 60 ticks/s * 5 = 5s
+                    break;
+                case Skills.Skills.Monk.SpiritSpenders.BreathOfHeaven:
+                    world.AddEffect(new Effect { Actor = player, EffectID = 101174, });
+                    /*
+                     * move to effect
+                    Actor.Attributes[GameAttribute.Resource_Cur, player.ResourceID] -= 75f;
+                    GameAttributeMap atm = new GameAttributeMap();
+                    atm[GameAttribute.Resource_Cur, player.ResourceID] = Actor.Attributes[GameAttribute.Resource_Cur, player.ResourceID];
+                    atm.SendMessage(client, player.DynamicID);
+                     * */
+                    break;
+                case Skills.Skills.Monk.SpiritSpenders.InnerSanctuary:
+                    world.AddEffect(new Effect { Actor = player, DurationInTicks = (60 * 8), EffectID = 98557, NeedsActor = true });
+                    break;
+                case Skills.Skills.Monk.SpiritSpenders.Serenity:
+                    world.AddEffect(new Effect { Actor = player, EffectID = 123156, });
+                    world.AddEffect(new Effect { Actor = player, EffectID = 142890, });
+                    world.AddEffect(new Effect { Actor = player, EffectID = 143230, DurationInTicks = (60 * 3) });
+                    break;
+                case Skills.Skills.Monk.SpiritSpenders.MysticAlly:
+                    effectID = (player.Properties.Gender == 0) ? 169904 : 123885;
+                    world.AddEffect(new Effect { Actor = player, DurationInTicks = -1, EffectID = effectID, NeedsActor = true }); // until is destroyed
+                    break;
+                case Skills.Skills.Monk.SpiritSpenders.BlindingFlash:
+                    world.AddEffect(new Effect { Actor = player, EffectID = 2588 });
+                    break;
             }
-            else if (message.PowerSNO == Skills.Skills.Monk.Mantras.MantraOfConviction)
+        }
+
+        private static void ProcessSkillTEST(Player.Player player, World world, SecondaryAnimationPowerMessage message)
+        {
+            switch (message.PowerSNO)
             {
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 95955, });
-                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 146990, Attached = true }); // 60 ticks/s * 120 = 120s
-                return;
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.Mantras.MantraOfRetribution)
-            {
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 142974, });
-                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 120), EffectID = 142987, Attached = true }); // 60 ticks/s * 120 = 120s
-                return;
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.LethalDecoy)
-            {
-                int effectID = (player.Properties.Gender == 0) ? 99241 : 208435;
-                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 5), EffectID = effectID, NeedsActor = true }); // 60 ticks/s * 5 = 5s
-                return;
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.BreathOfHeaven)
-            {
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 101174, });
-                return;
-                /*
-                 * move to effect
-                Actor.Attributes[GameAttribute.Resource_Cur, player.ResourceID] -= 75f;
-                GameAttributeMap atm = new GameAttributeMap();
-                atm[GameAttribute.Resource_Cur, player.ResourceID] = Actor.Attributes[GameAttribute.Resource_Cur, player.ResourceID];
-                atm.SendMessage(client, player.DynamicID);
-                 * */
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.InnerSanctuary)
-            {
-                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = (60 * 8), EffectID = 98557, NeedsActor = true });
-                return;
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.Serenity)
-            {
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 123156, });
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 142890, });
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 143230, DurationInTicks = (60 * 3) });
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.MysticAlly)
-            {
-                int effectID = (player.Properties.Gender == 0) ? 169904 : 123885;
-                player.World.AddEffect(new ActorEffect { Actor = player, DurationInTicks = -1, EffectID = effectID, NeedsActor = true }); // until is destroyed
-                return;
-            }
-            else if (message.PowerSNO == Skills.Skills.Monk.SpiritSpenders.BlindingFlash)
-            {
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 2588 });
-            }
-            else if (message.PowerSNO == Skills.Skills.Wizard.Utility.Archon)
-            {
-                player.World.AddEffect(new ActorEffect { Actor = player, EffectID = 162301, DurationInTicks = (60 * 15) });
+                case Skills.Skills.Wizard.Utility.Archon:
+                    world.AddEffect(new Effect { Actor = player, EffectID = 162301, DurationInTicks = (60 * 15) });
+                    break;
+                case Skills.Skills.Wizard.Offensive.Hydra:
+                    world.AddEffect(new HydraEffect { Actor = player});
+                    break;
             }
         }
     }

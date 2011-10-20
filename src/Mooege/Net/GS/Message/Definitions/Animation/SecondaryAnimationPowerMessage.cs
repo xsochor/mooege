@@ -32,7 +32,7 @@ namespace Mooege.Net.GS.Message.Definitions.Animation
 
         public void Handle(GameClient client)
         {
-            ClientEffect.CreateVisualSkill(client.Player, this);
+            ClientEffect.ProcessSkillPlayer(client.Player, this);
         }
 
         public override void Parse(GameBitBuffer buffer)
