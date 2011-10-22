@@ -56,7 +56,8 @@ namespace Mooege.Core.GS.Actors
         Monster,
         Item,
         Portal,
-        Effect
+        Effect,
+        Projectile
     }
 
     // Base actor

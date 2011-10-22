@@ -45,7 +45,7 @@ namespace Mooege.Core.GS.FXEffect
         public int EffectID { get; set; }
         public Actor Actor { get; set; } // initial actor for effect + attachment
         public Actor Target { get; set; } // target actor, used when effect is Actor->Target
-        public Actor ProxyActor { get; protected set; } // newly created proxy actor if DurationInTicks present
+        public EffectActor ProxyActor { get; protected set; } // newly created proxy actor if DurationInTicks present
         public int? StartingTick { get; set; } // don't spawn until Game.Tick >= StartingTick
         public int? DurationInTicks { get; set; } // longetivity of effect 
         public bool NeedsActor { get; set; } // proxy actor - some effects (mainly those lingering in world for time) need actor
@@ -172,7 +172,7 @@ namespace Mooege.Core.GS.FXEffect
         }
 
         // create proxy actor for this effect
-        protected virtual Actor CreateProxyActor()
+        protected virtual EffectActor CreateProxyActor()
         {
             
             if ((EffectID == 99241) || (EffectID == 208435))
@@ -187,6 +187,12 @@ namespace Mooege.Core.GS.FXEffect
             {
                 return new EffectActor(Actor.World, EffectID, Actor.Position);
             }
+            else if (EffectID == 81103)
+            {
+                // hydra - fire pool
+//                return new EffectActor(Actor.World, EffectID, Position); // needs scaling down A LOT
+                return new EffectActor(Actor.World, 81239, Position); // now returning arcane
+            }
             else
             {
                 return new EffectActor(Actor.World, EffectActor.GenericPowerProxyID, Actor.Position);
@@ -196,7 +202,7 @@ namespace Mooege.Core.GS.FXEffect
         // destroy proxy actor for this effect
         protected virtual void DestroyProxyActor()
         {
-            ProxyActor.Destroy();
+            ProxyActor.Die();
         }
 
         // effect start actions
@@ -644,6 +650,25 @@ namespace Mooege.Core.GS.FXEffect
         }
     }
 
+    public class ProjectileFXEffect : FXEffect
+    {
+        public float Speed = 0.1f;
+
+        public ProjectileFXEffect()
+            : base()
+        {
+            NeedsActor = true;
+
+        }
+
+        protected override EffectActor CreateProxyActor()
+        {
+//            return new PowerProjectile(this.Actor.World, EffectID, this.Position, Target.Position, 1f, 3000);
+            return new Projectile(this.Actor.World, this.Actor, EffectID, this.Position, Angle, Speed, (DurationInTicks.HasValue ? (StartingTick + DurationInTicks) : null));
+        }
+
+    }
+
     public class EffectActor : Actor
     {
         protected static readonly Logger Logger = LogManager.CreateLogger();
@@ -674,14 +699,16 @@ namespace Mooege.Core.GS.FXEffect
             this.Field11 = 0x0;
             this.Field12 = 0x0;
             this.Field13 = 0x0;
-
             this.Attributes[GameAttribute.Cannot_Be_Added_To_AI_Target_List] = true;
             this.Attributes[GameAttribute.Is_Power_Proxy] = true;
             this.Attributes[GameAttribute.Untargetable] = true;
             this.Attributes[GameAttribute.UntargetableByPets] = true;
             this.Attributes[GameAttribute.Invulnerable] = true;
             setAdditionalAttributes();
-            this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
+            if (this.GetType().Equals(typeof(EffectActor)))
+            {
+                this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
+            }
         }
 
         public virtual void setAdditionalAttributes()
@@ -705,7 +732,7 @@ namespace Mooege.Core.GS.FXEffect
             return true;
         }
 
-        public void Die(Mooege.Core.GS.Player.Player player)
+        public virtual void Die()
         {
             this.World.BroadcastIfRevealed(new ANNDataMessage(Opcodes.ANNDataMessage24)
             {
@@ -718,14 +745,14 @@ namespace Mooege.Core.GS.FXEffect
         public static bool CheckRange(Actor actor, Actor target, float range)
         {
             if (target == null) return false;
-            return (Math.Sqrt(Math.Pow(actor.Position.X - target.Position.X, 2) + Math.Pow(actor.Position.Y - target.Position.Y, 2) + Math.Pow(actor.Position.Z - target.Position.Z, 2)) < range);
+            return (Math.Sqrt(Math.Pow(actor.Position.X - target.Position.X, 2) + Math.Pow(actor.Position.Y - target.Position.Y, 2)) < range);
         }
 
         //  should go to some Utils
         public static float GetDistance(Vector3D startPosition, Vector3D targetPosition)
         {
             if (targetPosition == null) return 0;
-            return (float)Math.Sqrt(Math.Pow(startPosition.X - targetPosition.X, 2) + Math.Pow(startPosition.Y - targetPosition.Y, 2) + Math.Pow(startPosition.Z - targetPosition.Z, 2));
+            return (float)Math.Sqrt(Math.Pow(startPosition.X - targetPosition.X, 2) + Math.Pow(startPosition.Y - targetPosition.Y, 2));
         }
 
         //  should go to some Utils
@@ -758,7 +785,8 @@ namespace Mooege.Core.GS.FXEffect
             this.Attributes[GameAttribute.Summoner_ID] = unchecked((int)owner.DynamicID);
             this.Attributes[GameAttribute.Follow_Target_ACDID] = unchecked((int)owner.DynamicID);
             this.Attributes[GameAttribute.Last_ACD_Attacked] = 0;
-        }
+            this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
+         }
 
         public override void setAdditionalAttributes()
         {
@@ -804,7 +832,7 @@ namespace Mooege.Core.GS.FXEffect
             }
             if ((target == null) || (target.World == null))
             {
-                target = GetTarget(50f);
+                target = GetTarget(this.Position, 50f);
                 if (target != null)
                 {
                     this.Attributes[GameAttribute.Last_ACD_Attacked] = unchecked((int)target.DynamicID);
@@ -839,11 +867,17 @@ namespace Mooege.Core.GS.FXEffect
     /*
      * Actor attacking
      */
-    public class AtackingEffectActor : EffectActor
+    public class AttackingEffectActor : EffectActor
     {
         protected int attackAnimationSNO;
 
-        public AtackingEffectActor(World world, int actorSNO, Vector3D position) : base(world, actorSNO, position) { }
+        public AttackingEffectActor(World world, int actorSNO, Vector3D position) : base(world, actorSNO, position) {
+            if (this.GetType().Equals(typeof(AttackingEffectActor)))
+            {
+                this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
+            }
+
+        }
 
         protected virtual void Attack(Actor target)
         {
@@ -872,10 +906,10 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
-        protected virtual Actor GetTarget(float range)
+        protected virtual Actor GetTarget(Vector3D centerPosition, float range)
         {
             Actor result = null;
-            List<Actor> actors = this.World.GetActorsInRange(this.Position, range);
+            List<Actor> actors = this.World.GetActorsInRange(centerPosition, range);
             if (actors.Count > 1)
             {
                 float distanceNearest = range; // max. range
@@ -895,7 +929,7 @@ namespace Mooege.Core.GS.FXEffect
                             // leaving world
                             continue;
                         }
-                        distance = GetDistance(this.Position, actors[i].Position);
+                        distance = GetDistance(centerPosition, actors[i].Position);
                         if ((result == null) || (distance < distanceNearest))
                         {
                             result = actors[i];
@@ -912,7 +946,7 @@ namespace Mooege.Core.GS.FXEffect
     /*
      * Actor attacking and moving
      */
-    public class MovableEffectActor : AtackingEffectActor
+    public class MovableEffectActor : AttackingEffectActor
     {
         protected int walkAnimationSNO;
 
@@ -920,7 +954,16 @@ namespace Mooege.Core.GS.FXEffect
 
         protected float speed = 0.1f; // distance per 1 Tick
 
-        public MovableEffectActor(World world, int actorSNO, Vector3D position) : base(world, actorSNO, position) { }
+        protected Vector3D velocity;
+
+        public MovableEffectActor(World world, int actorSNO, Vector3D position)
+            : base(world, actorSNO, position)
+        {
+            if (this.GetType().Equals(typeof(MovableEffectActor)))
+            {
+                this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
+            }
+        }
 
         protected virtual void MoveTo(Actor target)
         {
@@ -963,16 +1006,246 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
+        protected virtual void MoveTo(Vector3D targetPosition)
+        {
+            if (targetPosition == null)
+            {
+                return;
+            }
+
+            float angle = EffectActor.GetFacingAngle(this.Position, targetPosition);
+            float[] delta = EffectActor.GetDistanceDelta(this.speed, angle);
+            Position.X += delta[0];
+            Position.Y += delta[1];
+            angle = GetFacingAngle(this.Position, targetPosition);
+
+            if (_cLientKnowsWalkAnimation)
+            {
+                this.World.BroadcastIfRevealed(new NotifyActorMovementMessage()
+                {
+                    ActorId = (int)this.DynamicID,
+                    Position = this.Position,
+                    Angle = angle,
+                    Id = 0x006E,
+                }, this);
+            }
+            else
+            {
+                this.World.BroadcastIfRevealed(new NotifyActorMovementMessage()
+                {
+                    ActorId = (int)this.DynamicID,
+                    Position = this.Position,
+                    Angle = angle,
+                    Field3 = false,
+                    Speed = this.speed, // distance in Tick == speed
+                    Field5 = 0,
+                    Id = 0x006E,
+                    AnimationTag = this.walkAnimationSNO,
+
+                }, this);
+                _cLientKnowsWalkAnimation = true;
+            }
+        }
+
+        protected virtual void ShootAtAngle(float angle, float speed)
+        {
+            this.World.BroadcastIfRevealed(new ACDTranslateFixedMessage()
+            {
+                Id = 113, // needed
+                ActorId = unchecked((int)this.DynamicID),
+                Velocity = this.velocity,
+                Field2 = 1,
+                AnimationTag = 1,//this.walkAnimationSNO,
+                Field4 = 1,
+            }, this);
+        }
 
     }
 
-    public class HydraEffectActor : EffectActor
+    public class Projectile : MovableEffectActor
     {
-        public HydraEffectActor(World world, int actorSNO, Vector3D position) : base(world, actorSNO, position) { }
+        public override ActorType ActorType { get { return ActorType.Projectile; } }
+        protected int? expiresInTick;
+        protected Actor shooter;
+        protected bool destroyWhenBlocked;
+
+        public Projectile(World world, Actor shooter, int actorSNO, Vector3D position, float angle, float speed, int? expiresInTick, bool destroyWhenBlocked = false)
+            : base(world, actorSNO, position) 
+        {
+            this.destroyWhenBlocked = destroyWhenBlocked;
+            this.shooter = shooter;
+            Scale = 1f;
+            this.speed = speed;
+            this.expiresInTick = expiresInTick;
+            this.Field7 = 0x00000001;
+            this.Field8 = this.ActorSNO;
+            this.Field10 = 0x1;
+            this.Field11 = 0x1;
+            this.Field12 = 0x1;
+            this.Field13 = 0x1;
+            this.CollFlags = 0x4;
+            this.RotationAmount = (float)Math.Cos(angle / 2);
+            this.RotationAxis.X = 0f;
+            this.RotationAxis.Y = 0f;
+            this.RotationAxis.Z = (float)Math.Sin(angle / 2);
+            this.GBHandle.Type = (int)GBHandleType.Projectile; this.GBHandle.GBID = 1;
+            float[] delta = GetDistanceDelta(speed, angle);
+            this.velocity = new Vector3D { X = delta[0], Y = delta[1], Z = 0 };
+
+            this.Attributes[GameAttribute.Projectile_Speed] = speed;
+            this.Attributes[GameAttribute.Destroy_When_Path_Blocked] = destroyWhenBlocked;
+            if (this.GetType().Equals(typeof(Projectile)))
+            {
+                this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
+            }
+            ShootAtAngle(angle, speed);
+        }
+
+        public override void setAdditionalAttributes()
+        {
+            //this.GBHandle.Type = (int)GBHandleType.Projectile; this.GBHandle.GBID = 1;
+        }
+
+        public override void Update()
+        {
+            if (expiresInTick.HasValue && (this.World.Game.Tick >= expiresInTick.Value))
+            {
+                this.Die();
+                return;
+            }
+            // TODO: fix targetting info
+            this.Position.X += velocity.X * 6;
+            this.Position.Y += velocity.Y * 6;
+            Actor target = GetTarget(this.Position, 5f); // TODO: expand targetting (line, arc, target types)
+            if (target != null)
+            {
+                (target as Monster).Die((shooter as Player.Player));
+            }
+            // if hydra, spawn effect 81874 on target
+        }
+
+        public override void Die()
+        {
+            base.Die();
+        }
+
+        public override bool Reveal(Mooege.Core.GS.Player.Player player)
+        {
+            if (!base.Reveal(player))
+                return false;
+
+            player.InGameClient.SendMessage(new SetIdleAnimationMessage
+            {
+                ActorID = this.DynamicID,
+                AnimationSNO = 0x0
+            });
+
+            player.InGameClient.SendMessage(new EndOfTickMessage()
+            {
+                Field0 = player.InGameClient.Game.Tick,
+                Field1 = player.InGameClient.Game.Tick + 20
+            });
+
+            return true;
+        }
+
+        
     }
 
-    public class HydraEffect : FXEffect
+    public class HydraEffectActor : AttackingEffectActor
     {
+
+        public HydraEffectActor(World world, int actorSNO, Vector3D position, int attackOffsetTick, Actor owner)
+            : base(world, actorSNO, position)
+        {
+            this.Attributes[GameAttribute.Last_Action_Timestamp] = world.Game.Tick - attackOffsetTick;
+            this.Attributes[GameAttribute.Spawned_by_ACDID] = unchecked((int)owner.DynamicID);
+            this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
+        }
+
+        public override void setAdditionalAttributes()
+        {
+            this.GBHandle.Type = (int)GBHandleType.CustomBrain;
+//            this.idleAnimationSNO = (this.ActorSNO == 80745) ? 80658 : (this.ActorSNO == 80757) ? 80773 : 80800; // crashes!
+            this.attackAnimationSNO = (this.ActorSNO == 80745) ? 80659 : (this.ActorSNO == 80757) ? 80771 : 80797;
+            this.Scale = 1f;
+            this.ticksBetweenActions = 6 * 12; // 1200 ms
+        }
+
+        public override void Update()
+        {
+            if (this.World.Game.Tick >= this.Attributes[GameAttribute.Last_Action_Timestamp] + this.ticksBetweenActions) {
+                Actor target = GetTarget(this.Position, 30f);
+                if (target != null)
+                {
+                    this.Attributes[GameAttribute.Last_Action_Timestamp] = this.World.Game.Tick;
+                    this.World.BroadcastIfRevealed(new ACDTranslateFacingMessage()
+                    {
+                        Id = 0x0070,
+                        ActorId = this.DynamicID,
+                        Angle = GetFacingAngle(this.Position, target.Position),
+                        Immediately = false
+                    }, this);
+                    Attack(target);
+                    Vector3D pos = new Vector3D
+                    {
+                        X = Position.X,
+                        Y = Position.Y,
+                        Z = Position.Z + 6f,
+                    };
+
+                    this.World.AddEffect(new ProjectileFXEffect
+                    {
+                        Actor = this.World.GetActor((uint)this.Attributes[GameAttribute.Spawned_by_ACDID]),
+                        EffectID = 77116,
+                        Target = target,
+                        NeedsActor = true,
+                        DurationInTicks = (60 * 5),
+                        Position = pos,
+                        Speed = 0.3f,
+                        StartingTick = this.World.Game.Tick,
+                        Angle = GetFacingAngle(pos, target.Position),
+                    });
+                }
+            }
+        }
+
+        public override void Die()
+        {
+            this.World.BroadcastIfRevealed(new PlayAnimationMessage
+            {
+                ActorID = this.DynamicID,
+                Field1 = 0xb,
+                Field2 = 0,
+                tAnim = new PlayAnimationMessageSpec[1]
+                {
+                    new PlayAnimationMessageSpec()
+                    {
+                        Field0 = 0x2,
+                        Field1 = (this.ActorSNO == 80745) ? 80660 : (this.ActorSNO == 80757) ? 80772 : 80799,
+                        Field2 = 0x0,
+                        Field3 = 1f
+                    }
+                }
+            }, this);
+            base.Die();
+        }
+    }
+
+    public class HydraFXEffect : FXEffect
+    {
+        public int AttackOffset = 0;
+
+        public HydraFXEffect()
+            : base()
+        {
+            NeedsActor = true;
+        }
+
+        protected override EffectActor CreateProxyActor()
+        {
+            return new HydraEffectActor(this.Actor.World, EffectID, Position, AttackOffset, this.Actor);
+        }
     }
 
     public class ClientEffect
@@ -995,15 +1268,19 @@ namespace Mooege.Core.GS.FXEffect
             switch (player.Properties.Class)
             {
                 case Common.Toons.ToonClass.Barbarian:
+                    ProcessSkillTEST(player, player.World, message);
                     break;
                 case Common.Toons.ToonClass.DemonHunter:
+                    ProcessSkillTEST(player, player.World, message);
                     break;
                 case Common.Toons.ToonClass.Monk:
                     ProcessSkillMonk(player, player.World, message);
                     break;
                 case Common.Toons.ToonClass.WitchDoctor:
+                    ProcessSkillTEST(player, player.World, message);
                     break;
                 case Common.Toons.ToonClass.Wizard:
+                    ProcessSkillTEST(player, player.World, message);
                     break;
             }
         }
@@ -1176,6 +1453,29 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
+        private static void ProcessSkillTEST(Player.Player player, World world, TargetMessage message)
+        {
+            Vector3D targetPosition = message.Field2.Position;
+            Actor target = null;
+            if (message.TargetID != 0xFFFFFFFF)
+            {
+                target = world.GetActor(message.TargetID);
+                if (target != null)
+                {
+                    targetPosition = target.Position;
+                }
+            } switch (message.PowerSNO)
+            {
+                
+                case Skills.Skills.Wizard.Offensive.Hydra:
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 81103, DurationInTicks = (60 * 9), Position = targetPosition, NeedsActor = true });
+                    world.AddEffect(new HydraFXEffect { Actor = player, EffectID = 80745, DurationInTicks = (60 * 9), Position = targetPosition, AttackOffset = 0 });
+                    world.AddEffect(new HydraFXEffect { Actor = player, EffectID = 80757, DurationInTicks = (60 * 9), Position = targetPosition, AttackOffset = (6 * 4) });
+                    world.AddEffect(new HydraFXEffect { Actor = player, EffectID = 80758, DurationInTicks = (60 * 9), Position = targetPosition, AttackOffset = (6 * 8) });
+                    break;
+            }
+        }
+
         public static void ProcessSkillPlayer(Player.Player player, SecondaryAnimationPowerMessage message)
         {
             switch (player.Properties.Class)
@@ -1255,10 +1555,8 @@ namespace Mooege.Core.GS.FXEffect
                 case Skills.Skills.Wizard.Utility.Archon:
                     world.AddEffect(new FXEffect { Actor = player, EffectID = 162301, DurationInTicks = (60 * 15) });
                     break;
-                case Skills.Skills.Wizard.Offensive.Hydra:
-                    world.AddEffect(new HydraEffect { Actor = player});
-                    break;
             }
         }
     }
+
 }

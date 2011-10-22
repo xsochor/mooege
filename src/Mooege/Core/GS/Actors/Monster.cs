@@ -83,6 +83,7 @@ namespace Mooege.Core.GS.Actors
             this.Attributes[GameAttribute.Level] = 1;
             this.Attributes[GameAttribute.Experience_Granted] = 125;
 
+            this.Attributes[GameAttribute.Blocks_Projectiles] = true;
             this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
         }
 
