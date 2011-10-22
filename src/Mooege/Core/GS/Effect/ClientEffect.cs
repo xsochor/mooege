@@ -41,6 +41,10 @@ namespace Mooege.Core.GS.FXEffect
         protected static readonly Logger Logger = LogManager.CreateLogger();
         // TODO: deal with repeated casting of the same overlapping effect with actor (e. g. lethal decoy)
         // TODO: after ComplexEffectAddMessage is decyphered switch from sending multiple effect to sending one complex
+        // TODO: add general effects (hit, die)
+        // TODO: resource management (+regen tracking)
+        // TODO: attributes manipulation + optimized sending
+        // TODO: targetting system
 
         public int EffectID { get; set; }
         public Actor Actor { get; set; } // initial actor for effect + attachment
@@ -208,9 +212,11 @@ namespace Mooege.Core.GS.FXEffect
         // effect start actions
         protected virtual void EffectStartingAction()
         {
-            /* streaming skills (which drain resource until dismissed:
+            /* streaming skills (which drain resource until dismissed):
              * starts using with targetMessage
-             * ends with DWordDataMessage5
+             * ends with DWordDataMessage5 - moving skill
+             * ends with DWordDataMessage3 - stationary skill
+             * 
             */
             // temporary HACK: TODO: move to subclasses + add sending visuals to other players
             if (EffectID == 99694)
@@ -305,7 +311,7 @@ namespace Mooege.Core.GS.FXEffect
                 //                Actor.Attributes[GameAttribute.Custom_Target_Weight] = 100f; // on decoy 
                 //                 map[GameAttribute.Forced_Enemy_ACDID]
                 //                map[GameAttribute.Is_Player_Decoy] = true; // on decoy
-                List<Actor> actors = this.Actor.World.GetActorsInRange(Actor.Position, 8f);
+                List<Actor> actors = this.Actor.World.GetActorsInRange(Actor.Position, 20f);
                 Monster monster = null;
                 for (int i = 0; i < actors.Count; i++)
                 {
@@ -1302,25 +1308,25 @@ namespace Mooege.Core.GS.FXEffect
             switch (message.PowerSNO)
             {
                 case Skills.Skills.Monk.SpiritGenerator.FistsOfThunder:
-                    masterEffectID = 143570; // cast
-                    effectID = 96176; // projectile
+                    effectID  = 143570; // cast
+                    masterEffectID = 96176; // projectile
                     switch (message.Field5)
                     {
                         case 0:
                             startingTick += (6 * 1);
                             break;
                         case 1:
-                            masterEffectID = 143561;//143569; // cast
-                            effectID = 96176;//96177;
+                            effectID = 143561;//143569; // cast
+                            masterEffectID = 96176;//96177;
                             break;
                         case 2:
-                            masterEffectID = 143566; // cast
-                            effectID = 96178;
+                            effectID = 143566; // cast
+                            masterEffectID = 96178;
                             startingTick += (6 * 3);
                             break;
                     }
                     world.AddEffect(new FXEffect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
-                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = (message.Field5 == 2) ? startingTick - (6 * 3) : startingTick });
                     break;
                 case Skills.Skills.Monk.SpiritGenerator.ExplodingPalm:
                     effectID = 142471;
@@ -1440,6 +1446,7 @@ namespace Mooege.Core.GS.FXEffect
                     break;
                 case Skills.Skills.Monk.SpiritSpenders.SevenSidedStrike:
                     // TODO: find targets for effects, now targetting self
+                    // 98886 ?
                     effectID = 98826;
                     startingTick += 12;
                     world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = startingTick });
@@ -1466,9 +1473,8 @@ namespace Mooege.Core.GS.FXEffect
                 }
             } switch (message.PowerSNO)
             {
-                
                 case Skills.Skills.Wizard.Offensive.Hydra:
-                    world.AddEffect(new FXEffect { Actor = player, EffectID = 81103, DurationInTicks = (60 * 9), Position = targetPosition, NeedsActor = true });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = 81103, DurationInTicks = (60 * 9), Position = targetPosition, NeedsActor = true }); // needs to lower to groud
                     world.AddEffect(new HydraFXEffect { Actor = player, EffectID = 80745, DurationInTicks = (60 * 9), Position = targetPosition, AttackOffset = 0 });
                     world.AddEffect(new HydraFXEffect { Actor = player, EffectID = 80757, DurationInTicks = (60 * 9), Position = targetPosition, AttackOffset = (6 * 4) });
                     world.AddEffect(new HydraFXEffect { Actor = player, EffectID = 80758, DurationInTicks = (60 * 9), Position = targetPosition, AttackOffset = (6 * 8) });
