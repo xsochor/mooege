@@ -14,6 +14,10 @@ namespace Mooege.Core.GS.Test
     {
         protected static readonly Logger Logger = LogManager.CreateLogger();
         /* // dmg attributes
+        defender.Attributes[Thorns_Percent] = 0f;
+        defender.Attributes[Thorns_Percent_All] = 0f; // elemental
+        defender.Attributes[Thorns_Percent_Total] = 0f; // Thorns_Percent + Thorns_Percent_All#NONE
+        defender.Attributes[Thorns_Fixed] = 0f; // elemental
         attacker.Attributes[GameAttribute.Damage_Absorb_Percent] = 0f;
         attacker.Attributes[GameAttribute.Damage_Absorb_Percent_All] = 0;
         attacker.Attributes[GameAttribute.Damage_Done_Reduction_Percent] = 0;
@@ -192,6 +196,8 @@ namespace Mooege.Core.GS.Test
             if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
             {
                 map.CombineMap(BuffStop(player, PowerSNO));
+            } else if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] < 0) {
+                map[GameAttribute.Buff_Icon_Count0, PowerSNO] = 0;
             }
             player.Attributes.CombineMap(map);
             return map;
@@ -285,6 +291,16 @@ namespace Mooege.Core.GS.Test
             {
                 return true;
             }
+            return false;
+        }
+
+        public static bool IsImmune(Actor defender, bool damageTypeOverriden, int damageTypeOverride)
+        {
+            if (defender.Attributes[GameAttribute.Invulnerable])
+            {
+                return true;
+            }
+            // TODO: add elemental immunities
             return false;
         }
     }

@@ -85,7 +85,16 @@ namespace Mooege.Core.GS.Test
                     Type = (defender is Player.Player) ? FloatingNumberMessage.FloatType.Dodge : FloatingNumberMessage.FloatType.Dodged
                 });
             }
-
+            if (AttributeMath.IsImmune(defender, damageTypeOverriden, damageTypeOverride))
+            {
+                attacker.World.AddEffect(new HitSpecialEffect
+                {
+                    Actor = attacker,
+                    Target = defender,
+                    Type = FloatingNumberMessage.FloatType.Immune
+                });
+                return maps;
+            }
             bool blocked = AttributeMath.IsBlock(defender);
             if (blocked)
             {
@@ -100,9 +109,8 @@ namespace Mooege.Core.GS.Test
             damage = defender.Attributes[GameAttribute.Hitpoints_Cur];
             critical = AttributeMath.IsCriticalHit(attacker, defender);
             maps = AttributeMath.ComputeCombat(attacker, defender, critical, blocked, damageTypeOverriden, damageTypeOverride);
-            attacker.UpdateMap.CombineMap(maps[0]);
-            defender.UpdateMap.CombineMap(maps[1]);
             damage -= defender.Attributes[GameAttribute.Hitpoints_Cur];
+//            Logger.Info("damage: " + damage);
             if (damage == 0f)
             {
                 attacker.World.AddEffect(new HitSpecialEffect
@@ -120,16 +128,20 @@ namespace Mooege.Core.GS.Test
                     Target = defender,
                     Damage = damage,
                     Critical = critical,
-                    Type = damageTypeOverriden ? damageTypeOverride : 0
+                    Type = damageTypeOverriden ? damageTypeOverride : 0 // TODO: find damage type from combat
                 });
                 if (defender.Attributes[GameAttribute.Hitpoints_Cur] <= 0f)
                 {
                     attacker.World.AddEffect(new DieEffect
                     {
                         Actor = defender,
+                        Killer = attacker,
+                        Type = damageTypeOverriden ? damageTypeOverride : 0, // TODO: find damage type from combat
                     });
                 }
             }
+            attacker.UpdateMap.CombineMap(maps[0]);
+            defender.UpdateMap.CombineMap(maps[1]);
             return maps;
         }
 

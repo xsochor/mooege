@@ -133,7 +133,7 @@ namespace Mooege.Core.GS.FXEffect
                                 a.UpdateMap.CombineMap(map);
                             }
                         }
-                        if (this.NeedsActor && ProxyActor.DynamicID == EffectActor.GenericPowerProxyID) // generic power proxy
+                        if (this.NeedsActor && ProxyActor.ActorSNO == EffectActor.GenericPowerProxyID) // generic power proxy
                         {
                             // not sure if needed
                             World.BroadcastIfRevealed(new PlayEffectMessage()
@@ -321,11 +321,10 @@ namespace Mooege.Core.GS.FXEffect
             }
             else if (EffectID == 97328)
             {
-                // doesn't work (exploding palm 2)
                 GameAttributeMap map = new GameAttributeMap();
                 map[GameAttribute.Bleeding] = true;
                 map[GameAttribute.Bleed_Duration] = DurationInTicks.Value;
-                map[GameAttribute.Buff_Visual_Effect, Skills.Skills.Monk.SpiritGenerator.ExplodingPalm] = true;
+                map[GameAttribute.Power_Buff_0_Visual_Effect_None, Skills.Skills.Monk.SpiritGenerator.ExplodingPalm] = true;
                 Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 111132)
@@ -423,19 +422,7 @@ namespace Mooege.Core.GS.FXEffect
                     CombatSystem.ResolveCombat(Actor, actors[i]);
                 }
             }
-            else if (EffectID == 143473)
-            {
-                // exploding palm lvl 2
-                List<Actor> actors = World.GetActorsInRange(Actor.Position, 20f);
-                for (int i = 0; i < actors.Count; i++)
-                {
-                    if ((actors[i].World == null) || (actors[i].ActorType != ActorType.Monster))
-                    {
-                        continue;
-                    }
-                    World.AddEffect(new FXEffect { Actor = actors[i], EffectID = 97328, DurationInTicks = (60 * 3) });
-                }
-            }
+            
             // Tempest rush               map[GameAttribute.Skill_Toggled_State]
             //map[GameAttribute.Spawned_by_ACDID]
             //map[GameAttribute.Spawner_Concurrent_Count_ID]
@@ -491,11 +478,10 @@ namespace Mooege.Core.GS.FXEffect
             }
             else if (EffectID == 97328)
             {
-                // doesn't work (exploding palm 2)
                 GameAttributeMap map = new GameAttributeMap();
                 map[GameAttribute.Bleeding] = false;
                 map[GameAttribute.Bleed_Duration] = 0;
-                map[GameAttribute.Buff_Visual_Effect, Skills.Skills.Monk.SpiritGenerator.ExplodingPalm] = false;
+                map[GameAttribute.Power_Buff_0_Visual_Effect_None, Skills.Skills.Monk.SpiritGenerator.ExplodingPalm] = false;
                 Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 143230)
@@ -640,9 +626,16 @@ namespace Mooege.Core.GS.FXEffect
 
         protected override void EffectStartingAction()
         {
-            Actor target = CombatSystem.GetNearestTarget(World, Actor, Actor.Position, 8f);
+                   
+            Actor target = CombatSystem.GetNearestTarget(World, Actor, Actor.Position, 12f);
             if (target != null)
             {
+                if (EffectID == 143473)
+                {
+                    // exploding palm lvl 2
+
+                    World.AddEffect(new FXEffect { Actor = target, EffectID = 97328, DurationInTicks = (60 * 3) });
+                }
                 if (DamageTypeOverride == -1)
                 {
                     CombatSystem.ResolveCombat(Actor, target);
@@ -785,6 +778,10 @@ namespace Mooege.Core.GS.FXEffect
 
     public class DieEffect : FXEffect
     {
+        public int Type = 0;
+
+        public Actor Killer;
+
         public int AnimationSNO = -1;
 
         int[] killAni = new int[]{
@@ -823,7 +820,7 @@ namespace Mooege.Core.GS.FXEffect
                     {
                         Field0 = 0x2,
                         Field1 = (AnimationSNO != -1 ? AnimationSNO : killAni[RandomHelper.Next(killAni.Length)]),
-                        Field2 = 0x0,
+                        Field2 = 0,
                         Field3 = 1f
                     }
                 }
@@ -838,9 +835,9 @@ namespace Mooege.Core.GS.FXEffect
             attribs[GameAttribute.Hitpoints_Cur] = 0f;
             attribs[GameAttribute.Could_Have_Ragdolled] = true;
             attribs[GameAttribute.Deleted_On_Server] = true;
-//            attribs[GameAttribute.Queue_Death] = true;
+            attribs[GameAttribute.Queue_Death] = true;
             Actor.Attributes.CombineMap(attribs);
-            Actor.UpdateMap.CombineMap(attribs);
+            attribs.BroadcastInclusive(World, Actor); // NEEDED to show anim
 
             this.World.BroadcastInclusive(new PlayEffectMessage()
             {
@@ -853,6 +850,18 @@ namespace Mooege.Core.GS.FXEffect
                 ActorId = Actor.DynamicID,
                 Effect = Effect.Burned2
             }, Actor);
+
+            if ((Killer != null) && (Type != 0))
+            {
+                this.World.BroadcastInclusive(new PlayHitEffectMessage()
+                {
+                    ActorID = Actor.DynamicID,
+                    HitDealer = Killer.DynamicID,
+                    Field2 = Type,
+                    Field3 = false,
+                }, Actor);
+            }
+
             if (Actor is Monster)
             {
                 (Actor as Monster).Die();
@@ -1492,6 +1501,9 @@ namespace Mooege.Core.GS.FXEffect
                     effectID = 98842;
                     startingTick += 12;
                     world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = startingTick });
+                    break;
+                case Skills.Skills.Monk.SpiritSpenders.TempestRush:
+
                     break;
             }
         }
