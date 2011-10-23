@@ -77,7 +77,7 @@ namespace Mooege.Core.GS.Map
         public override void Update()
         {
             // update players.
-            foreach (var pair in this._players) { pair.Value.Update(); }
+//            foreach (var pair in this._players) { pair.Value.Update(); }
 
             // update effects.
             int tick = this.Game.Tick;
@@ -96,7 +96,7 @@ namespace Mooege.Core.GS.Map
             }
 
             // update actors.
-            foreach (var pair in this._actors) { if (!(pair.Value is Player.Player)) { pair.Value.Update(); } } // don't update players twice
+            foreach (var pair in this._actors) { pair.Value.Update(); } // update all actors, sends updating attributes
 
         }
 
@@ -269,8 +269,9 @@ namespace Mooege.Core.GS.Map
         public void AddEffect(FXEffect.FXEffect effect)
         {
             bool notAdding = false;
+            effect.World = this;
             int tick = this.Game.Tick;
-            if (effect.StartingTick <= tick)
+            if (!effect.StartingTick.HasValue || (effect.StartingTick <= tick))
             {
                 notAdding = effect.Process(tick);
             }
@@ -493,6 +494,16 @@ namespace Mooege.Core.GS.Map
         public List<Mooege.Core.GS.Player.Player> GetPlayersInRange(Vector3D vec, float range)
         {
             return GetPlayersInRange(vec.X, vec.Y, vec.Z, range);
+        }
+
+        public List<Mooege.Core.GS.Player.Player> GetAllPlayers()
+        {
+            var result = new List<Mooege.Core.GS.Player.Player>();
+            foreach (var player in this._players.Values)
+            {
+                result.Add(player);
+            }
+            return result;
         }
 
         #endregion // Collections

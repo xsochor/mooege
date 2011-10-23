@@ -148,7 +148,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {
@@ -331,7 +331,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {
@@ -484,7 +484,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {
@@ -624,7 +624,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {
@@ -823,7 +823,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {
@@ -1054,7 +1054,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {
@@ -1285,7 +1285,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {
@@ -1516,7 +1516,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {
@@ -1747,7 +1747,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {
@@ -1978,7 +1978,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {
@@ -2209,7 +2209,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {
@@ -2440,7 +2440,7 @@ namespace Mooege.Core.GS.Test
     {
     Attribute = GameAttribute.Attributes[0x0051], // Hitpoints_Total_From_Level
     Int = 0x00000000,
-    Float = 3.051758E-05f,
+    Float = 0f,
     },
     new NetAttributeKeyValue()
     {

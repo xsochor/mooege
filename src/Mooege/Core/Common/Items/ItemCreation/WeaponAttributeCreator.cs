@@ -66,7 +66,7 @@ namespace Mooege.Core.Common.Items.ItemCreation
             item.Attributes[GameAttribute.Damage_Weapon_Delta_Total, 0] = (weaponDmg + heroMaxDmg) - (minWeaponDmg + heroMinDmg);
             item.Attributes[GameAttribute.Damage_Weapon_Delta_Total_All] = (weaponDmg + heroMaxDmg) - (minWeaponDmg + heroMinDmg);
             item.Attributes[GameAttribute.Damage_Weapon_Delta_Total_MainHand, 0] = (weaponDmg + heroMaxDmg) - (minWeaponDmg + heroMinDmg);
-            item.Attributes[GameAttribute.Damage_Weapon_Delta_Total_OffHand, 0] = 3.051758E-05f;
+            item.Attributes[GameAttribute.Damage_Weapon_Delta_Total_OffHand, 0] = 0f;
 
             bool equipped = false; // (item.InvLoc.x + item.InvLoc.y == 0) ? 0 : 1;
 

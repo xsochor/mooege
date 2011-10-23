@@ -93,6 +93,7 @@ namespace Mooege.Core.GS.Actors
 
         public abstract ActorType ActorType { get; }
 
+        public GameAttributeMap UpdateMap { get; private set; }
         public GameAttributeMap Attributes { get; private set; }
         public List<Affix> AffixList { get; set; }
 
@@ -176,6 +177,7 @@ namespace Mooege.Core.GS.Actors
             this.Scale = 1.0f;
             this.RotationAmount = 0.0f;
             this.RotationAxis.Set(0.0f, 0.0f, 1.0f);
+            this.UpdateMap = new GameAttributeMap();
         }
 
         // NOTE: When using this, you should *not* set the actor's world. It is done for you
@@ -296,6 +298,19 @@ namespace Mooege.Core.GS.Actors
             player.InGameClient.SendMessage(new ACDDestroyActorMessage(this.DynamicID));
             player.RevealedObjects.Remove(this.DynamicID);
             return true;
+        }
+
+        public override void Update()
+        {
+            if (!UpdateMap.IsEmpty() && (this.World != null))
+            {
+                SendUpdateMap();
+            }
+        }
+
+        private void SendUpdateMap() {
+            UpdateMap.BroadcastInclusive(this.World, this);
+            UpdateMap.Clear();
         }
     }
 }

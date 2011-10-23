@@ -17,8 +17,11 @@
  */
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Mooege.Net.GS.Message.Definitions.Attribute;
+using Mooege.Core.GS.Map;
+using Mooege.Core.GS.Actors;
 
 namespace Mooege.Net.GS.Message
 {
@@ -59,6 +62,106 @@ namespace Mooege.Net.GS.Message
             var list = GetMessageList(actorID);
             foreach (var msg in list)
                 client.SendMessage(msg);
+        }
+
+        public void BroadcastMessage(World world, uint actorID)
+        {
+            var list = GetMessageList(actorID);
+            foreach (var player in world.GetAllPlayers())
+            {
+                foreach (var msg in list)
+                    player.InGameClient.SendMessage(msg);
+            }
+        }
+
+        public void BroadcastIfRevealed(World world, Actor actor)
+        {
+            var list = GetMessageList(actor.DynamicID);
+            foreach (var player in world.GetAllPlayers())
+            {
+                if (player.RevealedObjects.ContainsKey(actor.DynamicID))
+                {
+                    foreach (var msg in list)
+                        player.InGameClient.SendMessage(msg);
+                }
+            }
+        }
+
+        public void BroadcastGlobal(World world, Actor actor)
+        {
+            var list = GetMessageList(actor.DynamicID);
+            foreach (var player in world.GetAllPlayers())
+            {
+                foreach (var msg in list)
+                    player.InGameClient.SendMessage(msg);
+            }
+        }
+
+        public void BroadcastInclusive(World world, Actor actor)
+        {
+            var players = world.GetPlayersInRange(actor.Position, 480.0f);
+            if ((players == null) || (players.Count == 0))
+            {
+                return;
+            }
+            var list = GetMessageList(actor.DynamicID); 
+            foreach (var player in players)
+            {
+                foreach (var msg in list)
+                    player.InGameClient.SendMessage(msg);
+            }
+        }
+
+        public void BroadcastExclusive(World world, Actor actor)
+        {
+            var players = world.GetPlayersInRange(actor.Position, 480.0f);
+            if ((players == null) || (players.Count == 0))
+            {
+                return;
+            }
+            var list = GetMessageList(actor.DynamicID);
+            foreach (var player in players.Where(player => player != actor))
+            {
+                foreach (var msg in list)
+                    player.InGameClient.SendMessage(msg);
+            }
+        }
+
+        public GameAttributeMap CombineMap(GameAttributeMap map)
+        {
+            Dictionary<KeyId, GameAttributeValue> mapValues = map.GetValues();
+            if (mapValues.Count == 0)
+            {
+                return this;
+            }
+            var e = mapValues.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (_attributeValues.ContainsKey(e.Current.Key))
+                {
+                    _attributeValues[e.Current.Key] = e.Current.Value;
+                }
+                else
+                {
+                    _attributeValues.Add(e.Current.Key, e.Current.Value);
+                }
+            }
+            return this;
+        }
+
+        Dictionary<KeyId, GameAttributeValue> GetValues()
+        {
+            return _attributeValues;
+        }
+
+        public bool IsEmpty()
+        {
+            return _attributeValues.Count == 0;
+        }
+
+        public void Clear()
+        {
+            _attributeValues.Clear();
         }
 
         public List<GameMessage> GetMessageList(uint actorID)

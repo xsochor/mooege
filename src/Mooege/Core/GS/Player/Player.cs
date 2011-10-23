@@ -42,6 +42,7 @@ using Mooege.Common.Helpers;
 using Mooege.Net.GS.Message.Definitions.Combat;
 using Mooege.Core.MooNet.Online;
 using System;
+using Mooege.Core.GS.Test;
 
 
 // TODO: When the player moves, it will set the Position property which will bounce back to the player again.
@@ -149,8 +150,7 @@ namespace Mooege.Core.GS.Player
             this.Attributes[GameAttribute.Skill, 0x6DF] = 1;
             this.Attributes[GameAttribute.Skill_Total, 0x7780] = 1; //Basic Attack
             this.Attributes[GameAttribute.Skill, 0x7780] = 1;
-            this.Attributes[GameAttribute.Skill_Total, 0x0000CE11] = 1;  //Monk Spirit Trait
-            this.Attributes[GameAttribute.Skill, 0x0000CE11] = 1;
+           
             this.Attributes[GameAttribute.Skill_Total, 0x0002EC66] = 0; //stone of recall
             this.Attributes[GameAttribute.Skill_Total, 0xFFFFF] = 1;
             this.Attributes[GameAttribute.Skill, 0xFFFFF] = 1;
@@ -181,49 +181,49 @@ namespace Mooege.Core.GS.Player
 
             //Damage
             this.Attributes[GameAttribute.Damage_Delta_Total, 0] = 1f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 1] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 2] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 3] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 4] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 5] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 6] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 1] = 0f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 2] = 0f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 3] = 0f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 4] = 0f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 5] = 0f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 6] = 0f;
             this.Attributes[GameAttribute.Damage_Min_Total, 0] = 2f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 1] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 2] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 3] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 4] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 5] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 6] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 0xFFFFF] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 1] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 2] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 3] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 4] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 5] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 6] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 0xFFFFF] = 0f;
             this.Attributes[GameAttribute.Damage_Min_Subtotal, 0] = 2f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 1] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 2] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 3] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 4] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 5] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 6] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 0xFFFFF] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 1] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 2] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 3] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 4] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 5] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 6] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 0xFFFFF] = 0f;
             this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 0] = 2f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 1] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 2] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 3] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 4] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 5] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 6] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 1] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 2] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 3] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 4] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 5] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 6] = 0f;
             this.Attributes[GameAttribute.Damage_Weapon_Min, 0] = 2f;
             this.Attributes[GameAttribute.Damage_Weapon_Min_Total, 0] = 2f;
             this.Attributes[GameAttribute.Damage_Weapon_Min_Total_All] = 2f;
             this.Attributes[GameAttribute.Damage_Weapon_Min_Total_MainHand, 0] = 2f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 0xFFFFF] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 0xFFFFF] = 0f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta, 0] = 1f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta_SubTotal, 0] = 1f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 0] = 1f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 1] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 2] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 3] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 4] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 5] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 6] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 1] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 2] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 3] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 4] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 5] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 6] = 0f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta_Total, 0] = 1f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_All] = 1f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_MainHand, 0] = 1f;
@@ -238,28 +238,28 @@ namespace Mooege.Core.GS.Player
             this.Attributes[GameAttribute.Get_Hit_Max_Per_Level] = 10f;
             this.Attributes[GameAttribute.Get_Hit_Max_Base] = 50f;
             this.Attributes[GameAttribute.Hit_Chance] = 1f;
-            this.Attributes[GameAttribute.Dodge_Rating_Total] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Dodge_Rating_Total] = 0f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Item_CurrentHand] = 1.199219f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Item_Total_MainHand] = 1.199219f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Total] = 1.199219f;
             this.Attributes[GameAttribute.Attacks_Per_Second] = 1f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Item_MainHand] = 1.199219f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Item_Total] = 1.199219f;
-            this.Attributes[GameAttribute.Attacks_Per_Second_Item_Subtotal] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Attacks_Per_Second_Item] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Attacks_Per_Second_Item_Subtotal] = 0f;
+            this.Attributes[GameAttribute.Attacks_Per_Second_Item] = 0f;
             this.Attributes[GameAttribute.Crit_Percent_Cap] = 0x3F400000;
             this.Attributes[GameAttribute.Casting_Speed_Total] = 1f;
             this.Attributes[GameAttribute.Casting_Speed] = 1f;
             this.Attributes[GameAttribute.Hitpoints_Max_Total] = 76f;
             this.Attributes[GameAttribute.Hitpoints_Max] = 40f;
-            this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f;
             this.Attributes[GameAttribute.Hitpoints_Total_From_Vitality] = 36f;
             this.Attributes[GameAttribute.Hitpoints_Factor_Vitality] = 4f;
             this.Attributes[GameAttribute.Hitpoints_Factor_Level] = 4f;
             this.Attributes[GameAttribute.Hitpoints_Cur] = 76f;
 
             //Basic stats
-            this.Attributes[GameAttribute.Level_Cap] = 13;
+            this.Attributes[GameAttribute.Level_Cap] = 60;
             this.Attributes[GameAttribute.Level] = 30;// this.Properties.Level;
             this.Attributes[GameAttribute.Experience_Next] = LevelBorders[this.Properties.Level];
             this.Attributes[GameAttribute.Experience_Granted] = 1000;
@@ -274,19 +274,60 @@ namespace Mooege.Core.GS.Player
             this.Attributes[GameAttribute.Resource_Max, this.ResourceID] = 200f;
             this.Attributes[GameAttribute.Resource_Max_Total, this.ResourceID] = 200f;
             this.Attributes[GameAttribute.Resource_Effective_Max, this.ResourceID] = 200f;
-            this.Attributes[GameAttribute.Resource_Regen_Total, this.ResourceID] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Resource_Regen_Total, this.ResourceID] = 0f;
             this.Attributes[GameAttribute.Resource_Type_Primary] = this.ResourceID;
-            //Secondary Resource for the Demon Hunter
-            if (this.Properties.Class == ToonClass.DemonHunter)
+            this.Attributes[GameAttribute.Resource_Regen_Bonus_Percent] = 0f;
+            this.Attributes[GameAttribute.Resource_Regen_Per_Second] = 0f;
+            this.Attributes[GameAttribute.Resource_Regen_Percent_Per_Second] = 0f;
+
+            // Class specific
+            switch (this.Properties.Class)
             {
-                int Discipline = this.ResourceID + 1; //0x00000006
-                this.Attributes[GameAttribute.Resource_Cur, Discipline] = 30f;
-                this.Attributes[GameAttribute.Resource_Max, Discipline] = 30f;
-                this.Attributes[GameAttribute.Resource_Max_Total, Discipline] = 30f;
-                this.Attributes[GameAttribute.Resource_Effective_Max, Discipline] = 30f;
-                this.Attributes[GameAttribute.Resource_Regen_Total, Discipline] = 3.051758E-05f;
-                this.Attributes[GameAttribute.Resource_Type_Secondary] = Discipline;
+                case ToonClass.Barbarian:
+                    this.Attributes[GameAttribute.Skill_Total, 30078] = 1;  //Fury Trait
+                    this.Attributes[GameAttribute.Skill, 30078] = 1;
+                    this.Attributes[GameAttribute.Trait, 30078] = 1;
+                    break;
+                case ToonClass.DemonHunter:
+                    /* // unknown
+                    this.Attributes[GameAttribute.Skill_Total, ] = 1;  // Hatred Trait
+                    this.Attributes[GameAttribute.Skill, ] = 1;
+                    this.Attributes[GameAttribute.Skill_Total, ] = 1;  // Discipline Trait
+                    this.Attributes[GameAttribute.Skill, ] = 1;
+                     */
+                    //Secondary Resource for the Demon Hunter
+                    int Discipline = this.ResourceID + 1; //0x00000006
+                    this.Attributes[GameAttribute.Resource_Cur, Discipline] = 15f;
+                    this.Attributes[GameAttribute.Resource_Max, Discipline] = 30f;
+                    this.Attributes[GameAttribute.Resource_Max_Total, Discipline] = 30f;
+                    this.Attributes[GameAttribute.Resource_Effective_Max, Discipline] = 30f;
+                    this.Attributes[GameAttribute.Resource_Type_Secondary] = Discipline;
+                    this.Attributes[GameAttribute.Resource_Regen_Per_Second, this.ResourceID] = 30f;
+                    this.Attributes[GameAttribute.Resource_Regen_Per_Second, Discipline] = 5f;
+                    this.Attributes.CombineMap(AttributeMath.ComputeResourceRegen(this, Discipline)); // doesn't work
+                    break;
+                case ToonClass.Monk:
+                    this.Attributes[GameAttribute.Skill_Total, 0x0000CE11] = 1;  //Spirit Trait
+                    this.Attributes[GameAttribute.Skill, 0x0000CE11] = 1;
+                    this.Attributes[GameAttribute.Trait, 0x0000CE11] = 1;
+                    break;
+                case ToonClass.WitchDoctor:
+                    /* // unknown
+                    this.Attributes[GameAttribute.Skill_Total, ] = 1;  //Mana Trait
+                    this.Attributes[GameAttribute.Skill, ] = 1;
+                     */
+                    this.Attributes[GameAttribute.Resource_Regen_Per_Second, this.ResourceID] = 50f; // needs proper number
+                    break;
+                case ToonClass.Wizard:
+                    /* // unknown
+                    this.Attributes[GameAttribute.Skill_Total, ] = 1;  //Arcane Power Trait
+                    this.Attributes[GameAttribute.Skill, ] = 1;
+                     */
+                    this.Attributes[GameAttribute.Resource_Regen_Per_Second, this.ResourceID] = 30f; // needs proper number
+                    break;
             }
+
+            AttributeMath.ComputeResourceRegen(this, this.ResourceID);
 
             //Movement
             this.Attributes[GameAttribute.Movement_Scalar_Total] = 1f;
@@ -297,8 +338,8 @@ namespace Mooege.Core.GS.Player
             this.Attributes[GameAttribute.Walking_Rate] = 0.2797852f;
             this.Attributes[GameAttribute.Running_Rate_Total] = 0.3598633f;
             this.Attributes[GameAttribute.Running_Rate] = 0.3598633f;
-            this.Attributes[GameAttribute.Sprinting_Rate_Total] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Strafing_Rate_Total] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Sprinting_Rate_Total] = 0f;
+            this.Attributes[GameAttribute.Strafing_Rate_Total] = 0f;
 
             //Miscellaneous
             //this.Attributes[GameAttribute.Disabled] = true;
@@ -308,8 +349,7 @@ namespace Mooege.Core.GS.Player
             this.Attributes[GameAttribute.Immobolize] = true;
             this.Attributes[GameAttribute.Untargetable] = true;
             this.Attributes[GameAttribute.CantStartDisplayedPowers] = true;
-            this.Attributes[GameAttribute.IsTrialActor] = true;
-            this.Attributes[GameAttribute.Trait, 0x0000CE11] = 1;
+            this.Attributes[GameAttribute.IsTrialActor] = false;
             this.Attributes[GameAttribute.TeamID] = 2;
             this.Attributes[GameAttribute.Shared_Stash_Slots] = 14;
             this.Attributes[GameAttribute.Backpack_Slots] = 60;
@@ -317,7 +357,7 @@ namespace Mooege.Core.GS.Player
             #endregion // Attributes
             // temp attributes
             this.Attributes[GameAttribute.ItemMeltUnlocked] = true;
-
+            this.Attributes[GameAttribute.Crit_Percent_Base] = 25;
         }
 
         public void Consume(GameClient client, GameMessage message)
@@ -340,6 +380,7 @@ namespace Mooege.Core.GS.Player
             CheckExpBonus(1);
             // Check if there is an conversation to close in this tick
             CheckOpenConversations();
+            base.Update();
             this.InGameClient.SendTick(); // if there's available messages to send, will handle ticking and flush the outgoing buffer.
         }
 

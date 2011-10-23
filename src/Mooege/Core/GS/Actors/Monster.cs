@@ -26,6 +26,7 @@ using Mooege.Net.GS.Message.Fields;
 using Mooege.Net.GS.Message.Definitions.Animation;
 using Mooege.Net.GS.Message.Definitions.Effect;
 using Mooege.Net.GS.Message.Definitions.Misc;
+using Mooege.Core.GS.Test;
 
 namespace Mooege.Core.GS.Actors
 {
@@ -72,34 +73,100 @@ namespace Mooege.Core.GS.Actors
             this.Attributes[GameAttribute.Buff_Active, 30283] = true;
             this.Attributes[GameAttribute.Buff_Active, 30290] = true;
 
-            this.Attributes[GameAttribute.Hitpoints_Max_Total] = 4.546875f;
+            this.Attributes[GameAttribute.Hitpoints_Max_Total] = 4f;
             this.Attributes[GameAttribute.Buff_Active, 79486] = true;
-            this.Attributes[GameAttribute.Hitpoints_Max] = 4.546875f;
+            this.Attributes[GameAttribute.Hitpoints_Max] = 4f;
             this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f;
-            this.Attributes[GameAttribute.Hitpoints_Cur] = 4.546875f;
+            this.Attributes[GameAttribute.Hitpoints_Cur] = 4f;
             this.Attributes[GameAttribute.Invulnerable] = false;
             this.Attributes[GameAttribute.Buff_Active, 30582] = true;
             this.Attributes[GameAttribute.TeamID] = 10;
             this.Attributes[GameAttribute.Level] = 1;
             this.Attributes[GameAttribute.Experience_Granted] = 125;
 
+            this.Attributes[GameAttribute.Last_ACD_Attacked] = 0;
+            this.Attributes[GameAttribute.Last_Action_Timestamp] = 0;
             this.Attributes[GameAttribute.Blocks_Projectiles] = true;
+            this.Attributes[GameAttribute.Hit_Chance] = 0.65f;
+            this.Attributes[GameAttribute.Crit_Percent_Base] = 5;
+            this.Attributes[GameAttribute.Crit_Percent_Cap] = 0;
             this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
         }
 
         public override void Update()
         {
-            this.Brain(); // let him think. /raist 
+            this.Brain(); // let him think. /raist
+            base.Update();
         }
+
+        private bool sentWalkAnimation = false;
 
         public virtual void Brain()
         {
             // intellectual activities goes here ;) /raist
+            if (this.Attributes[GameAttribute.Queue_Death])
+            {
+                // will die
+                return;
+            }
+            Actor target = null;
+            if (this.Attributes[GameAttribute.Last_ACD_Attacked] != 0)
+            {
+                target = this.World.GetActor((uint)this.Attributes[GameAttribute.Last_ACD_Attacked]);
+            }
+            if (this.Attributes[GameAttribute.Forced_Enemy_ACDID] != 0)
+            {
+                target = this.World.GetActor((uint)this.Attributes[GameAttribute.Forced_Enemy_ACDID]);
+            }
+            if ((target == null) || (target.World == null))
+            {
+                this.Attributes[GameAttribute.Forced_Enemy_ACDID] = 0;
+                target = CombatSystem.GetNearestTarget(this.World, this, this.Position, 50f, Actors.ActorType.Player);
+                if (target != null)
+                {
+                    this.Attributes[GameAttribute.Last_ACD_Attacked] = unchecked((int)target.DynamicID);
+                }
+            }
+            if (target == null)
+            {
+                return;
+            }
+            if (!ActorUtils.CheckRange(this, target, 8f))
+            {
+                if (!sentWalkAnimation)
+                {
+                    CombatSystem.MoveToBasic(this, target, 0.1f, 69728);
+                    sentWalkAnimation = true;
+                }
+                else
+                {
+                    CombatSystem.MoveToBasic(this, target, 0.1f, null);
+                }
+            }
+            else if (target != null)
+            {
+                if (this.World.Game.Tick < this.Attributes[GameAttribute.Last_Action_Timestamp] + (6 * 12))
+                {
+                    return;
+                }
+                this.Attributes[GameAttribute.Last_Action_Timestamp] = this.World.Game.Tick;
+                if (target.World != null)
+                {
+                    CombatSystem.Attack(this, target, 11465);
+                    CombatSystem.ResolveCombat(this, target);
+                    this.Attributes[GameAttribute.Last_ACD_Attacked] = 0;
+                }
+                else
+                {
+                    this.Attributes[GameAttribute.Last_ACD_Attacked] = 0;
+                }
+            }
+            base.Update();
         }
 
         public override void OnTargeted(Mooege.Core.GS.Player.Player player, TargetMessage message)
         {
-            this.Die(player);
+//            this.Die(player);
         }
 
         public override bool Reveal(Mooege.Core.GS.Player.Player player)
@@ -242,6 +309,22 @@ namespace Mooege.Core.GS.Actors
             int rGlobes = RandomHelper.Next(1, 100);
             if (rGlobes < 20)
                 this.World.SpawnGlobe(player, this.Position);
+            this.Destroy();
+        }
+
+        public void Die()
+        {
+            var players = this.World.GetPlayersInRange(this.Position, 480.0f);
+            foreach (var player in players)
+            {
+                player.UpdateExp(this.Attributes[GameAttribute.Experience_Granted]);
+                player.UpdateExpBonusData(player.GBHandle.Type, this.GBHandle.Type);
+                this.World.SpawnRandomDrop(player, this.Position);
+                this.World.SpawnGold(player, this.Position);
+                int rGlobes = RandomHelper.Next(1, 100);
+                if (rGlobes < 20)
+                    this.World.SpawnGlobe(player, this.Position); // should be shared globe
+            }
             this.Destroy();
         }
     }
