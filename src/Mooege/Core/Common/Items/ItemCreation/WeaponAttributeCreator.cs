@@ -26,14 +26,16 @@ namespace Mooege.Core.Common.Items.ItemCreation
     {
         public void CreateAttributes(Item item)
         {
+            // TODO: randomize this
+
 
             // DPS: (([GameAttribute.Damage_Weapon_Delta_Total_All] / 2) + [GameAttribute.Damage_Weapon_Min_Total_All]) * [GameAttribute.Attacks_Per_Second_Item_Total]
             
-            item.Attributes[GameAttribute.Skill, 0x7780] = 1;
+            item.Attributes[GameAttribute.Skill, 0x7780] = 1; // basic attack
             item.Attributes[GameAttribute.IdentifyCost] = 1;
 
-            item.Attributes[GameAttribute.Durability_Max] = 400; // Floor(value/10)
-            item.Attributes[GameAttribute.Durability_Cur] = 400; // Floor(value/10)
+            item.Attributes[GameAttribute.Durability_Max] = 400; // shows Floor(value/10)
+            item.Attributes[GameAttribute.Durability_Cur] = 400; // shows Floor(value/10)
 
             item.Attributes[GameAttribute.Damage_Weapon_Min_Total, 0] = 20; // physical, shows in view
             item.Attributes[GameAttribute.Damage_Weapon_Min_Total, 1] = 10; // fire, DOESN'T show in view
