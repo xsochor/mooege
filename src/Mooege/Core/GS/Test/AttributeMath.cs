@@ -13,6 +13,9 @@ namespace Mooege.Core.GS.Test
     public class AttributeMath
     {
         protected static readonly Logger Logger = LogManager.CreateLogger();
+        /*
+         * #NONE means 0xFFFFF
+         */
         /* // dmg attributes
         defender.Attributes[Thorns_Percent] = 0f;
         defender.Attributes[Thorns_Percent_All] = 0f; // elemental
@@ -65,9 +68,19 @@ namespace Mooege.Core.GS.Test
         attacker.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand] = 0; // (DualWield_Hand#NONE ? Damage_Weapon_Min_Total_OffHand : Damage_Weapon_Min_Total_MainHand)
         attacker.Attributes[GameAttribute.Damage_Weapon_Min_Total_MainHand] = 0; // (Held_In_OffHand#NONE ? 0 : Damage_Weapon_Min_Total )
         attacker.Attributes[GameAttribute.Damage_Weapon_Min_Total_OffHand] = 0; // (Held_In_OffHand#NONE ? Damage_Weapon_Min_Total : 0)
-        attacker.Attributes[GameAttribute.Damage_Weapon_Percent_All] = 0;
+        attacker.Attributes[GameAttribute.Damage_Weapon_Percent_All] = 0; // elemental
         attacker.Attributes[GameAttribute.Damage_Weapon_Percent_Bonus] = 0;
         attacker.Attributes[GameAttribute.Damage_Weapon_Percent_Total] = 0; // Damage_Weapon_Percent_Bonus + Damage_Weapon_Percent_All#NONE
+                    attribs[GameAttribute.Attack_Cooldown_Delta] = 0; // monster's?
+            attribs[GameAttribute.Attack_Cooldown_Delta_Total] = 0; // monster's?
+            attribs[GameAttribute.Attack_Cooldown_Min] = 0; // monster's?
+            attribs[GameAttribute.Attack_Cooldown_Min_Total] = 0; // monster's?
+            attribs[GameAttribute.Attack_Reduction_Percent] = 0;
+            attribs[GameAttribute.Attack_Slow] = false; // ???
+            attribs[GameAttribute.Attack_Fear_Chance] = 0;
+            attribs[GameAttribute.Attack_Fear_Time_Delta] = 0;
+            attribs[GameAttribute.Attack_Fear_Time_Min] = 0;
+
         */
 
         /* // all attributes on resource
@@ -222,13 +235,76 @@ namespace Mooege.Core.GS.Test
             /*
             DPS
              */
+            // basic stat
+            attribs[GameAttribute.Attack] = 10; // ((Attack.Agg + Stats_All_Bonus + Attack_Bonus) * (1 + Attack_Bonus_Percent)) * (1 - Attack_Reduction_Percent)
+            attribs[GameAttribute.Attack_Bonus] = 0; //
+            attribs[GameAttribute.Attack_Bonus_Percent] = 0;
+            attribs[GameAttribute.Attack_Reduction_Percent] = 0;
+            attribs[GameAttribute.Stats_All_Bonus] = 0f;
+            // armor
+            attribs[GameAttribute.Armor] = 10;
+            attribs[GameAttribute.Armor_Bonus_Item] = 0;
+            attribs[GameAttribute.Armor_Bonus_Percent] = 0;
+            attribs[GameAttribute.Armor_Item] = 10;
+            attribs[GameAttribute.Armor_Item_Percent] = 0;
+            attribs[GameAttribute.Armor_Item_SubTotal] = 10; // FLOOR((Armor_Item + Armor_Bonus_Item) * (Armor_Item_Percent + 1))
+            attribs[GameAttribute.Armor_Item_Total] = 10; // (Armor_Item > 0)?(Max(Armor_Item_SubTotal, 1)):Armor_Item_SubTotal
+            attribs[GameAttribute.Armor_Total] = 20; // FLOOR((Armor + Armor_Item_Total) * (Armor_Bonus_Percent + 1))
+            /* // place hold
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+            attribs[GameAttribute] = 0;
+             */
+            // test
+            /*
+            attribs[GameAttribute.Block_Amount_Total_Min, 0xfffff] = 25f; // OK // (Block_Amount + Block_Amount_Item_Min + Block_Amount_Item_Bonus) * (1 + Block_Amount_Bonus_Percent)
+            attribs[GameAttribute.Block_Amount_Total_Max, 0xfffff] = 68f; // OK // (Block_Amount + Block_Amount_Item_Min + Block_Amount_Item_Delta + Block_Amount_Item_Bonus) * (1 + Block_Amount_Bonus_Percent)
+            attribs[GameAttribute.Block_Chance_Total, 0xfffff] = 0.4f; // OK // Block_Chance + Block_Chance_Item_Total
+             */
             attribs[GameAttribute.Hitpoints_Cur] = player.Attributes[GameAttribute.Hitpoints_Cur];
             attribs[GameAttribute.Hitpoints_Max_Total] = player.Attributes[GameAttribute.Hitpoints_Max_Total];
+            player.Attributes.CombineMap(attribs);
+            player.UpdateMap.CombineMap(attribs);
             return attribs;
         }
 
         public static GameAttributeMap[] ComputeCombat(Actor attacker, Actor defender, bool critical, Boolean blocked, bool damageTypeOverriden = false, int damageTypeOverride = 0)
         {
+            attacker.Attributes[GameAttribute.Attacks_Per_Second] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Bonus] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Item] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Item_Bonus] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Item_CurrentHand] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Item_MainHand] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Item_OffHand] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Item_Percent] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Item_Subtotal] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Item_Total] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Item_Total_MainHand] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Item_Total_OffHand] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Percent] = 0;
+            attacker.Attributes[GameAttribute.Attacks_Per_Second_Total] = 0;
             // TODO: absorbing elemental dmg ([GameAttribute.Damage_Absorb_Percent, type] + [GameAttribute.Damage_Absorb_Percent_All]
             // blocked -> substract from dmg blocked amount
             GameAttributeMap[] attribs = new GameAttributeMap[2];
@@ -302,6 +378,112 @@ namespace Mooege.Core.GS.Test
             }
             // TODO: add elemental immunities
             return false;
+        }
+
+        public static void ComputeEquipment(Player.Player player)
+        {
+            // compute weapon to temp map
+            // compute armor to temp map
+            // compute all basic stats
+            // compute resource
+            // compute damage
+
+            // store to attributes
+            // send update to player
+        }
+
+        public static void UnlockSkills(Player.Player player)
+        {
+            // TOOD: hardcoded, needs to take values from MPQ
+            // TODO: now only monk's ksills < level 10
+            int level = player.Attributes[GameAttribute.Level];
+            if (level > 30)
+            {
+                // no skills after lvl 30
+                return;
+            }
+            // hardcoded, needs to take values from MPQ
+            List<int> PowerSNOs = new List<int>();
+            switch (player.Properties.Class)
+            {
+                /* set for skillSNO
+                    player.Attributes[GameAttribute.Skill, ] = 1;
+                    player.Attributes[GameAttribute.Skill_Total, ] = 1;
+                 */
+                case Common.Toons.ToonClass.Barbarian:
+                    break;
+                case Common.Toons.ToonClass.DemonHunter:
+                    break;
+                case Common.Toons.ToonClass.Monk:
+                    PowerSNOs.Add(Skills.Skills.Monk.SpiritGenerator.FistsOfThunder);
+                    if (level < 2)
+                    {
+                        break;
+                    }
+                    PowerSNOs.Add(Skills.Skills.Monk.SpiritSpenders.BlindingFlash);
+                    PowerSNOs.Add(Skills.Skills.Monk.Mantras.MantraOfEvasion);
+                    if (level < 3)
+                    {
+                        break;
+                    }
+                    PowerSNOs.Add(Skills.Skills.Monk.SpiritSpenders.LashingTailKick);
+                    if (level < 4)
+                    {
+                        break;
+                    }
+                    PowerSNOs.Add(Skills.Skills.Monk.SpiritGenerator.DeadlyReach);
+                    if (level < 5)
+                    {
+                        break;
+                    }
+                    PowerSNOs.Add(Skills.Skills.Monk.SpiritSpenders.BreathOfHeaven);
+                    if (level < 6)
+                    {
+                        break;
+                    }
+                    PowerSNOs.Add(Skills.Skills.Monk.SpiritSpenders.DashingStrike);
+                    if (level < 7)
+                    {
+                        break;
+                    }
+                    PowerSNOs.Add(Skills.Skills.Monk.SpiritSpenders.LethalDecoy);
+                    if (level < 8)
+                    {
+                        break;
+                    }
+                    PowerSNOs.Add(Skills.Skills.Monk.SpiritGenerator.CripplingWave);
+                    if (level < 9)
+                    {
+                        break;
+                    }
+                    PowerSNOs.Add(Skills.Skills.Monk.Mantras.MantraOfRetribution);
+                    break;
+                case Common.Toons.ToonClass.WitchDoctor:
+                    break;
+                case Common.Toons.ToonClass.Wizard:
+                    break;
+            }
+            GameAttributeMap map = new GameAttributeMap();
+            UnlockSkills(map, PowerSNOs);
+            player.Attributes.CombineMap(map);
+            // my addition
+            player.UpdateMap.CombineMap(map);
+        }
+
+        private static void UnlockSkills(GameAttributeMap map, List<int> PowerSNOs)
+        {
+            if (PowerSNOs == null) {
+                return;
+            }
+            foreach (int PowerSNO in PowerSNOs) {
+                UnlockSkill(map, PowerSNO);
+            }
+        }
+
+        private static void UnlockSkill(GameAttributeMap map, int PowerSNO)
+        {
+            map[GameAttribute.Skill, PowerSNO] = 1;
+            map[GameAttribute.Skill_Total, PowerSNO] = 1;
         }
     }
 }

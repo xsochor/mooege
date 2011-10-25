@@ -99,7 +99,7 @@ namespace Mooege.Net.GS.Message
         SecondaryAnimationPowerMessage = 81, // len: 	28
         SNODataMessage1 = 82, // len: 	12
         DWordDataMessage2 = 83, // len: 	12
-        DWordDataMessage3 = 84, // len: 	12 // sent IN when stopped using stationary power (e.g. disintigrate)
+        DWordDataMessage3 = 84, // len: 	12 // sent IN when stopped using stationary power (e.g. disintigrate, firebats)
         DWordDataMessage4 = 85, // len: 	12
         DWordDataMessage5 = 86, // len: 	12 // sent IN when stopped using moving power (e.g. tempest rush)
         TryChatMessage = 87, // len: 	528

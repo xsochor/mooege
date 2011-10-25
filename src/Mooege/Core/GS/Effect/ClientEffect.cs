@@ -97,10 +97,10 @@ namespace Mooege.Core.GS.FXEffect
                             // effect Actor->Target
                             World.BroadcastIfRevealed(new EffectGroupACDToACDMessage()
                             {
-                                Id = 0x7a,
-                                Field0 = unchecked((int)this.Actor.DynamicID),
+                                Id = 0xaa,
+                                Field2 = unchecked((int)this.Actor.DynamicID),
                                 Field1 = unchecked((int)this.Target.DynamicID),
-                                Field2 = this.EffectID,
+                                Field0 = this.EffectID,
                             }, this.Actor);
                         }
                         EffectStartingAction();
@@ -1001,7 +1001,9 @@ namespace Mooege.Core.GS.FXEffect
             this.Attributes[GameAttribute.Hitpoints_Cur] = 100f;
             this.Attributes[GameAttribute.TeamID] = 1;
             this.Attributes[GameAttribute.Level] = 1;
+            this.Attributes[GameAttribute.Always_Hits] = true;
 
+            this.Attributes[GameAttribute.Is_Helper] = true;
             this.GBHandle.Type = (int)GBHandleType.CustomBrain;
             this.idleAnimationSNO = (this.ActorSNO == 169904) ? 69968 : 69632;
             this.walkAnimationSNO = (this.ActorSNO == 169904) ? 69728 : 69728; // TODO: find tags
@@ -1086,8 +1088,6 @@ namespace Mooege.Core.GS.FXEffect
     public class MovableEffectActor : AttackingEffectActor
     {
         protected int walkAnimationSNO;
-
-        private bool _cLientKnowsWalkAnimation = false;
 
         protected float speed = 0.1f; // distance per 1 Tick
 

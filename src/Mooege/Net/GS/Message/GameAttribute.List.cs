@@ -32,9 +32,11 @@ namespace Mooege.Net.GS.Message
         public static readonly GameAttributeF Defense_Reduction_Percent = new GameAttributeF(24, 0f, -1, 1, 0, "", "", "Defense_Reduction_Percent", GameAttributeEncoding.Float16, 9, 0f, 0f, 16);
         public static readonly GameAttributeI Armor = new GameAttributeI(25, 0, -1, 0, 0, "", "", "Armor", GameAttributeEncoding.Int, 9, 0, 0, 32);
         public static readonly GameAttributeI Armor_Bonus_Percent = new GameAttributeI(26, 0, -1, 0, 0, "", "", "Armor_Bonus_Percent", GameAttributeEncoding.Int, 9, 0, 0, 32);
+//        public static readonly GameAttributeF Armor_Bonus_Percent = new GameAttributeF(26, 0f, -1, 0, 0, "", "", "Armor_Bonus_Percent", GameAttributeEncoding.Float16Or32, 9, 0f, 0f, 32);
         public static readonly GameAttributeI Armor_Item = new GameAttributeI(27, 0, -1, 0, 0, "", "0", "Armor_Item", GameAttributeEncoding.Int, 9, 0, 0, 32);
         public static readonly GameAttributeI Armor_Bonus_Item = new GameAttributeI(28, 0, -1, 0, 0, "", "", "Armor_Bonus_Item", GameAttributeEncoding.Int, 9, 0, 0, 32);
         public static readonly GameAttributeI Armor_Item_Percent = new GameAttributeI(29, 0, -1, 0, 0, "", "0", "Armor_Item_Percent", GameAttributeEncoding.Int, 9, 0, 0, 32);
+//        public static readonly GameAttributeF Armor_Item_Percent = new GameAttributeF(29, 0f, -1, 0, 0, "", "0", "Armor_Item_Percent", GameAttributeEncoding.Float16Or32, 9, 0f, 0f, 32);
         public static readonly GameAttributeI Armor_Item_SubTotal = new GameAttributeI(30, 0, -1, 0, 0, "FLOOR((Armor_Item + Armor_Bonus_Item) * (Armor_Item_Percent + 1))", "", "Armor_Item_SubTotal", GameAttributeEncoding.Int, 9, 0, 0, 32);
         public static readonly GameAttributeI Armor_Item_Total = new GameAttributeI(31, 0, -1, 0, 0, "(Armor_Item > 0)?(Max(Armor_Item_SubTotal, 1)):Armor_Item_SubTotal", "", "Armor_Item_Total", GameAttributeEncoding.Int, 9, 0, 0, 32);
         public static readonly GameAttributeI Armor_Total = new GameAttributeI(32, 0, -1, 0, 0, "", "FLOOR((Armor + Armor_Item_Total) * (Armor_Bonus_Percent + 1))", "Armor_Total", GameAttributeEncoding.Int, 9, 0, 0, 32);

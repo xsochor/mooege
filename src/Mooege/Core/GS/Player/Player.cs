@@ -253,7 +253,7 @@ namespace Mooege.Core.GS.Player
 
             //Basic stats
             this.Attributes[GameAttribute.Level_Cap] = 60;
-            this.Attributes[GameAttribute.Level] = 30;// this.Properties.Level;
+            this.Attributes[GameAttribute.Level] = 1;// this.Properties.Level;
             this.Attributes[GameAttribute.Experience_Next] = LevelBorders[this.Properties.Level];
             this.Attributes[GameAttribute.Experience_Granted] = 1000;
             this.Attributes[GameAttribute.Armor_Total] = 0;
@@ -443,7 +443,7 @@ namespace Mooege.Core.GS.Player
 
         private void CollectHealthGlobe()
         {
-            var actorList = this.World.GetActorsInRange(this.Position.X, this.Position.Y, this.Position.Z, 5f);
+            var actorList = this.World.GetActorsInRange(this.Position.X, this.Position.Y, this.Position.Z, (5f + this.Attributes[GameAttribute.Gold_PickUp_Radius]));
             foreach (Actor actor in actorList)
             {
                 Item item;
@@ -683,6 +683,7 @@ namespace Mooege.Core.GS.Player
                 if (this.Attributes[GameAttribute.Level] < this.Attributes[GameAttribute.Level_Cap]) { this.Attributes[GameAttribute.Experience_Next] = this.Attributes[GameAttribute.Experience_Next] + LevelBorders[this.Attributes[GameAttribute.Level]]; }
                 else { this.Attributes[GameAttribute.Experience_Next] = 0; }
 
+                AttributeMath.UnlockSkills(this);
                 // 4 main attributes are incremented according to class
                 this.Attributes[GameAttribute.Attack] += this.AttackIncrement;
                 this.Attributes[GameAttribute.Precision] += this.PrecisionIncrement;

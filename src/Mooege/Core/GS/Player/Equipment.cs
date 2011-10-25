@@ -5,6 +5,7 @@ using System.Text;
 using Mooege.Core.Common.Items;
 using Mooege.Net.GS.Message.Fields;
 using Mooege.Net.GS.Message;
+using Mooege.Core.GS.Test;
 
 namespace Mooege.Core.GS.Player
 {
@@ -41,7 +42,13 @@ namespace Mooege.Core.GS.Player
             item.SetInventoryLocation(slot, 0, 0);
             GameAttributeMap map = new GameAttributeMap();
             map[GameAttributeB.Item_Equipped] = true;
+            if (slot == (int)EquipmentSlotId.Off_Hand)
+            {
+                map[GameAttribute.Held_In_OffHand] = true;
+            }
+            item.Attributes.CombineMap(map);
             map.SendMessage(item.Owner.InGameClient, item.DynamicID); // flag item as equipped, so as not to shown in red color
+            AttributeMath.ComputeStats(_owner);
         }
 
         public void EquipItem(uint itemID, int slot)
@@ -64,7 +71,13 @@ namespace Mooege.Core.GS.Player
                     GameAttributeMap map = new GameAttributeMap();
                     map[GameAttributeB.Item_Equipped] = false;
                     map.SendMessage(item.Owner.InGameClient, item.DynamicID); // unflag item
+                    if (item.Attributes[GameAttribute.Held_In_OffHand])
+                    {
+                        map[GameAttribute.Held_In_OffHand] = false;
+                    }
+                    item.Attributes.CombineMap(map);
                     item.Owner = null;
+                    AttributeMath.ComputeStats(_owner);
                     return i;
                 }
             }

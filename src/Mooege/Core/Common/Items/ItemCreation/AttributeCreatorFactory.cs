@@ -27,7 +27,8 @@ namespace Mooege.Core.Common.Items.ItemCreation
             var creatorList = new List<IItemAttributeCreator> {new DefaultAttributeCreator()};
 
             if (Item.IsWeapon(itemType)) creatorList.Add(new WeaponAttributeCreator());
-            else if (Item.IsPotion(itemType))  creatorList.Add(new PotionAttributeCreator());
+            else if (Item.IsPotion(itemType)) creatorList.Add(new PotionAttributeCreator());
+            else if ((ItemType.ChestArmor == itemType) || (ItemType.Shield == itemType)) creatorList.Add(new ArmorAttributeCreator());
 
             return creatorList;
         }
