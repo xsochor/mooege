@@ -19,44 +19,37 @@
 using CrystalMpq;
 using Gibbed.IO;
 using Mooege.Common.MPQ.FileFormats.Types;
+using System.Collections.Generic;
 
-// Appears to work fine, created from snodata.xml - DarkLotus
 namespace Mooege.Common.MPQ.FileFormats
 {
-    [FileFormat(SNOGroup.Recipe)]
-    public class Recipe : FileFormat
+    [FileFormat(SNOGroup.Encounter)]
+    public class Encounter : FileFormat
     {
-        public Header Header;
-        public int SNO;
-        public ItemSpecifierData ItemSpecifierData;
-
-        public Recipe(MpqFile file)
+        public Header Header { get; private set; }
+        public int snoSpawn { get; private set; }
+        List<EncounterSpawnOptions> Spawnoptions = new List<EncounterSpawnOptions>();
+        public Encounter(MpqFile file)
         {
             var stream = file.Open();
             this.Header = new Header(stream);
-            this.SNO = stream.ReadValueS32();
-            stream.Position += (2 * 4);
-            ItemSpecifierData = new ItemSpecifierData(stream);
+            this.snoSpawn = stream.ReadValueS32();
+            stream.Position += (2 * 4);// pad 2 int
+            this.Spawnoptions = stream.ReadSerializedData<EncounterSpawnOptions>();
             stream.Close();
         }
     }
 
-    public class ItemSpecifierData
+    public class EncounterSpawnOptions : ISerializableData
     {
-        public int gbidItem;
-        int i0;
-        int[] gbidAffixes = new int[3];
-        int i1;
-        public ItemSpecifierData(MpqFileStream stream)
+        public int snoSpawn { get; private set; }
+        public int i0 { get; private set; }
+        public int i1 { get; private set; }
+        public void Read(MpqFileStream stream)
         {
-            gbidItem = stream.ReadValueS32();
-            i0 = stream.ReadValueS32();
-            for (int i = 0; i > 3; i++)
-            {
-                gbidAffixes[i] = stream.ReadValueS32();
-            }
-            i1 = stream.ReadValueS32();
-
+            this.snoSpawn = stream.ReadValueS32();
+            this.i0 = stream.ReadValueS32();
+            this.i1 = stream.ReadValueS32();
         }
     }
 }

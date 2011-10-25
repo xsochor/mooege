@@ -16,11 +16,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-using System.IO;
+using System.Collections.Generic;
 using CrystalMpq;
-using Mooege.Common.Extensions;
+using Gibbed.IO;
 using Mooege.Net.GS.Message.Fields;
+using AABB = Mooege.Common.MPQ.FileFormats.Types.AABB;
 using System.Text;
+using Mooege.Common.MPQ.FileFormats.Types;
 
 namespace Mooege.Common.MPQ.FileFormats
 {
@@ -44,7 +46,8 @@ namespace Mooege.Common.MPQ.FileFormats
         public AxialCylinder Cylinder;
         public Sphere Sphere;
         public AABB AABBBounds;
-        
+
+        TagMap hTagMap;
         /// <summary>
         /// SNO for actor's animset.
         /// </summary>
@@ -54,6 +57,7 @@ namespace Mooege.Common.MPQ.FileFormats
         /// MonterSNO if any.
         /// </summary>
         public int MonsterSNO;
+        List<MsgTriggeredEvent> arMsgTriggeredEvents = new List<MsgTriggeredEvent>();
 
         public int Int1;
         public Vector3D V0;
@@ -61,34 +65,40 @@ namespace Mooege.Common.MPQ.FileFormats
         public int PhysicsSNO;
         public int Int2, Int3;
         public float Float0, Float1, Float2;
-        public int[] ActorCollisionData;
+        public ActorCollisionData ActorCollisionData;
         public int[] InventoryImages;
         public int Int4;
-        
+        public string CastingNotes;
+        public string VoiceOverRole;
+        public int BitField0;           // 25 bits - better this this would be an uint
+        public int BitField1;           // 25 bits - better this this would be an uint
         public Actor(MpqFile file)
         {
             var stream = file.Open();
             Header = new Header(stream);
-          
-            this.Int0 = stream.ReadInt32();
-            this.Type = (ActorType)stream.ReadInt32();
-            this.ApperanceSNO = stream.ReadInt32();
-            this.PhysMeshSNO = stream.ReadInt32();
+
+            this.Int0 = stream.ReadValueS32();
+            this.Type = (ActorType)stream.ReadValueS32();
+            this.ApperanceSNO = stream.ReadValueS32();
+            this.PhysMeshSNO = stream.ReadValueS32();
             this.Cylinder = new AxialCylinder(stream);
             this.Sphere = new Sphere(stream);
             this.AABBBounds = new AABB(stream);
 
-            var tagmap = stream.GetSerializedDataPointer(); // we need to read tagmap. /raist.
-            stream.Position += (2*4);
-            
-            this.AnimSetSNO = stream.ReadInt32();
-            this.MonsterSNO = stream.ReadInt32();
+            this.hTagMap = stream.ReadSerializedItem<TagMap>();
+            //var tagmap = stream.GetSerializedDataPointer(); // we need to read tagmap. /raist.
+            stream.Position += (2 * 4);
 
-            var msgTriggeredEvents = stream.GetSerializedDataPointer();
+            this.AnimSetSNO = stream.ReadValueS32();
+            this.MonsterSNO = stream.ReadValueS32();
 
-            this.Int1 = stream.ReadInt32();
-            stream.Position += (3*4); 
-            this.V0 = new Vector3D(stream.ReadFloat(), stream.ReadFloat(), stream.ReadFloat());
+
+            arMsgTriggeredEvents = stream.ReadSerializedData<MsgTriggeredEvent>();
+            //var msgTriggeredEvents = stream.GetSerializedDataPointer();
+
+            this.Int1 = stream.ReadValueS32();
+            stream.Position += (3 * 4);
+            this.V0 = new Vector3D(stream.ReadValueF32(), stream.ReadValueF32(), stream.ReadValueF32());
 
             this.Looks = new WeightedLook[8];
             for (int i = 0; i < 8; i++)
@@ -96,26 +106,42 @@ namespace Mooege.Common.MPQ.FileFormats
                 this.Looks[i] = new WeightedLook(stream);
             }
 
-            this.PhysicsSNO = stream.ReadInt32();
-            this.Int2 = stream.ReadInt32(); 
-            this.Int3 = stream.ReadInt32();
-            this.Float0 = stream.ReadFloat(); 
-            this.Float1 = stream.ReadFloat(); 
-            this.Float2 = stream.ReadFloat();
+            this.PhysicsSNO = stream.ReadValueS32();
+            this.Int2 = stream.ReadValueS32();
+            this.Int3 = stream.ReadValueS32();
+            this.Float0 = stream.ReadValueF32();
+            this.Float1 = stream.ReadValueF32();
+            this.Float2 = stream.ReadValueF32();
 
-            this.ActorCollisionData = new int[17]; // Was 68/4 - Darklotus 
-            for (int i = 0; i < 17; i++)
-            {
-                this.ActorCollisionData[i] = stream.ReadInt32();
-            }
+            this.ActorCollisionData = new ActorCollisionData(stream);
 
             this.InventoryImages = new int[10]; //Was 5*8/4 - Darklotus
             for (int i = 0; i < 10; i++)
             {
-                this.InventoryImages[i] = stream.ReadInt32();
+                this.InventoryImages[i] = stream.ReadValueS32();
+            }
+            this.Int4 = stream.ReadValueS32();
+            stream.Position += 4;
+            BitField0 = stream.ReadValueS32();
+            var serVOCastingNotes = stream.GetSerializedDataPointer();
+            if (serVOCastingNotes.Size > 0)
+            {
+                long x = stream.Position;
+                stream.Position = serVOCastingNotes.Offset + 16;
+                CastingNotes = stream.ReadString((uint)serVOCastingNotes.Size,true);                
+                stream.Position = x;
             }
 
-            // Updated based on BoyC's 010editoer template, looks like some data at the end still isnt parsed - Darklotus
+            BitField1 = stream.ReadValueS32();// not sure
+            var serVORole = stream.GetSerializedDataPointer();
+            if (serVORole.Size > 0)
+            {
+                long x = stream.Position;
+                stream.Position = serVOCastingNotes.Offset + 16;
+                VoiceOverRole = stream.ReadString((uint)serVORole.Size,true); 
+                stream.Position = x;
+            }
+            // Updated based on BoyC's 010 template and Moack's work. Think we just about read all data from actor now.- DarkLotus
             stream.Close();
         }
 
@@ -135,6 +161,23 @@ namespace Mooege.Common.MPQ.FileFormats
             CustomBrain = 11
         }
     }
+    public class ActorCollisionData
+    {
+        ActorCollisionFlags ColFlags;
+        int i0;
+        AxialCylinder Cylinder;
+        AABB aabb;
+        float f0;
+        public ActorCollisionData(MpqFileStream stream)
+        {
+            ColFlags = new ActorCollisionFlags(stream);
+            i0 = stream.ReadValueS32();
+            Cylinder = new AxialCylinder(stream);
+            aabb = new AABB(stream);
+            f0 = stream.ReadValueF32();
+            stream.ReadValueS32();// Testing - DarkLotus
+        }
+    }
 
     public class AxialCylinder
     {
@@ -144,9 +187,9 @@ namespace Mooege.Common.MPQ.FileFormats
 
         public AxialCylinder(MpqFileStream stream)
         {
-            this.Position = new Vector3D(stream.ReadFloat(), stream.ReadFloat(), stream.ReadFloat());
-            Ax1 = stream.ReadFloat();
-            Ax2 = stream.ReadFloat();
+            this.Position = new Vector3D(stream.ReadValueF32(), stream.ReadValueF32(), stream.ReadValueF32());
+            Ax1 = stream.ReadValueF32();
+            Ax2 = stream.ReadValueF32();
         }
     }
 
@@ -157,8 +200,8 @@ namespace Mooege.Common.MPQ.FileFormats
 
         public Sphere(MpqFileStream stream)
         {
-            Position = new Vector3D(stream.ReadFloat(), stream.ReadFloat(), stream.ReadFloat());
-            Radius = stream.ReadFloat();
+            Position = new Vector3D(stream.ReadValueF32(), stream.ReadValueF32(), stream.ReadValueF32());
+            Radius = stream.ReadValueF32();
         }
     }
 
@@ -169,10 +212,8 @@ namespace Mooege.Common.MPQ.FileFormats
 
         public WeightedLook(MpqFileStream stream)
         {
-            var buf = new byte[64];
-            stream.Read(buf, 0, 64);
-            LookLink = Encoding.ASCII.GetString(buf);
-            Int0 = stream.ReadInt32();
+            this.LookLink = stream.ReadString(64, true);
+            Int0 = stream.ReadValueS32();
         }
     }
 }

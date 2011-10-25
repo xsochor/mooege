@@ -19,8 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Mooege.Common.MPQ.FileFormats;
-using Mooege.Common.Extensions;
+using Gibbed.IO;
 
 namespace Mooege.Common.MPQ
 {
@@ -30,7 +29,7 @@ namespace Mooege.Common.MPQ
         public readonly Dictionary<SNOGroup, Type> AssetFormats = new Dictionary<SNOGroup, Type>();
 
         public Data()
-            : base(new List<string> { "CoreData.mpq", "ClientData.mpq" }, "/base/d3-update-base-(?<version>.*?).mpq")
+            : base(7447, new List<string> { "CoreData.mpq", "ClientData.mpq" }, "/base/d3-update-base-(?<version>.*?).mpq")
         { }
 
         public void Init()
@@ -67,15 +66,14 @@ namespace Mooege.Common.MPQ
             }
             
             var stream = tocFile.Open();
-            var assetsCount = stream.ReadInt32();
+            var assetsCount = stream.ReadValueS32();
 
             while(stream.Position<stream.Length)
             {
-                var group = (SNOGroup)stream.ReadInt32();
-                var snoId = stream.ReadInt32();
-                var name = new byte[128];
-                stream.Read(name, 0, 128);
-
+                var group = (SNOGroup)stream.ReadValueS32();
+                var snoId = stream.ReadValueS32();
+                var name = stream.ReadString(128, true);
+                    
                 var asset = new Asset(group, snoId, name);
                 this.Assets[group].Add(snoId, asset);
             }
