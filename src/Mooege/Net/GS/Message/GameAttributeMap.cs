@@ -149,6 +149,68 @@ namespace Mooege.Net.GS.Message
             return this;
         }
 
+        public GameAttributeMap AddMap(GameAttributeMap map)
+        {
+            Dictionary<KeyId, GameAttributeValue> mapValues = map.GetValues();
+            if (mapValues.Count == 0)
+            {
+                return this;
+            }
+            var e = _attributeValues.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (mapValues.ContainsKey(e.Current.Key))
+                {
+                    if (mapValues[e.Current.Key].ValueF != 0f)
+                    {
+                        // guess it's float
+                        _attributeValues[e.Current.Key] = new GameAttributeValue(_attributeValues[e.Current.Key].ValueF + mapValues[e.Current.Key].ValueF);
+                    }
+                    else if (mapValues[e.Current.Key].Value != 0)
+                    {
+                        // guess it's int or true boolean
+                        _attributeValues[e.Current.Key] = new GameAttributeValue(_attributeValues[e.Current.Key].Value + mapValues[e.Current.Key].Value);
+                    } // 0 in both fields means nothing to add
+                }
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Combines THIS map to target map
+        /// </summary>
+        /// <param name="map">target map for combination</param>
+        /// <returns>map with changed values</returns>
+        public GameAttributeMap CombineToMapAndRemoveIdentities(GameAttributeMap map)
+        {
+            GameAttributeMap result = new GameAttributeMap();
+            Dictionary<KeyId, GameAttributeValue> mapValues = map.GetValues();
+            if (mapValues.Count == 0)
+            {
+                return this;
+            }
+            var e = _attributeValues.GetEnumerator();
+            while (e.MoveNext())
+            {
+                if (mapValues.ContainsKey(e.Current.Key))
+                {
+                    if ((mapValues[e.Current.Key].ValueF != e.Current.Value.ValueF) ||
+                        (mapValues[e.Current.Key].Value == e.Current.Value.Value))
+                    {
+                        // not identical
+                        result._attributeValues.Add(e.Current.Key, e.Current.Value);
+                    }
+                    mapValues[e.Current.Key] = e.Current.Value;
+                }
+                else
+                {
+                    mapValues.Add(e.Current.Key, e.Current.Value);
+                    result._attributeValues.Add(e.Current.Key, e.Current.Value);
+                }
+            }
+            return result;
+        }
+
         Dictionary<KeyId, GameAttributeValue> GetValues()
         {
             return _attributeValues;
