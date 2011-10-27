@@ -32,7 +32,12 @@ namespace Mooege.Core.Common.Items.ItemCreation
             item.Attributes[GameAttribute.Durability_Cur] = 800; // shows floor(value/10)
 
             item.Attributes[GameAttribute.Armor_Item_Total] = 45;
-
+            /*
+            item.Attributes[GameAttribute.Armor_Item_Percent] = 0.05f;
+            item.Attributes[GameAttribute.Armor_Bonus_Item] = 10;
+            item.Attributes[GameAttribute.Armor_Item_SubTotal] = 10; // FLOOR((Armor_Item + Armor_Bonus_Item) * (Armor_Item_Percent + 1))
+            item.Attributes[GameAttribute.Armor_Item_Total] = 10; // (Armor_Item > 0)?(Max(Armor_Item_SubTotal, 1)):Armor_Item_SubTotal
+             */
             if (item.ItemType == ItemType.Shield)
             {
                 item.Attributes[GameAttribute.Block_Amount_Item_Delta] = 15f; // OK -> Max = min + delta

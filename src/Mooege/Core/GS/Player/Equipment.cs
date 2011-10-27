@@ -44,11 +44,47 @@ namespace Mooege.Core.GS.Player
             map[GameAttributeB.Item_Equipped] = true;
             if (slot == (int)EquipmentSlotId.Off_Hand)
             {
-                map[GameAttribute.Held_In_OffHand] = true;
+                if (_equipment[(int)EquipmentSlotId.Main_Hand] != 0)
+                {
+                    map[GameAttribute.Held_In_OffHand] = true;
+                    Item mainWeapon = GetEquipment(EquipmentSlotId.Main_Hand);
+                    GameAttributeMap other = new GameAttributeMap();
+                    other[GameAttribute.Damage_Weapon_Delta_Total_MainHand] = mainWeapon.Attributes[GameAttribute.Damage_Weapon_Delta_Total];
+                    other[GameAttribute.Damage_Weapon_Delta_Total_OffHand] = 0;
+                    map[GameAttribute.Damage_Weapon_Delta_Total_OffHand] = item.Attributes[GameAttribute.Damage_Weapon_Delta_Total];
+                    map[GameAttribute.Damage_Weapon_Delta_Total_MainHand] = 0;
+                    other[GameAttribute.Damage_Weapon_Min_Total_MainHand] = mainWeapon.Attributes[GameAttribute.Damage_Weapon_Min_Total];
+                    other[GameAttribute.Damage_Weapon_Min_Total_OffHand] = 0;
+                    map[GameAttribute.Damage_Weapon_Min_Total_OffHand] = item.Attributes[GameAttribute.Damage_Weapon_Min_Total];
+                    map[GameAttribute.Damage_Weapon_Min_Total_MainHand] = 0;
+                    mainWeapon.Attributes.CombineMap(other);
+                    other.SendMessage(mainWeapon.Owner.InGameClient, mainWeapon.DynamicID);
+                }
+            }
+            else if (slot == (int)EquipmentSlotId.Main_Hand)
+            {
+                if (_equipment[(int)EquipmentSlotId.Off_Hand] != 0)
+                {
+                    Item offHandWeapon = GetEquipment(EquipmentSlotId.Off_Hand);
+                    GameAttributeMap other = new GameAttributeMap();
+                    map[GameAttribute.Damage_Weapon_Delta_Total_MainHand] = item.Attributes[GameAttribute.Damage_Weapon_Delta_Total];
+                    other[GameAttribute.Damage_Weapon_Delta_Total_OffHand] = offHandWeapon.Attributes[GameAttribute.Damage_Weapon_Delta_Total];
+                    map[GameAttribute.Damage_Weapon_Min_Total_MainHand] = map[GameAttribute.Damage_Weapon_Min_Total];
+                    other[GameAttribute.Damage_Weapon_Min_Total_OffHand] = offHandWeapon.Attributes[GameAttribute.Damage_Weapon_Min_Total];
+                    other[GameAttribute.Held_In_OffHand] = true;
+                    map[GameAttribute.Damage_Weapon_Min_Total_OffHand] = 0;
+                    map[GameAttribute.Damage_Weapon_Delta_Total_OffHand] = 0;
+                    other[GameAttribute.Damage_Weapon_Delta_Total_MainHand] = 0;
+                    other[GameAttribute.Damage_Weapon_Min_Total_MainHand] = 0;
+                    offHandWeapon.Attributes.CombineMap(other);
+                    other.SendMessage(offHandWeapon.Owner.InGameClient, offHandWeapon.DynamicID);
+                }
             }
             item.Attributes.CombineMap(map);
             map.SendMessage(item.Owner.InGameClient, item.DynamicID); // flag item as equipped, so as not to shown in red color
-            AttributeMath.ComputeStats(_owner);
+            _equippedMap = null;
+            // compute stats (depends on items)
+            AttributeMath.ComputeStats(_owner, GetEquippedMap());
         }
 
         public void EquipItem(uint itemID, int slot)
@@ -74,10 +110,34 @@ namespace Mooege.Core.GS.Player
                     if (item.Attributes[GameAttribute.Held_In_OffHand])
                     {
                         map[GameAttribute.Held_In_OffHand] = false;
+                        if (_equipment[(int)EquipmentSlotId.Main_Hand] != 0)
+                        {
+                            Item mainWeapon = GetEquipment(EquipmentSlotId.Main_Hand);
+                            GameAttributeMap other = new GameAttributeMap();
+                            other[GameAttribute.Damage_Weapon_Min_Total_MainHand] = 0;
+                            other[GameAttribute.Damage_Weapon_Delta_Total_MainHand] = 0;
+                            mainWeapon.Attributes.CombineMap(other);
+                            other.SendMessage(mainWeapon.Owner.InGameClient, mainWeapon.DynamicID);
+                        }
+                    }
+                    else if (i == (int)EquipmentSlotId.Main_Hand)
+                    {
+                        if (_equipment[(int)EquipmentSlotId.Off_Hand] != 0)
+                        {
+                            Item offHandWeapon = GetEquipment(EquipmentSlotId.Off_Hand);
+                            GameAttributeMap other = new GameAttributeMap();
+                            other[GameAttribute.Damage_Weapon_Min_Total_OffHand] = 0;
+                            other[GameAttribute.Damage_Weapon_Delta_Total_OffHand] = 0;
+                            other[GameAttribute.Held_In_OffHand] = false;
+                            offHandWeapon.Attributes.CombineMap(other);
+                            other.SendMessage(offHandWeapon.Owner.InGameClient, offHandWeapon.DynamicID);
+                        }
                     }
                     item.Attributes.CombineMap(map);
                     item.Owner = null;
-                    AttributeMath.ComputeStats(_owner);
+                    _equippedMap = null;
+                    // compute stats (depends on items)
+                    AttributeMath.ComputeStats(_owner, GetEquippedMap());
                     return i;
                 }
             }
@@ -149,6 +209,31 @@ namespace Mooege.Core.GS.Player
             }
 
             return _inventoryGold;
+        }
+
+        private List<GameAttributeMap> GetEquippedItemsAttributes()
+        {
+            List<GameAttributeMap> result = new List<GameAttributeMap>();
+            for (int i = 0; i < EquipmentSlots; i++)
+            {
+                if (_equipment[i] == 0)
+                {
+                    continue;
+                }
+                result.Add(GetEquipment(i).Attributes);
+            }
+            return result;
+        }
+
+        private GameAttributeMap _equippedMap;
+
+        internal GameAttributeMap GetEquippedMap()
+        {
+            if (_equippedMap == null)
+            {
+                _equippedMap = AttributeMath.ComputeEquipment(_owner, GetEquippedItemsAttributes());
+            }
+            return _equippedMap;
         }
 
         internal Item GetEquipment(int targetEquipSlot)

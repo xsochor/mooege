@@ -247,7 +247,7 @@ namespace Mooege.Core.GS.Player
             this.Attributes[GameAttribute.Attacks_Per_Second_Item_Total] = 1.199219f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Item_Subtotal] = 0f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Item] = 0f;
-            this.Attributes[GameAttribute.Crit_Percent_Cap] = 0x3F400000;
+            this.Attributes[GameAttribute.Crit_Percent_Cap] = 0.5f;//  0x3F400000; TODO: convert to proper float
             this.Attributes[GameAttribute.Casting_Speed_Total] = 1f;
             this.Attributes[GameAttribute.Casting_Speed] = 1f;
 
@@ -360,7 +360,7 @@ namespace Mooege.Core.GS.Player
             #endregion // Attributes
             // temp attributes
             this.Attributes[GameAttribute.ItemMeltUnlocked] = true;
-            this.Attributes[GameAttribute.Crit_Percent_Base] = 25;
+            this.Attributes[GameAttribute.Crit_Percent_Base] = 0.15f;
         }
 
         public void Consume(GameClient client, GameMessage message)

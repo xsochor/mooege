@@ -110,6 +110,14 @@ namespace Mooege.Core.GS.Player
         }
 
         /// <summary>
+        /// Returns attribute map from ALL equipped items for stats computation
+        /// </summary>
+        public GameAttributeMap GetEquippedMap()
+        {
+            return _equipment.GetEquippedMap();
+        }
+
+        /// <summary>
         /// Handles a request to move an item within the inventory.
         /// This covers moving items within the backpack, from equipment
         /// slot to backpack and from backpack to equipment slot
