@@ -22,7 +22,7 @@ namespace Mooege.Net.GS.Message.Fields
 {
     public class LearnedLore
     {
-        public int Field0;
+        public int Field0; // count of learned lores
         // MaxLength = 256
         public int /* sno */[] m_snoLoreLearned;
 

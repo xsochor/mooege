@@ -34,6 +34,8 @@ using Mooege.Net.GS.Message.Definitions.Animation;
 using Mooege.Net.GS.Message.Definitions.Actor;
 using Mooege.Common;
 using Mooege.Core.GS.Test;
+using Mooege.Common.MPQ;
+using Mooege.Common.MPQ.FileFormats;
 
 namespace Mooege.Core.GS.FXEffect
 {
@@ -48,8 +50,8 @@ namespace Mooege.Core.GS.FXEffect
         // TODO: targetting system
 
         public int EffectID { get; set; }
-        public Actor Actor { get; set; } // initial actor for effect + attachment
-        public Actor Target { get; set; } // target actor, used when effect is Actor->Target
+        public Mooege.Core.GS.Actors.Actor Actor { get; set; } // initial actor for effect + attachment
+        public Mooege.Core.GS.Actors.Actor Target { get; set; } // target actor, used when effect is Actor->Target
         public EffectActor ProxyActor { get; protected set; } // newly created proxy actor if DurationInTicks present
         public int? StartingTick { get; set; } // don't spawn until Game.Tick >= StartingTick
         public int? DurationInTicks { get; set; } // longetivity of effect 
@@ -58,7 +60,7 @@ namespace Mooege.Core.GS.FXEffect
         public float Angle { get; set; } // some effects need angle
         public bool Attached { get; set; } // some lingering effects are attached to other actors
         public bool UseTargetEffect { get; set; }
-        public World World { get; set; }
+        public Mooege.Core.GS.Map.World World { get; set; }
 
         private Boolean _started = false;
 
@@ -129,7 +131,7 @@ namespace Mooege.Core.GS.FXEffect
                                 map[GameAttribute.Attached_To_ACD] = unchecked((int)this.Actor.DynamicID);
                                 map[GameAttribute.Attachment_Handled_By_Client] = true;
                                 map[GameAttribute.Actor_Updates_Attributes_From_Owner] = true;
-                                Actor a = (this.NeedsActor ? ProxyActor : Actor);
+                                Mooege.Core.GS.Actors.Actor a = (this.NeedsActor ? ProxyActor : Actor);
                                 a.UpdateMap.CombineMap(map);
                             }
                         }
@@ -287,13 +289,13 @@ namespace Mooege.Core.GS.FXEffect
                 ProxyActor.Attributes[GameAttribute.Always_Hits] = true;
                 ProxyActor.Attributes[GameAttribute.Custom_Target_Weight] = 100f;
                 ProxyActor.Attributes[GameAttribute.Is_Player_Decoy] = true;
-                List<Actor> actors = World.GetActorsInRange(Actor.Position, 40f);
-                Monster monster = null;
+                List<Mooege.Core.GS.Actors.Actor> actors = World.GetActorsInRange(Actor.Position, 40f);
+                Mooege.Core.GS.Actors.Monster monster = null;
                 for (int i = 0; i < actors.Count; i++)
                 {
                     if ((World != null) && (actors[i].ActorType == ActorType.Monster))
                     {
-                        monster = (actors[i] as Monster);
+                        monster = (actors[i] as Mooege.Core.GS.Actors.Monster);
                         monster.Attributes[GameAttribute.Forced_Enemy_ACDID] = unchecked((int)ProxyActor.DynamicID); // redying monsters
                         monster.Attributes[GameAttribute.Last_ACD_Attacked] = unchecked((int)ProxyActor.DynamicID);
                     }
@@ -386,7 +388,7 @@ namespace Mooege.Core.GS.FXEffect
                     OptionalParameter = 137107,
                 }, Actor);
                 // blinding flash
-                List<Actor> actors = World.GetActorsInRange(Actor.Position, 20f);
+                List<Mooege.Core.GS.Actors.Actor> actors = World.GetActorsInRange(Actor.Position, 20f);
                 for (int i = 0; i < actors.Count; i++)
                 {
                     if ((actors[i].World != null) && (actors[i].ActorType == ActorType.Monster))
@@ -412,7 +414,7 @@ namespace Mooege.Core.GS.FXEffect
             else if ((EffectID == 140870) || (EffectID == 140871) || (EffectID == 140872))
             {
                 // deadly strike
-                List<Actor> actors = World.GetActorsInRange(Actor.Position, 20f);
+                List<Mooege.Core.GS.Actors.Actor> actors = World.GetActorsInRange(Actor.Position, 20f);
                 for (int i = 0; i < actors.Count; i++)
                 {
                     if ((actors[i].World == null) || (actors[i].ActorType != ActorType.Monster))
@@ -466,7 +468,7 @@ namespace Mooege.Core.GS.FXEffect
                         Effect = Effect.PlayEffectGroup,
                         OptionalParameter = 99504
                     }, this.ProxyActor);
-                List<Actor> actors = World.GetActorsInRange(ProxyActor.Position, 30f);
+                List<Mooege.Core.GS.Actors.Actor> actors = World.GetActorsInRange(ProxyActor.Position, 30f);
                 for (int i = 0; i < actors.Count; i++)
                 {
                     if ((actors[i].World != null) && (actors[i].ActorType == ActorType.Monster))
@@ -589,7 +591,7 @@ namespace Mooege.Core.GS.FXEffect
                     Effect = Effect.PlayEffectGroup,
                     OptionalParameter = 113720
                 }, this.Actor);
-                Actor target = CombatSystem.GetNearestTarget(World, Actor, Actor.Position, 8f);
+                Mooege.Core.GS.Actors.Actor target = CombatSystem.GetNearestTarget(World, Actor, Actor.Position, 8f);
                 if (target != null) {
                     GameAttributeMap[] combatResult = CombatSystem.ResolveCombat(Actor, target);
                 }
@@ -626,8 +628,8 @@ namespace Mooege.Core.GS.FXEffect
 
         protected override void EffectStartingAction()
         {
-                   
-            Actor target = CombatSystem.GetNearestTarget(World, Actor, Actor.Position, 12f);
+
+            Mooege.Core.GS.Actors.Actor target = CombatSystem.GetNearestTarget(World, Actor, Actor.Position, 12f);
             if (target != null)
             {
                 if (EffectID == 143473)
@@ -780,7 +782,7 @@ namespace Mooege.Core.GS.FXEffect
     {
         public int Type = 0;
 
-        public Actor Killer;
+        public Mooege.Core.GS.Actors.Actor Killer;
 
         public int AnimationSNO = -1;
 
@@ -862,9 +864,37 @@ namespace Mooege.Core.GS.FXEffect
                 }, Actor);
             }
 
-            if (Actor is Monster)
+            if (Actor is Mooege.Core.GS.Actors.Monster)
             {
-                (Actor as Monster).Die();
+                // play lore if 1st kill for player
+                var players = this.World.GetPlayersInRange(Actor.Position, 480f);
+                if (players != null)
+                {
+                    var y = MPQStorage.Data.Assets[SNOGroup.Monster].FirstOrDefault(x => (x.Value.Data as Mooege.Common.MPQ.FileFormats.Monster).ActorSNO == Actor.ActorSNO);
+                    if (y.Value != null)
+                    {
+                        int loreSNO = (y.Value.Data as Mooege.Common.MPQ.FileFormats.Monster).snoLore;
+                        if (loreSNO != -1)
+                        {
+                            foreach (var player in players.Where(player => !player.LearnedLore.m_snoLoreLearned.Contains(loreSNO)))
+                            {
+                                // play lore to player
+                                player.InGameClient.SendMessage(new Mooege.Net.GS.Message.Definitions.Quest.LoreMessage {Id = 212, snoLore = loreSNO });
+                                // add lore to player's lores
+                                int loreIndex = 0;
+                                while ((loreIndex < player.LearnedLore.m_snoLoreLearned.Length) && (player.LearnedLore.m_snoLoreLearned[loreIndex] != 0)) {
+                                    loreIndex++;
+                                }
+                                if (loreIndex < player.LearnedLore.m_snoLoreLearned.Length)
+                                {
+                                    player.LearnedLore.m_snoLoreLearned[loreIndex] = loreSNO;
+                                    player.LearnedLore.Field0++; // Count
+                                }
+                            }
+                        }
+                    }
+                }
+                (Actor as Mooege.Core.GS.Actors.Monster).Die();
             }
             else if (Actor is EffectActor)
             {
@@ -895,7 +925,7 @@ namespace Mooege.Core.GS.FXEffect
 
     }
 
-    public class EffectActor : Actor
+    public class EffectActor : Mooege.Core.GS.Actors.Actor
     {
         protected static readonly Logger Logger = LogManager.CreateLogger();
 
@@ -907,7 +937,7 @@ namespace Mooege.Core.GS.FXEffect
 
         protected int ticksBetweenActions = 30; // 500 ms
 
-        public EffectActor(World world, int actorSNO, Vector3D position)
+        public EffectActor(Mooege.Core.GS.Map.World world, int actorSNO, Vector3D position)
             : base(world, world.NewActorID)
         {
             this.ActorSNO = actorSNO;
@@ -974,7 +1004,7 @@ namespace Mooege.Core.GS.FXEffect
         public override ActorType ActorType { get { return ActorType.NPC; } }
 
 
-        public MysticAllyEffectActor(World world, int actorSNO, Vector3D position, Actor owner) :
+        public MysticAllyEffectActor(Mooege.Core.GS.Map.World world, int actorSNO, Vector3D position, Mooege.Core.GS.Actors.Actor owner) :
             base(world, actorSNO, position)
         {
             this.Attributes[GameAttribute.Summoned_By_ACDID] = unchecked((int)owner.DynamicID);
@@ -1025,7 +1055,7 @@ namespace Mooege.Core.GS.FXEffect
                 base.Update();
                 return;
             }
-            Actor target = null;
+            Mooege.Core.GS.Actors.Actor target = null;
             if (this.Attributes[GameAttribute.Last_ACD_Attacked] != 0)
             {
                 target = this.World.GetActor((uint)this.Attributes[GameAttribute.Last_ACD_Attacked]);
@@ -1072,7 +1102,7 @@ namespace Mooege.Core.GS.FXEffect
     {
         protected int attackAnimationSNO;
 
-        public AttackingEffectActor(World world, int actorSNO, Vector3D position) : base(world, actorSNO, position) {
+        public AttackingEffectActor(Mooege.Core.GS.Map.World world, int actorSNO, Vector3D position) : base(world, actorSNO, position) {
             if (this.GetType().Equals(typeof(AttackingEffectActor)))
             {
                 this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
@@ -1093,7 +1123,7 @@ namespace Mooege.Core.GS.FXEffect
 
         protected Vector3D velocity;
 
-        public MovableEffectActor(World world, int actorSNO, Vector3D position)
+        public MovableEffectActor(Mooege.Core.GS.Map.World world, int actorSNO, Vector3D position)
             : base(world, actorSNO, position)
         {
             if (this.GetType().Equals(typeof(MovableEffectActor)))
@@ -1108,10 +1138,10 @@ namespace Mooege.Core.GS.FXEffect
     {
         public override ActorType ActorType { get { return ActorType.Projectile; } }
         protected int? expiresInTick;
-        protected Actor shooter;
+        protected Mooege.Core.GS.Actors.Actor shooter;
         protected bool destroyWhenBlocked;
 
-        public Projectile(World world, Actor shooter, int actorSNO, Vector3D position, float angle, float speed, int? expiresInTick, bool destroyWhenBlocked = false)
+        public Projectile(Mooege.Core.GS.Map.World world, Mooege.Core.GS.Actors.Actor shooter, int actorSNO, Vector3D position, float angle, float speed, int? expiresInTick, bool destroyWhenBlocked = false)
             : base(world, actorSNO, position) 
         {
             this.destroyWhenBlocked = destroyWhenBlocked;
@@ -1158,10 +1188,10 @@ namespace Mooege.Core.GS.FXEffect
             // TODO: fix targetting info
             this.Position.X += velocity.X * 6;
             this.Position.Y += velocity.Y * 6;
-            Actor target = CombatSystem.GetNearestTarget(this.World, this, this.Position, 5f); // TODO: expand targetting (line, arc, target types)
+            Mooege.Core.GS.Actors.Actor target = CombatSystem.GetNearestTarget(this.World, this, this.Position, 5f); // TODO: expand targetting (line, arc, target types)
             if (target != null)
             {
-                (target as Monster).Die((shooter as Player.Player));
+                (target as Mooege.Core.GS.Actors.Monster).Die((shooter as Player.Player));
             }
             // if hydra, spawn effect 81874 on target
         }
@@ -1197,7 +1227,7 @@ namespace Mooege.Core.GS.FXEffect
     public class HydraEffectActor : AttackingEffectActor
     {
 
-        public HydraEffectActor(World world, int actorSNO, Vector3D position, int attackOffsetTick, Actor owner)
+        public HydraEffectActor(Mooege.Core.GS.Map.World world, int actorSNO, Vector3D position, int attackOffsetTick, Mooege.Core.GS.Actors.Actor owner)
             : base(world, actorSNO, position)
         {
             this.Attributes[GameAttribute.Last_Action_Timestamp] = world.Game.Tick - attackOffsetTick;
@@ -1223,7 +1253,7 @@ namespace Mooege.Core.GS.FXEffect
             map.BroadcastInclusive(this.World, this);
              */
             if (this.World.Game.Tick >= this.Attributes[GameAttribute.Last_Action_Timestamp] + this.ticksBetweenActions) {
-                Actor target = CombatSystem.GetNearestTarget(this.World, this, this.Position, 30f);
+                Mooege.Core.GS.Actors.Actor target = CombatSystem.GetNearestTarget(this.World, this, this.Position, 30f);
                 if (target != null)
                 {
                     this.Attributes[GameAttribute.Last_Action_Timestamp] = this.World.Game.Tick;
@@ -1293,7 +1323,7 @@ namespace Mooege.Core.GS.FXEffect
     {
         private static readonly Logger Logger = LogManager.CreateLogger();
 
-        public static void ProcessSkill(Actor actor, TargetMessage message)
+        public static void ProcessSkill(Mooege.Core.GS.Actors.Actor actor, TargetMessage message)
         {
             switch (actor.ActorType)
             {
@@ -1336,9 +1366,9 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
-        private static void ProcessSkillMonk(Player.Player player, World world, TargetMessage message) {
+        private static void ProcessSkillMonk(Player.Player player, Mooege.Core.GS.Map.World world, TargetMessage message) {
             Vector3D targetPosition = message.Field2.Position;
-            Actor target = null;
+            Mooege.Core.GS.Actors.Actor target = null;
             if (message.TargetID != 0xFFFFFFFF)
             {
                 target = world.GetActor(message.TargetID);
@@ -1416,7 +1446,7 @@ namespace Mooege.Core.GS.FXEffect
                     world.AddEffect(new AttackEffect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
                     break;
                 case Skills.Skills.Monk.SpiritGenerator.CripplingWave:
-                    effectID = 2603;
+                    effectID = 152353;
                     switch (message.Field5)
                     {
                         case 0:
@@ -1508,10 +1538,10 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
-        private static void ProcessSkillTEST(Player.Player player, World world, TargetMessage message)
+        private static void ProcessSkillTEST(Player.Player player, Mooege.Core.GS.Map.World world, TargetMessage message)
         {
             Vector3D targetPosition = message.Field2.Position;
-            Actor target = null;
+            Mooege.Core.GS.Actors.Actor target = null;
             if (message.TargetID != 0xFFFFFFFF)
             {
                 target = world.GetActor(message.TargetID);
@@ -1549,7 +1579,7 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
-        private static void ProcessSkillMonk(Player.Player player, World world, SecondaryAnimationPowerMessage message)
+        private static void ProcessSkillMonk(Player.Player player, Mooege.Core.GS.Map.World world, SecondaryAnimationPowerMessage message)
         {
             int effectID = 0;
             switch (message.PowerSNO)
@@ -1602,7 +1632,7 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
-        private static void ProcessSkillTEST(Player.Player player, World world, SecondaryAnimationPowerMessage message)
+        private static void ProcessSkillTEST(Player.Player player, Mooege.Core.GS.Map.World world, SecondaryAnimationPowerMessage message)
         {
             switch (message.PowerSNO)
             {

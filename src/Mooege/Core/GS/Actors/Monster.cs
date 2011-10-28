@@ -91,10 +91,6 @@ namespace Mooege.Core.GS.Actors
             this.Attributes[GameAttribute.Crit_Percent_Base] = 5;
             this.Attributes[GameAttribute.Crit_Percent_Cap] = 0;
            
-            if (this.ActorSNO == 6652)
-            {
-                this.World.GetPlayersInRange(this.Position, 50f)[0].InGameClient.SendMessage(new Mooege.Net.GS.Message.Definitions.Quest.LoreMessage {Id = 212, snoLore = 136834 });
-            }
             this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
         }
 
