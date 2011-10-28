@@ -12,6 +12,7 @@ using Mooege.Net.GS.Message.Definitions.Misc;
 using Mooege.Net.GS.Message.Definitions.Actor;
 using Mooege.Net.GS.Message.Definitions.Animation;
 using Mooege.Common;
+using Mooege.Core.GS.Common.Types.Math;
 
 namespace Mooege.Core.GS.Test
 {

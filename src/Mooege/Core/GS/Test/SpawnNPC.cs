@@ -27,6 +27,8 @@ using Mooege.Net.GS.Message.Definitions.Misc;
 using Mooege.Net.GS.Message.Definitions.Attribute;
 using Mooege.Net.GS.Message;
 using Mooege.Net.GS.Message.Definitions.Animation;
+using Mooege.Core.GS.Common.Types.Math;
+using Mooege.Core.GS.Common.Types.SNO;
 
 namespace Mooege.Core.GS.Test
 {
@@ -66,17 +68,18 @@ namespace Mooege.Core.GS.Test
                     Scale = 1f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        
+                        Quaternion = new Quaternion()
                         {
-                            Amount = -0.7652696f,
-                            Axis = new Vector3D()
+                            W = -0.7652696f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 0f,
                                 Y = 0f,
                                 Z = 0.6437099f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 3113.659f,
                             Y = 2803.692f,
@@ -198,8 +201,8 @@ namespace Mooege.Core.GS.Test
                 Id = 0x00D3,
                 Name = new SNOName()
                 {
-                    Group = 0x00000001,
-                    Handle = 0x00013871,
+                    Group =  SNOGroup.Actor,
+                    SNOId = 0x00013871,
                 },
             });
             #endregion
@@ -222,17 +225,17 @@ namespace Mooege.Core.GS.Test
                     Scale = 1f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        Quaternion = new Quaternion()
                         {
-                            Amount = 0.9997472f,
-                            Axis = new Vector3D()
+                            W = 0.9997472f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 1.02945E-05f,
                                 Y = 3.217819E-05f,
                                 Z = 0.0224885f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 2970.619f,
                             Y = 2789.915f,
@@ -402,17 +405,17 @@ namespace Mooege.Core.GS.Test
                     Scale = 1f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        Quaternion = new Quaternion()
                         {
-                            Amount = 0.9228876f,
-                            Axis = new Vector3D()
+                            W = 0.9228876f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 0f,
                                 Y = 0f,
                                 Z = -0.3850694f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 2981.73f,
                             Y = 2835.009f,
@@ -546,17 +549,17 @@ namespace Mooege.Core.GS.Test
                     Scale = 1f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        Quaternion = new Quaternion()
                         {
-                            Amount = -0.01089788f,
-                            Axis = new Vector3D()
+                            W = -0.01089788f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 0f,
                                 Y = 0f,
                                 Z = 0.9999406f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 3125.888f,
                             Y = 2602.642f,
@@ -671,8 +674,8 @@ namespace Mooege.Core.GS.Test
                 Id = 0x00D3,
                 Name = new SNOName()
                 {
-                    Group = 0x00000001,
-                    Handle = 0x0000157E,
+                    Group = SNOGroup.Actor,
+                    SNOId = 0x0000157E,
                 },
             });
             #endregion
@@ -694,17 +697,17 @@ namespace Mooege.Core.GS.Test
                     Scale = 1.13f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        Quaternion = new Quaternion()
                         {
-                            Amount = 0.1261874f,
-                            Axis = new Vector3D()
+                            W = 0.1261874f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 0f,
                                 Y = 0f,
                                 Z = 0.9920065f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 3131.338f,
                             Y = 2597.316f,
@@ -880,8 +883,8 @@ namespace Mooege.Core.GS.Test
                 Id = 0x00D3,
                 Name = new SNOName()
                 {
-                    Group = 0x00000001,
-                    Handle = 0x000255BB,
+                    Group = SNOGroup.Actor,
+                    SNOId = 0x000255BB,
                 },
             });
             world.BroadcastGlobal(new TrickleMessage()
@@ -925,17 +928,17 @@ namespace Mooege.Core.GS.Test
                     Scale = 1.13f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        Quaternion = new Quaternion()
                         {
-                            Amount = 0.1261874f,
-                            Axis = new Vector3D()
+                            W = 0.1261874f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 0f,
                                 Y = 0f,
                                 Z = 0.9920065f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 2980.198f,
                             Y = 2795.186f,
@@ -1111,8 +1114,8 @@ namespace Mooege.Core.GS.Test
                 Id = 0x00D3,
                 Name = new SNOName()
                 {
-                    Group = 0x00000001,
-                    Handle = 56948,
+                    Group = SNOGroup.Actor,
+                    SNOId = 56948,
                 },
             });
             world.BroadcastGlobal(new TrickleMessage()
@@ -1156,17 +1159,17 @@ namespace Mooege.Core.GS.Test
                     Scale = 1.13f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        Quaternion = new Quaternion()
                         {
-                            Amount = 1.6f,
-                            Axis = new Vector3D()
+                            W = 1.6f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 0f,
                                 Y = 0f,
                                 Z = 0.9920065f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 3003.498f,
                             Y = 2788.01f,
@@ -1342,8 +1345,8 @@ namespace Mooege.Core.GS.Test
                 Id = 0x00D3,
                 Name = new SNOName()
                 {
-                    Group = 0x00000001,
-                    Handle = 56947,
+                    Group = SNOGroup.Actor,
+                    SNOId = 56947,
                 },
             });
             world.BroadcastGlobal(new TrickleMessage()
@@ -1387,17 +1390,17 @@ namespace Mooege.Core.GS.Test
                     Scale = 1.13f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        Quaternion = new Quaternion()
                         {
-                            Amount = 1.6f,
-                            Axis = new Vector3D()
+                            W = 1.6f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 0f,
                                 Y = 0f,
                                 Z = 0.9920065f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 2940.198f,
                             Y = 2795.186f,
@@ -1573,8 +1576,8 @@ namespace Mooege.Core.GS.Test
                 Id = 0x00D3,
                 Name = new SNOName()
                 {
-                    Group = 0x00000001,
-                    Handle = 56949,
+                    Group = SNOGroup.Actor,
+                    SNOId = 56949,
                 },
             });
             world.BroadcastGlobal(new TrickleMessage()
@@ -1618,17 +1621,17 @@ namespace Mooege.Core.GS.Test
                     Scale = 1.13f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        Quaternion = new Quaternion()
                         {
-                            Amount = 1.6f,
-                            Axis = new Vector3D()
+                            W = 1.6f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 0f,
                                 Y = 0f,
                                 Z = 0.9920065f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 2922.286f,
                             Y = 2796.864f,
@@ -1804,8 +1807,8 @@ namespace Mooege.Core.GS.Test
                 Id = 0x00D3,
                 Name = new SNOName()
                 {
-                    Group = 0x00000001,
-                    Handle = 81610,//0x00001243,
+                    Group = SNOGroup.Actor,
+                    SNOId = 81610,//0x00001243,
                 },
             });
             world.BroadcastGlobal(new TrickleMessage()
@@ -1849,17 +1852,17 @@ namespace Mooege.Core.GS.Test
                     Scale = 1.13f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        Quaternion = new Quaternion()
                         {
-                            Amount = 1.6f,
-                            Axis = new Vector3D()
+                            W = 1.6f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 0f,
                                 Y = 0f,
                                 Z = 0.9920065f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 2962.286f,
                             Y = 2796.864f,
@@ -2035,8 +2038,8 @@ namespace Mooege.Core.GS.Test
                 Id = 0x00D3,
                 Name = new SNOName()
                 {
-                    Group = 0x00000001,
-                    Handle = 4062,
+                    Group = SNOGroup.Actor,
+                    SNOId = 4062,
                 },
             });
             world.BroadcastGlobal(new TrickleMessage()
@@ -2080,17 +2083,17 @@ namespace Mooege.Core.GS.Test
                     Scale = 1.13f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        Quaternion = new Quaternion()
                         {
-                            Amount = 1.6f,
-                            Axis = new Vector3D()
+                            W = 1.6f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 0f,
                                 Y = 0f,
                                 Z = 0.9920065f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 2970.241f,
                             Y = 2794.907f,
@@ -2266,8 +2269,8 @@ namespace Mooege.Core.GS.Test
                 Id = 0x00D3,
                 Name = new SNOName()
                 {
-                    Group = 0x00000001,
-                    Handle = 87037,
+                    Group = SNOGroup.Actor,
+                    SNOId = 87037,
                 },
             });
             world.BroadcastGlobal(new TrickleMessage()
@@ -2311,17 +2314,17 @@ namespace Mooege.Core.GS.Test
                     Scale = 1.13f,
                     Transform = new PRTransform()
                     {
-                        Rotation = new Quaternion()
+                        Quaternion = new Quaternion()
                         {
-                            Amount = 1.6f,
-                            Axis = new Vector3D()
+                            W = 1.6f,
+                            Vector3D = new Vector3D()
                             {
                                 X = 0f,
                                 Y = 0f,
                                 Z = 0.9920065f,
                             },
                         },
-                        ReferencePoint = new Vector3D()
+                        Vector3D = new Vector3D()
                         {
                             X = 2932.286f,
                             Y = 2796.864f,
@@ -2497,8 +2500,8 @@ namespace Mooege.Core.GS.Test
                 Id = 0x00D3,
                 Name = new SNOName()
                 {
-                    Group = 0x00000001,
-                    Handle = 4644,
+                    Group = SNOGroup.Actor,
+                    SNOId = 4644,
                 },
             });
             world.BroadcastGlobal(new TrickleMessage()

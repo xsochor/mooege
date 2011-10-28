@@ -260,7 +260,7 @@ namespace Mooege.Core.GS.Test
             return map;
         }
 
-        public static GameAttributeMap ComputeStats(Player.Player player, GameAttributeMap equippedMap)
+        public static GameAttributeMap ComputeStats(Player.Player player, GameAttributeMap equippedMap, bool initialSetting = false)
         {
             GameAttributeMap attribs = new GameAttributeMap();
             // basic stats
@@ -350,8 +350,11 @@ namespace Mooege.Core.GS.Test
             // store to attributes
             attribs = attribs.CombineToMapAndRemoveIdentities(player.Attributes);
 //            player.Attributes.CombineMap(attribs);
-            // send update to player
-            player.UpdateMap.CombineMap(attribs);
+            if (!initialSetting)
+            {
+                // send update to player
+                player.UpdateMap.CombineMap(attribs);
+            }
             return attribs;
         }
 

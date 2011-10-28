@@ -18,6 +18,7 @@
 
 using System;
 using Mooege.Common.Helpers;
+using Mooege.Core.GS.Common.Types.Math;
 using Mooege.Core.GS.Map;
 using Mooege.Net.GS.Message;
 using Mooege.Net.GS.Message.Definitions.Tick;
@@ -83,7 +84,6 @@ namespace Mooege.Core.GS.Actors
             this.Attributes[GameAttribute.TeamID] = 10;
             this.Attributes[GameAttribute.Level] = 1;
             this.Attributes[GameAttribute.Experience_Granted] = 125;
-
             this.Attributes[GameAttribute.Last_ACD_Attacked] = 0;
             this.Attributes[GameAttribute.Last_Action_Timestamp] = 0;
             this.Attributes[GameAttribute.Blocks_Projectiles] = true;
@@ -91,7 +91,6 @@ namespace Mooege.Core.GS.Actors
             this.Attributes[GameAttribute.Crit_Percent_Base] = 5;
             this.Attributes[GameAttribute.Crit_Percent_Cap] = 0;
            
-            this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
         }
 
         public override void Update()
@@ -114,7 +113,7 @@ namespace Mooege.Core.GS.Actors
             }
             if (true)
             {
-                return;
+                return; // weird side-effect on mpq based spawning - all npcs are monsters
             }
             Actor target = null;
             if (this.Attributes[GameAttribute.Last_ACD_Attacked] != 0)
@@ -192,12 +191,6 @@ namespace Mooege.Core.GS.Actors
             {
                 ActorID = this.DynamicID,
                 AnimationSNO = this.AnimationSNO
-            });
-
-            player.InGameClient.SendMessage(new EndOfTickMessage()
-            {
-                Field0 = player.InGameClient.Game.Tick,
-                Field1 = player.InGameClient.Game.Tick + 20
             });
 
             return true;

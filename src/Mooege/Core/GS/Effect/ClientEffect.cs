@@ -36,6 +36,9 @@ using Mooege.Common;
 using Mooege.Core.GS.Test;
 using Mooege.Common.MPQ;
 using Mooege.Common.MPQ.FileFormats;
+using Mooege.Core.GS.Common.Types.Math;
+using Mooege.Core.GS.Common.Types.SNO;
+using Mooege.Core.Common.Toons;
 
 namespace Mooege.Core.GS.FXEffect
 {
@@ -873,7 +876,7 @@ namespace Mooege.Core.GS.FXEffect
                     var y = MPQStorage.Data.Assets[SNOGroup.Monster].FirstOrDefault(x => (x.Value.Data as Mooege.Common.MPQ.FileFormats.Monster).ActorSNO == Actor.ActorSNO);
                     if (y.Value != null)
                     {
-                        int loreSNO = (y.Value.Data as Mooege.Common.MPQ.FileFormats.Monster).snoLore;
+                        int loreSNO = (y.Value.Data as Mooege.Common.MPQ.FileFormats.Monster).SNOLore;
                         if (loreSNO != -1)
                         {
                             foreach (var player in players.Where(player => !player.LearnedLore.m_snoLoreLearned.Contains(loreSNO)))
@@ -889,6 +892,7 @@ namespace Mooege.Core.GS.FXEffect
                                 {
                                     player.LearnedLore.m_snoLoreLearned[loreIndex] = loreSNO;
                                     player.LearnedLore.Field0++; // Count
+                                    player.UpdateState();
                                 }
                             }
                         }
@@ -1346,21 +1350,23 @@ namespace Mooege.Core.GS.FXEffect
             }
             player.UpdateMap.CombineMap(map);
             */
+            // message.Field6.Field1 - tick, when client sent this request (start of animation)
+            // animations are based on attack_per_second (_current_hand) !!!
             switch (player.Properties.Class)
             {
-                case Common.Toons.ToonClass.Barbarian:
+                case ToonClass.Barbarian:
                     ProcessSkillTEST(player, player.World, message);
                     break;
-                case Common.Toons.ToonClass.DemonHunter:
+                case ToonClass.DemonHunter:
                     ProcessSkillTEST(player, player.World, message);
                     break;
-                case Common.Toons.ToonClass.Monk:
+                case ToonClass.Monk:
                     ProcessSkillMonk(player, player.World, message);
                     break;
-                case Common.Toons.ToonClass.WitchDoctor:
+                case ToonClass.WitchDoctor:
                     ProcessSkillTEST(player, player.World, message);
                     break;
-                case Common.Toons.ToonClass.Wizard:
+                case ToonClass.Wizard:
                     ProcessSkillTEST(player, player.World, message);
                     break;
             }
@@ -1405,7 +1411,7 @@ namespace Mooege.Core.GS.FXEffect
                     {
                         Actor = player,
                         EffectID = masterEffectID,
-                        StartingTick =  startingTick,
+                        StartingTick =  ,//startingTick,
                         DamageTypeOverride = 2
                     });
                     break;
@@ -1564,16 +1570,16 @@ namespace Mooege.Core.GS.FXEffect
         {
             switch (player.Properties.Class)
             {
-                case Common.Toons.ToonClass.Barbarian:
+                case ToonClass.Barbarian:
                     break;
-                case Common.Toons.ToonClass.DemonHunter:
+                case ToonClass.DemonHunter:
                     break;
-                case Common.Toons.ToonClass.Monk:
+                case ToonClass.Monk:
                     ProcessSkillMonk(player, player.World, message);
                     break;
-                case Common.Toons.ToonClass.WitchDoctor:
+                case ToonClass.WitchDoctor:
                     break;
-                case Common.Toons.ToonClass.Wizard:
+                case ToonClass.Wizard:
                     ProcessSkillTEST(player, player.World, message);
                     break;
             }
