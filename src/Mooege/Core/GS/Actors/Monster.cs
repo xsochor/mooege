@@ -90,6 +90,11 @@ namespace Mooege.Core.GS.Actors
             this.Attributes[GameAttribute.Hit_Chance] = 0.65f;
             this.Attributes[GameAttribute.Crit_Percent_Base] = 5;
             this.Attributes[GameAttribute.Crit_Percent_Cap] = 0;
+           
+            if (this.ActorSNO == 6652)
+            {
+                this.World.GetPlayersInRange(this.Position, 50f)[0].InGameClient.SendMessage(new Mooege.Net.GS.Message.Definitions.Quest.LoreMessage {Id = 212, snoLore = 136834 });
+            }
             this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
         }
 
@@ -104,9 +109,15 @@ namespace Mooege.Core.GS.Actors
         public virtual void Brain()
         {
             // intellectual activities goes here ;) /raist
+            
+
             if (this.Attributes[GameAttribute.Queue_Death])
             {
                 // will die
+                return;
+            }
+            if (true)
+            {
                 return;
             }
             Actor target = null;
