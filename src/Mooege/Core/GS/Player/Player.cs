@@ -572,7 +572,14 @@ namespace Mooege.Core.GS.Player
         private void OnAssignActiveSkill(GameClient client, AssignActiveSkillMessage message)
         {
             var oldSNOSkill = this.SkillSet.ActiveSkills[message.SkillIndex]; // find replaced skills SNO.
-
+            GameAttributeMap map = new GameAttributeMap();
+            // switch off old skill in hotbar
+            map[GameAttribute.Skill, oldSNOSkill] = 0;
+            map[GameAttribute.Skill_Total, oldSNOSkill] = 0;
+            // switch on new skill in hotbar
+            map[GameAttribute.Skill, message.SNOSkill] = 1;
+            map[GameAttribute.Skill_Total, message.SNOSkill] = 1;
+            map.SendMessage(InGameClient, this.DynamicID);
             foreach (HotbarButtonData button in this.SkillSet.HotBarSkills.Where(button => button.SNOSkill == oldSNOSkill)) // loop through hotbar and replace the old skill with new one
             {
                 button.SNOSkill = message.SNOSkill;
@@ -683,7 +690,6 @@ namespace Mooege.Core.GS.Player
                 if (this.Attributes[GameAttribute.Level] < this.Attributes[GameAttribute.Level_Cap]) { this.Attributes[GameAttribute.Experience_Next] = this.Attributes[GameAttribute.Experience_Next] + LevelBorders[this.Attributes[GameAttribute.Level]]; }
                 else { this.Attributes[GameAttribute.Experience_Next] = 0; }
 
-                AttributeMath.UnlockSkills(this);
                 // 4 main attributes are incremented according to class
                 this.Attributes[GameAttribute.Attack] += this.AttackIncrement;
                 this.Attributes[GameAttribute.Precision] += this.PrecisionIncrement;
@@ -696,7 +702,7 @@ namespace Mooege.Core.GS.Player
                 // For now, hit points are based solely on vitality and initial hitpoints received.
                 // This will have to change when hitpoint bonuses from items are implemented.
                 this.Attributes[GameAttribute.Hitpoints_Total_From_Vitality] = this.Attributes[GameAttribute.Vitality] * this.Attributes[GameAttribute.Hitpoints_Factor_Vitality];
-                this.Attributes[GameAttribute.Hitpoints_Max] = GetMaxTotalHitpoints();
+                this.Attributes[GameAttribute.Hitpoints_Max] = 40f; // STATIC value
                 this.Attributes[GameAttribute.Hitpoints_Max_Total] = GetMaxTotalHitpoints();
 
                 // On level up, health is set to max
