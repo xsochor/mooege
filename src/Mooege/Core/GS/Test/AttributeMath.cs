@@ -14,6 +14,11 @@ namespace Mooege.Core.GS.Test
     {
         protected static readonly Logger Logger = LogManager.CreateLogger();
         /*
+         * Stone of Recall = Recipe 		SNOId	195660	int
+        */
+
+
+        /*
          * #NONE means 0xFFFFF
          */
         /* // dmg attributes
@@ -186,6 +191,10 @@ namespace Mooege.Core.GS.Test
                 map[GameAttribute.Resource_Regen_Total, index] = total;
                 player.Attributes[GameAttribute.Resource_Regen_Total, index] = total;
             }
+            /*
+            map[GameAttribute.Skill, 195660] = 1; // NOT working
+            map[GameAttribute.Skill_Total, 195660] = 1;
+             */
             return map;
         }
 
@@ -471,98 +480,5 @@ namespace Mooege.Core.GS.Test
             return map;
         }
 
-        public static void UnlockSkills(Player.Player player)
-        {
-            // TODO: WRONG, should unlock skill when selected in skills panel (added to slot)
-            // TODO: disable skills when unselected in skills panel
-            int level = player.Attributes[GameAttribute.Level];
-            if (level > 30)
-            {
-                // no skills after lvl 30
-                return;
-            }
-            // hardcoded, needs to take values from MPQ
-            List<int> PowerSNOs = new List<int>();
-            switch (player.Properties.Class)
-            {
-                /* set for skillSNO
-                    player.Attributes[GameAttribute.Skill, ] = 1;
-                    player.Attributes[GameAttribute.Skill_Total, ] = 1;
-                 */
-                case Common.Toons.ToonClass.Barbarian:
-                    break;
-                case Common.Toons.ToonClass.DemonHunter:
-                    break;
-                case Common.Toons.ToonClass.Monk:
-                    PowerSNOs.Add(Skills.Skills.Monk.SpiritGenerator.FistsOfThunder);
-                    if (level < 2)
-                    {
-                        break;
-                    }
-                    PowerSNOs.Add(Skills.Skills.Monk.SpiritSpenders.BlindingFlash);
-                    PowerSNOs.Add(Skills.Skills.Monk.Mantras.MantraOfEvasion);
-                    if (level < 3)
-                    {
-                        break;
-                    }
-                    PowerSNOs.Add(Skills.Skills.Monk.SpiritSpenders.LashingTailKick);
-                    if (level < 4)
-                    {
-                        break;
-                    }
-                    PowerSNOs.Add(Skills.Skills.Monk.SpiritGenerator.DeadlyReach);
-                    if (level < 5)
-                    {
-                        break;
-                    }
-                    PowerSNOs.Add(Skills.Skills.Monk.SpiritSpenders.BreathOfHeaven);
-                    if (level < 6)
-                    {
-                        break;
-                    }
-                    PowerSNOs.Add(Skills.Skills.Monk.SpiritSpenders.DashingStrike);
-                    if (level < 7)
-                    {
-                        break;
-                    }
-                    PowerSNOs.Add(Skills.Skills.Monk.SpiritSpenders.LethalDecoy);
-                    if (level < 8)
-                    {
-                        break;
-                    }
-                    PowerSNOs.Add(Skills.Skills.Monk.SpiritGenerator.CripplingWave);
-                    if (level < 9)
-                    {
-                        break;
-                    }
-                    PowerSNOs.Add(Skills.Skills.Monk.Mantras.MantraOfRetribution);
-                    break;
-                case Common.Toons.ToonClass.WitchDoctor:
-                    break;
-                case Common.Toons.ToonClass.Wizard:
-                    break;
-            }
-            GameAttributeMap map = new GameAttributeMap();
-            UnlockSkills(map, PowerSNOs);
-            player.Attributes.CombineMap(map);
-            // my addition
-            player.UpdateMap.CombineMap(map);
-        }
-
-        private static void UnlockSkills(GameAttributeMap map, List<int> PowerSNOs)
-        {
-            if (PowerSNOs == null) {
-                return;
-            }
-            foreach (int PowerSNO in PowerSNOs) {
-                UnlockSkill(map, PowerSNO);
-            }
-        }
-
-        private static void UnlockSkill(GameAttributeMap map, int PowerSNO)
-        {
-            map[GameAttribute.Skill, PowerSNO] = 1;
-            map[GameAttribute.Skill_Total, PowerSNO] = 1;
-        }
     }
 }
