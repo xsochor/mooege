@@ -256,7 +256,7 @@ namespace Mooege.Core.GS.Player
 
             //Basic stats
             this.Attributes[GameAttribute.Level_Cap] = 60;
-            this.Attributes[GameAttribute.Level] = 1;// this.Properties.Level;
+            this.Attributes[GameAttribute.Level] = this.Properties.Level;
             this.Attributes[GameAttribute.Experience_Next] = LevelBorders[this.Properties.Level];
             this.Attributes[GameAttribute.Experience_Granted] = 1000;
             this.Attributes[GameAttribute.Armor_Total] = 0;
@@ -269,9 +269,9 @@ namespace Mooege.Core.GS.Player
             this.Attributes[GameAttribute.Hitpoints_Factor_Level] = 4f;
             this.Attributes[GameAttribute.Hitpoints_Factor_Vitality] = 4f;
             //this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 40f; // For now, this just adds 40 hitpoints to the hitpoints gained from vitality
+            this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f; // For now, this just adds 40 hitpoints to the hitpoints gained from vitality
             this.Attributes[GameAttribute.Hitpoints_Total_From_Vitality] = this.Attributes[GameAttribute.Vitality] * this.Attributes[GameAttribute.Hitpoints_Factor_Vitality];
-            this.Attributes[GameAttribute.Hitpoints_Max] = GetMaxTotalHitpoints();
+            this.Attributes[GameAttribute.Hitpoints_Max] = 40f;
             this.Attributes[GameAttribute.Hitpoints_Max_Total] = GetMaxTotalHitpoints();
             this.Attributes[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Max_Total];
 
@@ -364,6 +364,7 @@ namespace Mooege.Core.GS.Player
             // temp attributes
             this.Attributes[GameAttribute.ItemMeltUnlocked] = true;
             this.Attributes[GameAttribute.Crit_Percent_Base] = 0.15f;
+            AttributeMath.ComputeStats(this, new GameAttributeMap(), true);
         }
 
         public void Consume(GameClient client, GameMessage message)
@@ -584,7 +585,20 @@ namespace Mooege.Core.GS.Player
 
         private void OnAssignPassiveSkill(GameClient client, AssignPassiveSkillMessage message)
         {
-            this.SkillSet.PassiveSkills[message.SkillIndex] = message.SNOSkill;
+            var oldSNOSkill = this.SkillSet.PassiveSkills[message.SkillIndex]; // find replaced skills SNO.
+            GameAttributeMap map = new GameAttributeMap();
+            if (oldSNOSkill != -1)
+            {
+                // switch off old passive skill
+                map[GameAttribute.Trait, oldSNOSkill] = 0;
+                map[GameAttribute.Skill, oldSNOSkill] = 0;
+                map[GameAttribute.Skill_Total, oldSNOSkill] = 0;
+            }
+            // switch on new passive skill
+            map[GameAttribute.Trait, message.SNOSkill] = 1;
+            map[GameAttribute.Skill, message.SNOSkill] = 1;
+            map[GameAttribute.Skill_Total, message.SNOSkill] = 1;
+            map.SendMessage(InGameClient, this.DynamicID); this.SkillSet.PassiveSkills[message.SkillIndex] = message.SNOSkill;
             this.UpdateHeroState();
         }
 
@@ -592,9 +606,12 @@ namespace Mooege.Core.GS.Player
         {
             var oldSNOSkill = this.SkillSet.ActiveSkills[message.SkillIndex]; // find replaced skills SNO.
             GameAttributeMap map = new GameAttributeMap();
-            // switch off old skill in hotbar
-            map[GameAttribute.Skill, oldSNOSkill] = 0;
-            map[GameAttribute.Skill_Total, oldSNOSkill] = 0;
+            if (oldSNOSkill != -1)
+            {
+                // switch off old skill in hotbar
+                map[GameAttribute.Skill, oldSNOSkill] = 0;
+                map[GameAttribute.Skill_Total, oldSNOSkill] = 0;
+            }
             // switch on new skill in hotbar
             map[GameAttribute.Skill, message.SNOSkill] = 1;
             map[GameAttribute.Skill_Total, message.SNOSkill] = 1;
