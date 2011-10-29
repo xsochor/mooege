@@ -97,11 +97,11 @@ namespace Mooege.Net.GS.Message
         ProjectileStickMessage = 79, // len: 	28
         TargetMessage = 80, // len: 	60
         SecondaryAnimationPowerMessage = 81, // len: 	28
-        SNODataMessage1 = 82, // len: 	12
+        SNODataMessage1 = 82, // len: 	12 // sent IN when used Stone of Recall: Field0 = 0x0002EC66 (PowerSNO)
         DWordDataMessage2 = 83, // len: 	12
-        DWordDataMessage3 = 84, // len: 	12 // sent IN when stopped using stationary power (e.g. disintigrate, firebats)
+        DWordDataMessage3 = 84, // len: 	12 // sent IN when stopped using stationary power (e.g. disintigrate, firebats) Field0 = PowerSNO
         DWordDataMessage4 = 85, // len: 	12
-        DWordDataMessage5 = 86, // len: 	12 // sent IN when stopped using moving power (e.g. tempest rush)
+        DWordDataMessage5 = 86, // len: 	12 // sent IN when stopped using moving power (e.g. tempest rush) Field0 = PowerSNO
         TryChatMessage = 87, // len: 	528
         ChatMessage = 88, // len: 	528
         ANNDataMessage9 = 89, // len: 	12 // crashed client when sent OUT on player's ID

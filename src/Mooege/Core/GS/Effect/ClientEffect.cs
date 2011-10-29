@@ -892,7 +892,7 @@ namespace Mooege.Core.GS.FXEffect
                                 {
                                     player.LearnedLore.m_snoLoreLearned[loreIndex] = loreSNO;
                                     player.LearnedLore.Field0++; // Count
-                                    player.UpdateState();
+                                    player.UpdateHeroState();
                                 }
                             }
                         }
@@ -1386,6 +1386,10 @@ namespace Mooege.Core.GS.FXEffect
             int startingTick = world.Game.Tick;
             int effectID = 0;
             int masterEffectID = 0;
+            if (message.Field6 != null)
+            {
+                startingTick =  message.Field6.Field1;
+            }
             switch (message.PowerSNO)
             {
                 case Skills.Skills.Monk.SpiritGenerator.FistsOfThunder:
@@ -1394,24 +1398,25 @@ namespace Mooege.Core.GS.FXEffect
                     switch (message.Field5)
                     {
                         case 0:
-                            startingTick += (6 * 2);
+                            startingTick += (int)(6 * 3 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             break;
                         case 1:
                             effectID = 143561;//143569; // cast
                             masterEffectID = 96176;//96177;
+                            startingTick += (int)(6 * 2 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             break;
                         case 2:
                             effectID = 143566; // cast
                             masterEffectID = 96178;
-                            startingTick += (6 * 4);
+                            startingTick += (int)(6 * 5 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             break;
                     }
-                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = (message.Field5 == 2) ? startingTick - (6 * 4) : startingTick });
+                    world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = (message.Field5 == 2) ? startingTick - (int)(6 * 5 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]) : startingTick });
                     world.AddEffect(new AttackEffect
                     {
                         Actor = player,
                         EffectID = masterEffectID,
-                        StartingTick =  ,//startingTick,
+                        StartingTick = startingTick,
                         DamageTypeOverride = 2
                     });
                     break;
@@ -1421,13 +1426,15 @@ namespace Mooege.Core.GS.FXEffect
                     switch (message.Field5)
                     {
                         case 0:
+                            startingTick += (int)(6 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             break;
                         case 1:
+                            startingTick += (int)(6 * 2 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             break;
                         case 2:
                             effectID = 142473;
                             masterEffectID = 143473;
-                            startingTick += (6 * 3);
+                            startingTick += (int)(6 * 4 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             break;
                     }
                     world.AddEffect(new FXEffect { Actor = player, EffectID = effectID, StartingTick = startingTick });
@@ -1438,21 +1445,22 @@ namespace Mooege.Core.GS.FXEffect
                     switch (message.Field5)
                     {
                         case 0:
-                            startingTick += (6 * 2);
+                            startingTick += (int)(6 * 2 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             break;
                         case 1:
                             masterEffectID = 140871;
-                            startingTick += (6 * 1);
+                            startingTick += (int)(6 * 2/ player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             break;
                         case 2:
                             masterEffectID = 140872;
-                            startingTick += (6 * 4);
+                            startingTick += (int)(6 * 5 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             break;
                     }
                     world.AddEffect(new AttackEffect { Actor = player, EffectID = masterEffectID, StartingTick = startingTick });
                     break;
                 case Skills.Skills.Monk.SpiritGenerator.CripplingWave:
                     effectID = 152353;
+                    startingTick += (int)(6 * 2 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                     switch (message.Field5)
                     {
                         case 0:
@@ -1464,10 +1472,11 @@ namespace Mooege.Core.GS.FXEffect
                             effectID = 147929;
                             break;
                     }
-                    world.AddEffect(new AttackEffect { Actor = player, EffectID = effectID, });
+                    world.AddEffect(new AttackEffect { Actor = player, EffectID = effectID, StartingTick = startingTick });
                     break;
                 case Skills.Skills.Monk.SpiritGenerator.SweepingWind:
                     effectID = 196981;
+                    startingTick += (int)(6 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                     switch (message.Field5)
                     {
                         case 0:
@@ -1479,7 +1488,7 @@ namespace Mooege.Core.GS.FXEffect
                             effectID = 196984;
                             break;
                     }
-                    world.AddEffect(new AttackEffect { Actor = player, EffectID = effectID, });
+                    world.AddEffect(new AttackEffect { Actor = player, EffectID = effectID, StartingTick = startingTick});
                     break;
                 case Skills.Skills.Monk.SpiritGenerator.WayOfTheHundredFists:
                     effectID = 2612;//(player.Properties.Gender == 0) ? 2612 : ???;
@@ -1487,14 +1496,15 @@ namespace Mooege.Core.GS.FXEffect
                     switch (message.Field5)
                     {
                         case 0:
-                            startingTick += (6 * 3);
+                            startingTick += (int)(6 * 3 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             break;
                         case 1:
+                            startingTick += (int)(6 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             effectID = 98412;//(player.Properties.Gender == 0) ? 98412 : ???;
                             masterEffectID = 137346;//(player.Properties.Gender == 0) ? 137346 : ???;
                             break;
                         case 2:
-                            startingTick += (6 * 2);
+                            startingTick += (int)(6 * 2 / player.Attributes[GameAttribute.Attacks_Per_Second_Total]);
                             masterEffectID = 137347;//(player.Properties.Gender == 0) ? 137347 : ???;
                             effectID = 98416;//(player.Properties.Gender == 0) ? 98416 : ???;
                             break;
