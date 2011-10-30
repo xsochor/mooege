@@ -42,7 +42,26 @@ namespace Mooege.Core.Common.Items.ItemCreation
             item.Attributes[GameAttribute.Damage_Weapon_Min_Total_All] = 30; // used in DPS, sum of elemental
             item.Attributes[GameAttribute.Damage_Weapon_Max_Total, 0] = 40; // physical, shows in view
             item.Attributes[GameAttribute.Damage_Weapon_Max_Total, 1] = 10; // fire, DOESN'T show in view
-            item.Attributes[GameAttribute.Attacks_Per_Second_Item_Total] = 0.3f; // shows in view, used in DPS
+
+            float speed = 1f;
+            double r = RandomHelper.NextDouble();
+            if (r > 0.75)
+            {
+                speed = 2f;
+            }
+            else if (r > 0.5)
+            {
+                speed = 1.5f;
+            }
+            else if (r > 0.25)
+            {
+                speed = 1f;
+            }
+            else
+            {
+                speed = 0.5f;
+            }
+            item.Attributes[GameAttribute.Attacks_Per_Second_Item_Total] = speed; // shows in view, used in DPS
             item.Attributes[GameAttribute.Damage_Weapon_Delta_Total_All] = 20f; // used in DPS, sum of elemental 
 
             item.Attributes[GameAttribute.Item_Equipped] = false;

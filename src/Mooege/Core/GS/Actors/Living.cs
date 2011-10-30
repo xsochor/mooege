@@ -61,7 +61,8 @@ namespace Mooege.Core.GS.Actors
 
         public override void Update()
         {
-            this.Brain(); // let him think. /raist 
+            this.Brain(); // let him think. /raist
+            base.Update();
         }
 
         public virtual void Brain()

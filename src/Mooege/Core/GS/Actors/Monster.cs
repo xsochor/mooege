@@ -60,11 +60,11 @@ namespace Mooege.Core.GS.Actors
             {
                 // will die
                 return;
-            }
+            }/*
             if (true)
             {
                 return; // weird side-effect on mpq based spawning - all npcs are monsters
-            }
+            }*/
             Actor target = null;
             if (this.Attributes[GameAttribute.Last_ACD_Attacked] != 0)
             {
