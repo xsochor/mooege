@@ -1442,10 +1442,10 @@ namespace Mooege.Common.MPQ.FileFormats
         public string Name { get; private set; }
         public int SNORecipe { get; private set; }
         public RecipeType Type { get; private set; }
-        public int I0 { get; private set; }
-        public int I1 { get; private set; }
-        public int I2 { get; private set; }
-        public int I3 { get; private set; }
+        public int I0 { get; private set; } // bool 1 = need to find recipe, 0 = automatically gained when artisan level >= I1
+        public int I1 { get; private set; } // artisan sublevel
+        public int I2 { get; private set; } // crafting cost
+        public int I3 { get; private set; } // number of needed material types
         public RecipeIngredient[] Ingredients { get; private set; }
 
         public void Read(MpqFileStream stream)

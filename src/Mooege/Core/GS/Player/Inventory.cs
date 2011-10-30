@@ -34,7 +34,7 @@ namespace Mooege.Core.GS.Player
         static readonly Logger Logger = LogManager.CreateLogger();
 
         // Access by ID
-        public Dictionary<uint, Item> Items { get; private set; } // Not needed atm. Whats the suppose of it?
+        public Dictionary<uint, Item> Items { get; private set; } // Not needed atm. Whats the suppose of it? // needed for transferring items between worlds - xsochor
         private readonly Mooege.Core.GS.Player.Player _owner; // Used, because most information is not in the item class but Actors managed by the world
 
         private Equipment _equipment;
