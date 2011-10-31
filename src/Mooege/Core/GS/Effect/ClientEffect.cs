@@ -42,6 +42,19 @@ using Mooege.Core.Common.Toons;
 
 namespace Mooege.Core.GS.FXEffect
 {
+    /*
+     * Lore
+     -		[9]	{Mooege.Common.MPQ.FileFormats.Types.TagMapEntry}	Mooege.Common.MPQ.FileFormats.Types.TagMapEntry
+		Float0	0.0	float
+		Int1	67331	int
+		Int2	91532	int > cain's lore
+		ScriptFormula	null	Mooege.Common.MPQ.FileFormats.Types.ScriptFormula
+		Type	2	int
+*/
+    /*
+     * 		ItemType1	3646475	int - book with lore
+*/
+
     public class FXEffect
     {
         protected static readonly Logger Logger = LogManager.CreateLogger();
@@ -728,7 +741,7 @@ namespace Mooege.Core.GS.FXEffect
                 {
                     ActorID = Target.DynamicID,
                     Number = Damage,
-                    Type = (Target is Player.Player) ? (Critical ? FloatingNumberMessage.FloatType.RedCritical : FloatingNumberMessage.FloatType.Red) : (Critical ? FloatingNumberMessage.FloatType.WhiteCritical : FloatingNumberMessage.FloatType.White),
+                    Type = (Target is Player.Player) ? (Critical ? FloatingNumberMessage.FloatType.RedCritical : FloatingNumberMessage.FloatType.Red) : (Critical ? FloatingNumberMessage.FloatType.Golden : FloatingNumberMessage.FloatType.White),
                 }, Target);
             }
             else
@@ -738,7 +751,7 @@ namespace Mooege.Core.GS.FXEffect
                 {
                     ActorID = Target.DynamicID,
                     Number = Damage,
-                    Type = (Target is Player.Player) ? (Critical ? FloatingNumberMessage.FloatType.RedCritical : FloatingNumberMessage.FloatType.Red) : (Critical ? FloatingNumberMessage.FloatType.WhiteCritical : FloatingNumberMessage.FloatType.White),
+                    Type = (Target is Player.Player) ? (Critical ? FloatingNumberMessage.FloatType.RedCritical : FloatingNumberMessage.FloatType.Red) : (Critical ? FloatingNumberMessage.FloatType.Golden : FloatingNumberMessage.FloatType.White),
                 });
             }
         }

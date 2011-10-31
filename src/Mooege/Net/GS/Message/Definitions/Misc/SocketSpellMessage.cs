@@ -20,11 +20,17 @@ using System.Text;
 
 namespace Mooege.Net.GS.Message.Definitions.Misc
 {
+    /*SocketSpellMessage:
+{
+ Field0: 0x000000C6 (198)
+ Field1: 0x000176C4 (95940)
+}
+     */
     [Message(Opcodes.SocketSpellMessage)]
     public class SocketSpellMessage : GameMessage
     {
-        public int Field0;
-        public int Field1;
+        public int Field0; // rune dynamicID
+        public int Field1; // PowerSNO
 
         public override void Parse(GameBitBuffer buffer)
         {

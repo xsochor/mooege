@@ -207,6 +207,50 @@ namespace Mooege.Core.Common.Items
         {
             //Logger.Trace("OnTargeted");
             player.Inventory.PickUp(this);
+            // after MPQ based items are in master
+            /*
+            //Logger.Trace("OnTargeted");
+            if (this.ItemType.Hash == 3646475)
+            {
+                // book with lore
+                var y = MPQStorage.Data.Assets[SNOGroup.Actor].FirstOrDefault(x => x.Value.SNOId == this.ActorSNO);
+                var e = (y.Value.Data as Mooege.Common.MPQ.FileFormats.Actor).TagMap.TagMapEntries.FirstOrDefault(z => z.Int1 == 67331);
+                if (e != null)
+                {
+                    int loreSNO = e.Int2;
+                    if ((loreSNO != -1) && !player.LearnedLore.m_snoLoreLearned.Contains(loreSNO))
+                    {
+                        // play lore to player
+                        player.InGameClient.SendMessage(new Mooege.Net.GS.Message.Definitions.Quest.LoreMessage { Id = 213, snoLore = loreSNO }); // id 212 - new lore button, 213 - play immediatelly
+                        // add lore to player's lores
+                        int loreIndex = 0;
+                        while ((loreIndex < player.LearnedLore.m_snoLoreLearned.Length) && (player.LearnedLore.m_snoLoreLearned[loreIndex] != 0))
+                        {
+                            loreIndex++;
+                        }
+                        if (loreIndex < player.LearnedLore.m_snoLoreLearned.Length)
+                        {
+                            player.LearnedLore.m_snoLoreLearned[loreIndex] = loreSNO;
+                            player.LearnedLore.Field0++; // Count
+                            player.UpdateHeroState();
+                        }
+                    }
+                    if (player.GroundItems.ContainsKey(this.DynamicID))
+                        player.GroundItems.Remove(this.DynamicID);
+                    this.Destroy();
+                }
+                else
+                {
+                    // monster lore, shouldn't occure
+                    player.Inventory.PickUp(this);
+                }
+            }
+            else
+            {
+                // other items
+                player.Inventory.PickUp(this);
+            }
+            */
         }
 
         public override bool Reveal(Mooege.Core.GS.Player.Player player)
