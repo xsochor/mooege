@@ -39,6 +39,7 @@ using Mooege.Common.MPQ.FileFormats;
 using Mooege.Core.GS.Common.Types.Math;
 using Mooege.Core.GS.Common.Types.SNO;
 using Mooege.Core.Common.Toons;
+using Mooege.Core.GS.Players;
 
 namespace Mooege.Core.GS.FXEffect
 {
@@ -151,7 +152,7 @@ namespace Mooege.Core.GS.FXEffect
                                 a.UpdateMap.CombineMap(map);
                             }
                         }
-                        if (this.NeedsActor && ProxyActor.ActorSNO == EffectActor.GenericPowerProxyID) // generic power proxy
+                        if (this.NeedsActor && ProxyActor.SNOId == EffectActor.GenericPowerProxyID) // generic power proxy
                         {
                             // not sure if needed
                             World.BroadcastIfRevealed(new PlayEffectMessage()
@@ -245,8 +246,8 @@ namespace Mooege.Core.GS.FXEffect
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfEvasion;
                 GameAttributeMap map = new GameAttributeMap();
                 // icon + cooldown
-                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player.Player), PowerSNO, tick, 120));
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player.Player), PowerSNO, tick, 30));
+                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120));
+                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30));
                 if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
                 {
                     // skill effect
@@ -259,8 +260,8 @@ namespace Mooege.Core.GS.FXEffect
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfHealing;
                 GameAttributeMap map = new GameAttributeMap();
                 // icon + cooldown
-                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player.Player), PowerSNO, tick, 120));
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player.Player), PowerSNO, tick, 30));
+                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120));
+                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30));
                 if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
                 {
                     // skill effect
@@ -273,8 +274,8 @@ namespace Mooege.Core.GS.FXEffect
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfConviction;
                 GameAttributeMap map = new GameAttributeMap();
                 // icon + cooldown
-                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player.Player), PowerSNO, tick, 120));
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player.Player), PowerSNO, tick, 30));
+                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120));
+                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30));
                 if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
                 {
                     // skill effect
@@ -288,8 +289,8 @@ namespace Mooege.Core.GS.FXEffect
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfRetribution;
                 GameAttributeMap map = new GameAttributeMap();
                 // icon + cooldown
-                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player.Player), PowerSNO, tick, 120));
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player.Player), PowerSNO, tick, 30));
+                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120));
+                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30));
                 if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
                 {
                     // skill effect
@@ -333,8 +334,8 @@ namespace Mooege.Core.GS.FXEffect
                 map[GameAttribute.Slowdown_Immune] = true;
                 map[GameAttribute.Root_Immune] = true;
                 // icon + cooldown
-                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player.Player), PowerSNO, tick, 3));
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player.Player), PowerSNO, tick, 60));
+                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 3));
+                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 60));
                 Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 97328)
@@ -359,7 +360,7 @@ namespace Mooege.Core.GS.FXEffect
                     Field3 = false,
                     Speed = ActorUtils.GetDistance(Actor.Position, Position) / DurationInTicks, // speed, distance per tick
                     //Field5 = 0x00220008, // ???
-                    AnimationTag = (Actor as Player.Player).Properties.Gender == 0 ? 69840 : 90432// animation TAG, 0xFFFFFFFF - actor stopped (use idle?)
+                    AnimationTag = (Actor as Player).Properties.Gender == 0 ? 69840 : 90432// animation TAG, 0xFFFFFFFF - actor stopped (use idle?)
                 }, Actor);
                 Actor.Position = Position; // update position on server
             }
@@ -367,21 +368,21 @@ namespace Mooege.Core.GS.FXEffect
             {
                 int PowerSNO = Skills.Skills.Monk.SpiritSpenders.LashingTailKick;
                 GameAttributeMap map = new GameAttributeMap();
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player.Player), PowerSNO, tick, 3));
+                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 3));
                 Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 98826)
             {
                 int PowerSNO = Skills.Skills.Monk.SpiritSpenders.SevenSidedStrike;
                 GameAttributeMap map = new GameAttributeMap();
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player.Player), PowerSNO, tick, 30));
+                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30));
                 Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 145011)
             {
                 int PowerSNO = Skills.Skills.Monk.SpiritSpenders.WaveOfLight;
                 GameAttributeMap map = new GameAttributeMap();
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player.Player), PowerSNO, tick, 15));
+                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 15));
                 Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 162301)
@@ -459,8 +460,8 @@ namespace Mooege.Core.GS.FXEffect
                 // temporary HACK: TODO: move to subclasses
                 GameAttributeMap map = new GameAttributeMap();
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfEvasion;
-                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player.Player), PowerSNO));
-//                map.CombineMap(AttributeMath.CooldownStop((Actor as Player.Player), PowerSNO)); // to generic effect
+                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player), PowerSNO));
+//                map.CombineMap(AttributeMath.CooldownStop((Actor as Player), PowerSNO)); // to generic effect
                 if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0) {
                     // last mantra casted expired
                     World.BroadcastIfRevealed(new PlayEffectMessage()
@@ -489,7 +490,7 @@ namespace Mooege.Core.GS.FXEffect
                 {
                     if ((actors[i].World != null) && (actors[i].ActorType == ActorType.Monster))
                     {
-//                        (actors[i] as Monster).Die((Actor as Player.Player));
+//                        (actors[i] as Monster).Die((Actor as Player));
                         CombatSystem.ResolveCombat(ProxyActor, actors[i], true, 6);
                     }
                 }
@@ -516,7 +517,7 @@ namespace Mooege.Core.GS.FXEffect
                 map[GameAttribute.Stun_Immune] = false;
                 map[GameAttribute.Slowdown_Immune] = false;
                 map[GameAttribute.Root_Immune] = false;
-                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player.Player), PowerSNO));
+                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player), PowerSNO));
                 World.BroadcastIfRevealed(new PlayEffectMessage()
                 {
                     Id = 0x7a,
@@ -530,7 +531,7 @@ namespace Mooege.Core.GS.FXEffect
             {
                 GameAttributeMap map = new GameAttributeMap();
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfHealing;
-                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player.Player), PowerSNO));
+                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player), PowerSNO));
                 if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
                 {
                     // last mantra casted expired
@@ -549,7 +550,7 @@ namespace Mooege.Core.GS.FXEffect
             {
                 GameAttributeMap map = new GameAttributeMap();
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfConviction;
-                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player.Player), PowerSNO));
+                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player), PowerSNO));
                 if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
                 {
                     // last mantra casted expired
@@ -569,7 +570,7 @@ namespace Mooege.Core.GS.FXEffect
             {
                 GameAttributeMap map = new GameAttributeMap();
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfRetribution;
-                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player.Player), PowerSNO));
+                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player), PowerSNO));
                 if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
                 {
                     // last mantra casted expired
@@ -615,7 +616,7 @@ namespace Mooege.Core.GS.FXEffect
             }
             else if (EffectID == 162301)
             {
-                int sno = ((Actor as Player.Player).Properties.Gender == 0) ? 6544 : 6526;
+                int sno = ((Actor as Player).Properties.Gender == 0) ? 6544 : 6526;
                 World.BroadcastIfRevealed(new ACDChangeActorMessage
                 {
                     Field0 = unchecked((int)Actor.DynamicID),
@@ -670,7 +671,7 @@ namespace Mooege.Core.GS.FXEffect
     {
         protected override void EffectStartingAction()
         {
-            Actor.UpdateMap.CombineMap(AttributeMath.CooldownStop((Actor as Player.Player), EffectID));
+            Actor.UpdateMap.CombineMap(AttributeMath.CooldownStop((Actor as Player), EffectID));
         }
     }
 
@@ -726,14 +727,14 @@ namespace Mooege.Core.GS.FXEffect
                 Field3 = false,
             }, Actor);
 
-            Player.Player player = null;
-            if (Actor is Player.Player)
+            Player player = null;
+            if (Actor is Player)
             {
-                player = (Actor as Player.Player);
+                player = (Actor as Player);
             }
-            else if (Target is Player.Player)
+            else if (Target is Player)
             {
-                player = (Target as Player.Player);
+                player = (Target as Player);
             }
             if (player == null)
             {
@@ -741,7 +742,7 @@ namespace Mooege.Core.GS.FXEffect
                 {
                     ActorID = Target.DynamicID,
                     Number = Damage,
-                    Type = (Target is Player.Player) ? (Critical ? FloatingNumberMessage.FloatType.RedCritical : FloatingNumberMessage.FloatType.Red) : (Critical ? FloatingNumberMessage.FloatType.Golden : FloatingNumberMessage.FloatType.White),
+                    Type = (Target is Player) ? (Critical ? FloatingNumberMessage.FloatType.RedCritical : FloatingNumberMessage.FloatType.Red) : (Critical ? FloatingNumberMessage.FloatType.Golden : FloatingNumberMessage.FloatType.White),
                 }, Target);
             }
             else
@@ -751,7 +752,7 @@ namespace Mooege.Core.GS.FXEffect
                 {
                     ActorID = Target.DynamicID,
                     Number = Damage,
-                    Type = (Target is Player.Player) ? (Critical ? FloatingNumberMessage.FloatType.RedCritical : FloatingNumberMessage.FloatType.Red) : (Critical ? FloatingNumberMessage.FloatType.Golden : FloatingNumberMessage.FloatType.White),
+                    Type = (Target is Player) ? (Critical ? FloatingNumberMessage.FloatType.RedCritical : FloatingNumberMessage.FloatType.Red) : (Critical ? FloatingNumberMessage.FloatType.Golden : FloatingNumberMessage.FloatType.White),
                 });
             }
         }
@@ -763,14 +764,14 @@ namespace Mooege.Core.GS.FXEffect
 
         protected override void EffectStartingAction()
         {
-            Player.Player player = null;
-            if (Actor is Player.Player)
+            Player player = null;
+            if (Actor is Player)
             {
-                player = (Actor as Player.Player);
+                player = (Actor as Player);
             }
-            else if (Target is Player.Player)
+            else if (Target is Player)
             {
-                player = (Target as Player.Player);
+                player = (Target as Player);
             }
             if (player == null)
             {
@@ -886,7 +887,7 @@ namespace Mooege.Core.GS.FXEffect
                 var players = this.World.GetPlayersInRange(Actor.Position, 480f);
                 if (players != null)
                 {
-                    var y = MPQStorage.Data.Assets[SNOGroup.Monster].FirstOrDefault(x => (x.Value.Data as Mooege.Common.MPQ.FileFormats.Monster).ActorSNO == Actor.ActorSNO);
+                    var y = MPQStorage.Data.Assets[SNOGroup.Monster].FirstOrDefault(x => (x.Value.Data as Mooege.Common.MPQ.FileFormats.Monster).ActorSNO == Actor.SNOId);
                     if (y.Value != null)
                     {
                         int loreSNO = (y.Value.Data as Mooege.Common.MPQ.FileFormats.Monster).SNOLore;
@@ -917,7 +918,7 @@ namespace Mooege.Core.GS.FXEffect
             {
                 (Actor as EffectActor).Die();
             }
-            else if (Actor is Player.Player)
+            else if (Actor is Player)
             {
                 // TODO: death of player
             }
@@ -948,7 +949,7 @@ namespace Mooege.Core.GS.FXEffect
 
         public const int GenericPowerProxyID = 4176;
 
-        public override ActorType ActorType { get { return ActorType.Effect; } }
+        public override ActorType ActorType { get { return ActorType.ClientEffect; } }
 
         protected int? idleAnimationSNO;
 
@@ -957,7 +958,7 @@ namespace Mooege.Core.GS.FXEffect
         public EffectActor(Mooege.Core.GS.Map.World world, int actorSNO, Vector3D position)
             : base(world, world.NewActorID)
         {
-            this.ActorSNO = actorSNO;
+            this.SNOId = actorSNO;
             // FIXME: This is hardcoded crap
             this.Field2 = 0x8;
             this.Field3 = 0x0;
@@ -967,7 +968,7 @@ namespace Mooege.Core.GS.FXEffect
             this.RotationAxis.X = 0f; this.RotationAxis.Y = 0f; this.RotationAxis.Z = 1f;
             this.GBHandle.Type = (int)GBHandleType.ClientEffect; this.GBHandle.GBID = actorSNO;
             this.Field7 = 0x00000001;
-            this.Field8 = this.ActorSNO;
+            this.Field8 = this.SNOId;
             this.Field10 = 0x0;
             this.Field11 = 0x0;
             this.Field12 = 0x0;
@@ -988,7 +989,7 @@ namespace Mooege.Core.GS.FXEffect
         {
         }
 
-        public override bool Reveal(Mooege.Core.GS.Player.Player player)
+        public override bool Reveal(Player player)
         {
             if (!base.Reveal(player))
             {
@@ -1018,7 +1019,7 @@ namespace Mooege.Core.GS.FXEffect
 
     public class MysticAllyEffectActor : MovableEffectActor
     {
-        public override ActorType ActorType { get { return ActorType.NPC; } }
+        public override ActorType ActorType { get { return ActorType.Monster; } }
 
 
         public MysticAllyEffectActor(Mooege.Core.GS.Map.World world, int actorSNO, Vector3D position, Mooege.Core.GS.Actors.Actor owner) :
@@ -1052,9 +1053,9 @@ namespace Mooege.Core.GS.FXEffect
 
             this.Attributes[GameAttribute.Is_Helper] = true;
             this.GBHandle.Type = (int)GBHandleType.CustomBrain;
-            this.idleAnimationSNO = (this.ActorSNO == 169904) ? 69968 : 69632;
-            this.walkAnimationSNO = (this.ActorSNO == 169904) ? 69728 : 69728; // TODO: find tags
-            this.attackAnimationSNO = (this.ActorSNO == 169904) ? 69776 : 69776; // TODO: find tags
+            this.idleAnimationSNO = (this.SNOId == 169904) ? 69968 : 69632;
+            this.walkAnimationSNO = (this.SNOId == 169904) ? 69728 : 69728; // TODO: find tags
+            this.attackAnimationSNO = (this.SNOId == 169904) ? 69776 : 69776; // TODO: find tags
             this.speed = 0.23f;
             this.Scale = 1.22f;
             this.ticksBetweenActions = 6 * 9; // 900 ms
@@ -1062,7 +1063,7 @@ namespace Mooege.Core.GS.FXEffect
 
         public override void Update()
         {
-            Player.Player owner = this.World.GetPlayer((uint)this.Attributes[GameAttribute.Summoner_ID]);
+            Player owner = this.World.GetPlayer((uint)this.Attributes[GameAttribute.Summoner_ID]);
             if (ActorUtils.GetDistance(this.Position, owner.Position) > 200)
             {
                 // player is too far away, warp to his position
@@ -1167,7 +1168,7 @@ namespace Mooege.Core.GS.FXEffect
             this.speed = speed;
             this.expiresInTick = expiresInTick;
             this.Field7 = 0x00000001;
-            this.Field8 = this.ActorSNO;
+            this.Field8 = this.SNOId;
             this.Field10 = 0x1;
             this.Field11 = 0x1;
             this.Field12 = 0x1;
@@ -1208,7 +1209,7 @@ namespace Mooege.Core.GS.FXEffect
             Mooege.Core.GS.Actors.Actor target = CombatSystem.GetNearestTarget(this.World, this, this.Position, 5f); // TODO: expand targetting (line, arc, target types)
             if (target != null)
             {
-                (target as Mooege.Core.GS.Actors.Monster).Die((shooter as Player.Player));
+                (target as Mooege.Core.GS.Actors.Monster).Die((shooter as Player));
             }
             // if hydra, spawn effect 81874 on target
         }
@@ -1218,7 +1219,7 @@ namespace Mooege.Core.GS.FXEffect
             base.Die();
         }
 
-        public override bool Reveal(Mooege.Core.GS.Player.Player player)
+        public override bool Reveal(Player player)
         {
             if (!base.Reveal(player))
                 return false;
@@ -1255,9 +1256,9 @@ namespace Mooege.Core.GS.FXEffect
         public override void setAdditionalAttributes()
         {
             this.GBHandle.Type = (int)GBHandleType.CustomBrain;
-//            this.idleAnimationSNO = (this.ActorSNO == 80745) ? 80658 : (this.ActorSNO == 80757) ? 80773 : 80800; // crashes!
-            this.attackAnimationSNO = (this.ActorSNO == 80745) ? 80659 : (this.ActorSNO == 80757) ? 80771 : 80797;
-            this.Attributes[GameAttribute.Has_Special_Death_AnimTag] = (this.ActorSNO == 80745) ? 80660 : (this.ActorSNO == 80757) ? 80772 : 80799;
+//            this.idleAnimationSNO = (this.SNOId == 80745) ? 80658 : (this.SNOId == 80757) ? 80773 : 80800; // crashes!
+            this.attackAnimationSNO = (this.SNOId == 80745) ? 80659 : (this.SNOId == 80757) ? 80771 : 80797;
+            this.Attributes[GameAttribute.Has_Special_Death_AnimTag] = (this.SNOId == 80745) ? 80660 : (this.SNOId == 80757) ? 80772 : 80799;
             this.Scale = 1f;
             this.ticksBetweenActions = 6 * 12; // 1200 ms
         }
@@ -1310,7 +1311,7 @@ namespace Mooege.Core.GS.FXEffect
                     new PlayAnimationMessageSpec()
                     {
                         Field0 = 0x2,
-                        Field1 = (this.ActorSNO == 80745) ? 80660 : (this.ActorSNO == 80757) ? 80772 : 80799,
+                        Field1 = (this.SNOId == 80745) ? 80660 : (this.SNOId == 80757) ? 80772 : 80799,
                         Field2 = 0x0,
                         Field3 = 1f
                     }
@@ -1345,16 +1346,14 @@ namespace Mooege.Core.GS.FXEffect
             switch (actor.ActorType)
             {
                 case ActorType.Player:
-                    ProcessSkillPlayer((actor as Player.Player), message);
+                    ProcessSkillPlayer((actor as Player), message);
                     break;
                 case ActorType.Monster:
-                    break;
-                case ActorType.NPC:
                     break;
             }
         }
 
-        private static void ProcessSkillPlayer(Player.Player player, TargetMessage message) {
+        private static void ProcessSkillPlayer(Player player, TargetMessage message) {
             /* // testing resource management
             GameAttributeMap map = AttributeMath.ModifyResource(player, player.ResourceID, -10f);
             if (player.Properties.Class == Common.Toons.ToonClass.DemonHunter)
@@ -1385,7 +1384,7 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
-        private static void ProcessSkillMonk(Player.Player player, Mooege.Core.GS.Map.World world, TargetMessage message) {
+        private static void ProcessSkillMonk(Player player, Mooege.Core.GS.Map.World world, TargetMessage message) {
             Vector3D targetPosition = message.Field2.Position;
             Mooege.Core.GS.Actors.Actor target = null;
             if (message.TargetID != 0xFFFFFFFF)
@@ -1567,7 +1566,7 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
-        private static void ProcessSkillTEST(Player.Player player, Mooege.Core.GS.Map.World world, TargetMessage message)
+        private static void ProcessSkillTEST(Player player, Mooege.Core.GS.Map.World world, TargetMessage message)
         {
             Vector3D targetPosition = message.Field2.Position;
             Mooege.Core.GS.Actors.Actor target = null;
@@ -1589,7 +1588,7 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
-        public static void ProcessSkillPlayer(Player.Player player, SecondaryAnimationPowerMessage message)
+        public static void ProcessSkillPlayer(Player player, SecondaryAnimationPowerMessage message)
         {
             switch (player.Properties.Class)
             {
@@ -1608,7 +1607,7 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
-        private static void ProcessSkillMonk(Player.Player player, Mooege.Core.GS.Map.World world, SecondaryAnimationPowerMessage message)
+        private static void ProcessSkillMonk(Player player, Mooege.Core.GS.Map.World world, SecondaryAnimationPowerMessage message)
         {
             int effectID = 0;
             switch (message.PowerSNO)
@@ -1661,7 +1660,7 @@ namespace Mooege.Core.GS.FXEffect
             }
         }
 
-        private static void ProcessSkillTEST(Player.Player player, Mooege.Core.GS.Map.World world, SecondaryAnimationPowerMessage message)
+        private static void ProcessSkillTEST(Player player, Mooege.Core.GS.Map.World world, SecondaryAnimationPowerMessage message)
         {
             switch (message.PowerSNO)
             {

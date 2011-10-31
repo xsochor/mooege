@@ -13,6 +13,7 @@ using Mooege.Net.GS.Message.Definitions.Actor;
 using Mooege.Net.GS.Message.Definitions.Animation;
 using Mooege.Common;
 using Mooege.Core.GS.Common.Types.Math;
+using Mooege.Core.GS.Players;
 
 namespace Mooege.Core.GS.Test
 {
@@ -28,7 +29,7 @@ namespace Mooege.Core.GS.Test
             {
                 float distanceNearest = range; // max. range
                 float distance = 0f;
-                foreach (var target in actors.Where(target => ((target.ActorType == targetType) && (target != attacker))))
+                foreach (var target in actors.Where(target => ((target.ActorType == targetType) && (target != attacker) && !target.Attributes[GameAttribute.Is_NPC])))
                 {
                     if ((target.World == null) || (world.GetActor(target.DynamicID) == null))
                     {
@@ -83,7 +84,7 @@ namespace Mooege.Core.GS.Test
                 {
                     Actor = attacker,
                     Target = defender,
-                    Type = (defender is Player.Player) ? FloatingNumberMessage.FloatType.Dodge : FloatingNumberMessage.FloatType.Dodged
+                    Type = (defender is Player) ? FloatingNumberMessage.FloatType.Dodge : FloatingNumberMessage.FloatType.Dodged
                 });
             }
             if (AttributeMath.IsImmune(defender, damageTypeOverriden, damageTypeOverride))

@@ -7,6 +7,7 @@ using Mooege.Core.GS.Actors;
 using Mooege.Core.GS.FXEffect;
 using Mooege.Common.Helpers;
 using Mooege.Common;
+using Mooege.Core.GS.Players;
 
 namespace Mooege.Core.GS.Test
 {
@@ -144,7 +145,7 @@ namespace Mooege.Core.GS.Test
            map[GameAttribute.Resource_Type_Primary] = 0;
            map[GameAttribute.Resource_Type_Secondary] = 0;
            */
-        public static GameAttributeMap ModifyResource(Player.Player player, int resourceID, float amount)
+        public static GameAttributeMap ModifyResource(Player player, int resourceID, float amount)
         {
             GameAttributeMap map = new GameAttributeMap();
             if (amount < 0f)
@@ -171,11 +172,11 @@ namespace Mooege.Core.GS.Test
             return map;
         }
 
-        private static void ComputeResourceSpent(Player.Player player, float amount)
+        private static void ComputeResourceSpent(Player player, float amount)
         {
         }
 
-        public static GameAttributeMap ComputeResourceRegen(Player.Player player, int resourceID)
+        public static GameAttributeMap ComputeResourceRegen(Player player, int resourceID)
         {
             float total = player.Attributes[GameAttribute.Resource_Regen_Per_Second, resourceID] * (1 + player.Attributes[GameAttribute.Resource_Regen_Bonus_Percent, resourceID]) + 
                 (player.Attributes[GameAttribute.Resource_Regen_Percent_Per_Second, resourceID] * player.Attributes[GameAttribute.Resource_Max_Total, resourceID]);
@@ -198,7 +199,7 @@ namespace Mooege.Core.GS.Test
             return map;
         }
 
-        public static GameAttributeMap CooldownStart(Player.Player player, int PowerSNO, int startTick, int seconds)
+        public static GameAttributeMap CooldownStart(Player player, int PowerSNO, int startTick, int seconds)
         {
             GameAttributeMap map = new GameAttributeMap();
             map[GameAttribute.Power_Cooldown_Start, PowerSNO] = startTick;
@@ -207,14 +208,14 @@ namespace Mooege.Core.GS.Test
             return map;
         }
 
-        public static GameAttributeMap CooldownStop(Player.Player player, int PowerSNO)
+        public static GameAttributeMap CooldownStop(Player player, int PowerSNO)
         {
             GameAttributeMap map = new GameAttributeMap();
             map[GameAttribute.Power_Cooldown, PowerSNO] = 0;
             return map;
         }
 
-        public static GameAttributeMap BuffIconStart(Player.Player player, int PowerSNO, int startTick, int seconds)
+        public static GameAttributeMap BuffIconStart(Player player, int PowerSNO, int startTick, int seconds)
         {
             GameAttributeMap map = new GameAttributeMap();
             map[GameAttribute.Buff_Icon_Count0, PowerSNO] = player.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] + 1;
@@ -237,7 +238,7 @@ namespace Mooege.Core.GS.Test
             return map;
         }
 
-        public static GameAttributeMap BuffIconStop(Player.Player player, int PowerSNO)
+        public static GameAttributeMap BuffIconStop(Player player, int PowerSNO)
         {
             GameAttributeMap map = new GameAttributeMap();
             map[GameAttribute.Buff_Icon_Count0, PowerSNO] = player.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] - 1;
@@ -260,7 +261,7 @@ namespace Mooege.Core.GS.Test
             return map;
         }
 
-        public static GameAttributeMap ComputeStats(Player.Player player, GameAttributeMap equippedMap, bool initialSetting = false)
+        public static GameAttributeMap ComputeStats(Player player, GameAttributeMap equippedMap, bool initialSetting = false)
         {
             GameAttributeMap attribs = new GameAttributeMap();
             // basic stats
@@ -368,7 +369,7 @@ namespace Mooege.Core.GS.Test
             attribs[1] = new GameAttributeMap();
             // Temp - do 1 dmg
             attribs[1][GameAttribute.Hitpoints_Cur] = defender.Attributes[GameAttribute.Hitpoints_Cur] - 1f;
-            if ((defender is Player.Player) && (attribs[1][GameAttribute.Hitpoints_Cur] < 10f))
+            if ((defender is Player) && (attribs[1][GameAttribute.Hitpoints_Cur] < 10f))
             {
                 // temp, not die as player
                 attribs[1][GameAttribute.Hitpoints_Cur] = 50f;
@@ -436,7 +437,7 @@ namespace Mooege.Core.GS.Test
             return false;
         }
 
-        public static GameAttributeMap ComputeEquipment(Player.Player player, List<GameAttributeMap> equipped)
+        public static GameAttributeMap ComputeEquipment(Player player, List<GameAttributeMap> equipped)
         {
             // TODO: add non-basic stats of items, use AddMap method, figure out exception for offHand weapon
             GameAttributeMap map = new GameAttributeMap();
