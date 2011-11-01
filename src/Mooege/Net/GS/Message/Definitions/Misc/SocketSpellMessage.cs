@@ -26,7 +26,7 @@ namespace Mooege.Net.GS.Message.Definitions.Misc
  Field1: 0x000176C4 (95940)
 }
      */
-    [Message(Opcodes.SocketSpellMessage)]
+    [Message(Opcodes.SocketSpellMessage, Consumers.Player)]
     public class SocketSpellMessage : GameMessage
     {
         public int Field0; // rune dynamicID

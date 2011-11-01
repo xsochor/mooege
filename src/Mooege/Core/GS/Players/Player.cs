@@ -410,7 +410,106 @@ namespace Mooege.Core.GS.Players
             else if (message is TargetMessage) OnObjectTargeted(client, (TargetMessage)message);
             else if (message is PlayerMovementMessage) OnPlayerMovement(client, (PlayerMovementMessage)message);
             else if (message is TryWaypointMessage) OnTryWaypoint(client, (TryWaypointMessage)message);
+//            else if (message is SocketSpellMessage) OnSocketSpell(client, (SocketSpellMessage)message);
             else return;
+        }
+
+        private void OnSocketSpell(GameClient client, SocketSpellMessage socketSpellMessage)
+        {
+            Item rune = this.World.GetItem(unchecked((uint)socketSpellMessage.Field0));
+            int PowerSNO = socketSpellMessage.Field1;
+            int skillIndex = -1; // find index of powerSNO.
+            for (int i = 0; i < this.SkillSet.ActiveSkills.Length; i++)
+            {
+                if (this.SkillSet.ActiveSkills[i] == PowerSNO)
+                {
+                    skillIndex = i;
+                    break;
+                }
+            }
+            if (skillIndex == -1)
+            {
+                // validity of message in controlled on client side, this shouldn't happen
+                return;
+            }
+            GameAttributeMap map = new GameAttributeMap();
+            if (Attributes[GameAttribute.Rune_A, PowerSNO] != 0)
+            {
+                // TODO: remove old rune
+                Attributes[GameAttribute.Rune_A, PowerSNO] = 0;
+                map[GameAttribute.Rune_A, PowerSNO] = 0;
+            }
+            if (Attributes[GameAttribute.Rune_B, PowerSNO] != 0)
+            {
+                // TODO: remove old rune
+                Attributes[GameAttribute.Rune_B, PowerSNO] = 0;
+                map[GameAttribute.Rune_B, PowerSNO] = 0;
+            }
+            if (Attributes[GameAttribute.Rune_C, PowerSNO] != 0)
+            {
+                // TODO: remove old rune
+                Attributes[GameAttribute.Rune_C, PowerSNO] = 0;
+                map[GameAttribute.Rune_C, PowerSNO] = 0;
+            }
+            if (Attributes[GameAttribute.Rune_D, PowerSNO] != 0)
+            {
+                // TODO: remove old rune
+                Attributes[GameAttribute.Rune_D, PowerSNO] = 0;
+                map[GameAttribute.Rune_D, PowerSNO] = 0;
+            }
+            if (Attributes[GameAttribute.Rune_E, PowerSNO] != 0)
+            {
+                // TODO: remove old rune
+                Attributes[GameAttribute.Rune_E, PowerSNO] = 0;
+                map[GameAttribute.Rune_E, PowerSNO] = 0;
+            }
+            // type of rune is in AttributeSpec
+            //            Attributes[GameAttribute.Rune_Rank] = <in spec>; // on rune, inititalized in creation
+            //            Attributes[GameAttribute.Rune_Attuned_Power] = 0; // 0 on unattuned or  random value from all powers, inititalized in creation
+
+            // if unattuned, pick random color and set attunement
+            if (rune.Attributes[GameAttribute.Rune_Attuned_Power] == 0)
+            {
+                GameAttributeMap m = new GameAttributeMap();
+                rune.Attributes[GameAttribute.Rune_Attuned_Power] = PowerSNO;
+                m[GameAttribute.Rune_Attuned_Power] = PowerSNO;
+                int colorIndex = RandomHelper.Next(0, 5);
+                switch (colorIndex)
+                {
+                    case 0:
+                        //rune.ActorSNO = <SNODataMessage for Rune_A>
+                        break;
+                    case 1:
+                        //rune.ActorSNO = <SNODataMessage for Rune_A>
+                        break;
+                    case 2:
+                        //rune.ActorSNO = <SNODataMessage for Rune_A>
+                        break;
+                    case 3:
+                        //rune.ActorSNO = <SNODataMessage for Rune_A>
+                        break;
+                    case 4:
+                        //rune.ActorSNO = <SNODataMessage for Rune_A>
+                        break;
+                }
+                m.SendMessage(InGameClient, rune.DynamicID);
+                // TODO: send change actor to rune
+            }
+            else
+            {
+                // TODO: switch between rune's color
+                Attributes[GameAttribute.Rune_A, PowerSNO] = rune.Attributes[GameAttribute.Rune_Rank];
+                map[GameAttribute.Rune_A, PowerSNO] = rune.Attributes[GameAttribute.Rune_Rank];
+            }
+            map.SendMessage(InGameClient, DynamicID);
+            rune.SetInventoryLocation(16, skillIndex, 0); // skills (16), index, 0
+            /*
+             // need info from BETA if and how this changes 
+            this.SkillKeyMappings[0].Power = PowerSNO;
+            this.SkillKeyMappings[0].Field1 = unchecked((int)rune.DynamicID);
+            this.SkillKeyMappings[0].Field2 = rune.Attributes[GameAttribute.Rune_Rank];
+             */
+            UpdateHeroState();
         }
 
         private void OnAssignActiveSkill(GameClient client, AssignActiveSkillMessage message)
