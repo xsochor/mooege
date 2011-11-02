@@ -144,12 +144,10 @@ namespace Mooege.Core.GS.FXEffect
                             // attach if needed
                             if (this.Attached)
                             {
-                                GameAttributeMap map = new GameAttributeMap();
-                                map[GameAttribute.Attached_To_ACD] = unchecked((int)this.Actor.DynamicID);
-                                map[GameAttribute.Attachment_Handled_By_Client] = true;
-                                map[GameAttribute.Actor_Updates_Attributes_From_Owner] = true;
                                 Mooege.Core.GS.Actors.Actor a = (this.NeedsActor ? ProxyActor : Actor);
-                                a.UpdateMap.CombineMap(map);
+                                a.Attributes[GameAttribute.Attached_To_ACD] = unchecked((int)this.Actor.DynamicID);
+                                a.Attributes[GameAttribute.Attachment_Handled_By_Client] = true;
+                                a.Attributes[GameAttribute.Actor_Updates_Attributes_From_Owner] = true;
                             }
                         }
                         if (this.NeedsActor && ProxyActor.SNOId == EffectActor.GenericPowerProxyID) // generic power proxy
@@ -244,60 +242,49 @@ namespace Mooege.Core.GS.FXEffect
             if (EffectID == 99694)
             {
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfEvasion;
-                GameAttributeMap map = new GameAttributeMap();
                 // icon + cooldown
-                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120));
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30));
-                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
+                AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120);
+                AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30);
+                if (Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
                 {
                     // skill effect
-                    map[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
                     Actor.Attributes[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
                 }
-                Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 140190) {
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfHealing;
-                GameAttributeMap map = new GameAttributeMap();
                 // icon + cooldown
-                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120));
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30));
-                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
+                AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120);
+                AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30);
+                if (Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
                 {
                     // skill effect
-                    map[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
                     Actor.Attributes[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
                 }
-                Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 146990) {
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfConviction;
-                GameAttributeMap map = new GameAttributeMap();
                 // icon + cooldown
-                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120));
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30));
-                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
+                AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120);
+                AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30);
+                if (Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
                 {
                     // skill effect
-                    map[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
                     Actor.Attributes[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
                 }
-                Actor.UpdateMap.CombineMap(map);
+                Actor.Attributes.SendChangedMessage((Actor as Player).InGameClient, Actor.DynamicID);
             }
             else if (EffectID == 142987)
             {
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfRetribution;
-                GameAttributeMap map = new GameAttributeMap();
                 // icon + cooldown
-                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120));
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30));
-                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
+                AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 120);
+                AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30);
+                if (Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] == 1)
                 {
                     // skill effect
-                    map[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
                     Actor.Attributes[GameAttribute.Dodge_Chance_Bonus] += 0.3f;
                 }
-                Actor.UpdateMap.CombineMap(map);
             }
             else if ((EffectID == 99241) || (EffectID == 208435))
             {
@@ -322,36 +309,31 @@ namespace Mooege.Core.GS.FXEffect
             else if (EffectID == 143230)
             {
                 int PowerSNO = Skills.Skills.Monk.SpiritSpenders.Serenity;
-                GameAttributeMap map = new GameAttributeMap();
                 // skill effect
-                map[GameAttribute.Invulnerable] = true;
-                map[GameAttribute.Immune_To_Knockback] = true;
-                map[GameAttribute.Immune_To_Charm] = true;
-                map[GameAttribute.Immune_To_Blind] = true;
-                map[GameAttribute.Freeze_Immune] = true;
-                map[GameAttribute.Fear_Immune] = true;
-                map[GameAttribute.Stun_Immune] = true;
-                map[GameAttribute.Slowdown_Immune] = true;
-                map[GameAttribute.Root_Immune] = true;
+                Actor.Attributes[GameAttribute.Invulnerable] = true;
+                Actor.Attributes[GameAttribute.Immune_To_Knockback] = true;
+                Actor.Attributes[GameAttribute.Immune_To_Charm] = true;
+                Actor.Attributes[GameAttribute.Immune_To_Blind] = true;
+                Actor.Attributes[GameAttribute.Freeze_Immune] = true;
+                Actor.Attributes[GameAttribute.Fear_Immune] = true;
+                Actor.Attributes[GameAttribute.Stun_Immune] = true;
+                Actor.Attributes[GameAttribute.Slowdown_Immune] = true;
+                Actor.Attributes[GameAttribute.Root_Immune] = true;
                 // icon + cooldown
-                map.CombineMap(AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 3));
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 60));
-                Actor.UpdateMap.CombineMap(map);
+                AttributeMath.BuffIconStart((Actor as Player), PowerSNO, tick, 3);
+                AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 60);
             }
             else if (EffectID == 97328)
             {
-                GameAttributeMap map = new GameAttributeMap();
-                map[GameAttribute.Bleeding] = true;
-                map[GameAttribute.Bleed_Duration] = DurationInTicks.Value;
-                map[GameAttribute.Power_Buff_0_Visual_Effect_None, Skills.Skills.Monk.SpiritGenerator.ExplodingPalm] = true;
-                Actor.UpdateMap.CombineMap(map);
+                Actor.Attributes[GameAttribute.Bleeding] = true;
+                Actor.Attributes[GameAttribute.Bleed_Duration] = DurationInTicks.Value;
+                Actor.Attributes[GameAttribute.Power_Buff_0_Visual_Effect_None, Skills.Skills.Monk.SpiritGenerator.ExplodingPalm] = true;
             }
             else if (EffectID == 111132)
             {
                 int PowerSNO = Skills.Skills.Monk.SpiritSpenders.DashingStrike;
-                GameAttributeMap map = new GameAttributeMap();
-                map[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = true; // switch on effect
-                Actor.UpdateMap.CombineMap(map);
+                Actor.Attributes[GameAttribute.Power_Buff_0_Visual_Effect_None, PowerSNO] = true; // switch on effect
+                Actor.Attributes.SendChangedMessage((Actor as Player).InGameClient, Actor.DynamicID);
                 World.BroadcastIfRevealed(new NotifyActorMovementMessage
                 {
                     ActorId = unchecked((int)Actor.DynamicID),
@@ -367,23 +349,17 @@ namespace Mooege.Core.GS.FXEffect
             else if (EffectID == 143782)
             {
                 int PowerSNO = Skills.Skills.Monk.SpiritSpenders.LashingTailKick;
-                GameAttributeMap map = new GameAttributeMap();
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 3));
-                Actor.UpdateMap.CombineMap(map);
+                AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 3);
             }
             else if (EffectID == 98826)
             {
                 int PowerSNO = Skills.Skills.Monk.SpiritSpenders.SevenSidedStrike;
-                GameAttributeMap map = new GameAttributeMap();
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30));
-                Actor.UpdateMap.CombineMap(map);
+                AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 30);
             }
             else if (EffectID == 145011)
             {
                 int PowerSNO = Skills.Skills.Monk.SpiritSpenders.WaveOfLight;
-                GameAttributeMap map = new GameAttributeMap();
-                map.CombineMap(AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 15));
-                Actor.UpdateMap.CombineMap(map);
+                AttributeMath.CooldownStart((Actor as Player), PowerSNO, tick, 15);
             }
             else if (EffectID == 162301)
             {
@@ -422,11 +398,9 @@ namespace Mooege.Core.GS.FXEffect
                 {
                     Actor.Attributes[GameAttribute.Hit_Chance] = 0.05f;
                 }
-                GameAttributeMap map = new GameAttributeMap();
-                map[GameAttribute.Blind] = true;
-                map[GameAttribute.Buff_Visual_Effect, 2032] = true;
-                map[GameAttribute.Hit_Chance] = Actor.Attributes[GameAttribute.Hit_Chance];
-                Actor.UpdateMap.CombineMap(map);
+                Actor.Attributes[GameAttribute.Blind] = true;
+                Actor.Attributes[GameAttribute.Buff_Visual_Effect, 2032] = true;
+                Actor.Attributes[GameAttribute.Hit_Chance] = Actor.Attributes[GameAttribute.Hit_Chance];
             }
             else if ((EffectID == 140870) || (EffectID == 140871) || (EffectID == 140872))
             {
@@ -458,11 +432,11 @@ namespace Mooege.Core.GS.FXEffect
             if (EffectID == 99694)
             {
                 // temporary HACK: TODO: move to subclasses
-                GameAttributeMap map = new GameAttributeMap();
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfEvasion;
-                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player), PowerSNO));
+                AttributeMath.BuffIconStop((Actor as Player), PowerSNO);
 //                map.CombineMap(AttributeMath.CooldownStop((Actor as Player), PowerSNO)); // to generic effect
-                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0) {
+                if (Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
+                {
                     // last mantra casted expired
                     World.BroadcastIfRevealed(new PlayEffectMessage()
                     {
@@ -471,10 +445,8 @@ namespace Mooege.Core.GS.FXEffect
                         Effect = Effect.PlayEffectGroup,
                         OptionalParameter = 199677,
                     }, this.Actor);
-                    map[GameAttribute.Dodge_Chance_Bonus] -= 0.3f;
                     Actor.Attributes[GameAttribute.Dodge_Chance_Bonus] -= 0.3f;
                 }
-                Actor.UpdateMap.CombineMap(map);
             }
             else if ((EffectID == 99241) || (EffectID == 208435))
             {
@@ -485,9 +457,13 @@ namespace Mooege.Core.GS.FXEffect
                         Effect = Effect.PlayEffectGroup,
                         OptionalParameter = 99504
                     }, this.ProxyActor);
-                List<Mooege.Core.GS.Actors.Actor> actors = World.GetActorsInRange(ProxyActor.Position, 30f);
+                List<Mooege.Core.GS.Actors.Actor> actors = World.GetActorsInRange(ProxyActor.Position, 20f);
                 for (int i = 0; i < actors.Count; i++)
                 {
+                    if (i > 63)
+                    {
+                        break; // lethal decoy's explosion has maximum of 64 actors
+                    }
                     if ((actors[i].World != null) && (actors[i].ActorType == ActorType.Monster))
                     {
 //                        (actors[i] as Monster).Die((Actor as Player));
@@ -497,27 +473,24 @@ namespace Mooege.Core.GS.FXEffect
             }
             else if (EffectID == 97328)
             {
-                GameAttributeMap map = new GameAttributeMap();
-                map[GameAttribute.Bleeding] = false;
-                map[GameAttribute.Bleed_Duration] = 0;
-                map[GameAttribute.Power_Buff_0_Visual_Effect_None, Skills.Skills.Monk.SpiritGenerator.ExplodingPalm] = false;
-                Actor.UpdateMap.CombineMap(map);
+                Actor.Attributes[GameAttribute.Bleeding] = false;
+                Actor.Attributes[GameAttribute.Bleed_Duration] = 0;
+                Actor.Attributes[GameAttribute.Power_Buff_0_Visual_Effect_None, Skills.Skills.Monk.SpiritGenerator.ExplodingPalm] = false;
             }
             else if (EffectID == 143230)
             {
-                GameAttributeMap map = new GameAttributeMap();
                 int PowerSNO = Skills.Skills.Monk.SpiritSpenders.Serenity;
                 // skill effect
-                map[GameAttribute.Invulnerable] = false;
-                map[GameAttribute.Immune_To_Knockback] = false;
-                map[GameAttribute.Immune_To_Charm] = false;
-                map[GameAttribute.Immune_To_Blind] = false;
-                map[GameAttribute.Freeze_Immune] = false;
-                map[GameAttribute.Fear_Immune] = false;
-                map[GameAttribute.Stun_Immune] = false;
-                map[GameAttribute.Slowdown_Immune] = false;
-                map[GameAttribute.Root_Immune] = false;
-                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player), PowerSNO));
+                Actor.Attributes[GameAttribute.Invulnerable] = false;
+                Actor.Attributes[GameAttribute.Immune_To_Knockback] = false;
+                Actor.Attributes[GameAttribute.Immune_To_Charm] = false;
+                Actor.Attributes[GameAttribute.Immune_To_Blind] = false;
+                Actor.Attributes[GameAttribute.Freeze_Immune] = false;
+                Actor.Attributes[GameAttribute.Fear_Immune] = false;
+                Actor.Attributes[GameAttribute.Stun_Immune] = false;
+                Actor.Attributes[GameAttribute.Slowdown_Immune] = false;
+                Actor.Attributes[GameAttribute.Root_Immune] = false;
+                AttributeMath.BuffIconStop((Actor as Player), PowerSNO);
                 World.BroadcastIfRevealed(new PlayEffectMessage()
                 {
                     Id = 0x7a,
@@ -525,14 +498,12 @@ namespace Mooege.Core.GS.FXEffect
                     Effect = Effect.PlayEffectGroup,
                     OptionalParameter = 143230,
                 }, this.Actor);
-                Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 140190)
             {
-                GameAttributeMap map = new GameAttributeMap();
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfHealing;
-                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player), PowerSNO));
-                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
+                AttributeMath.BuffIconStop((Actor as Player), PowerSNO);
+                if (Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
                 {
                     // last mantra casted expired
                     World.BroadcastIfRevealed(new PlayEffectMessage()
@@ -544,14 +515,12 @@ namespace Mooege.Core.GS.FXEffect
                     }, this.Actor);
                     // TODO: remove mantra's effect
                 }
-                Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 146990)
             {
-                GameAttributeMap map = new GameAttributeMap();
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfConviction;
-                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player), PowerSNO));
-                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
+                AttributeMath.BuffIconStop((Actor as Player), PowerSNO);
+                if (Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
                 {
                     // last mantra casted expired
                     World.BroadcastIfRevealed(new PlayEffectMessage()
@@ -564,14 +533,12 @@ namespace Mooege.Core.GS.FXEffect
                     // TODO: remove mantra's effect
                     Actor.Attributes[GameAttribute.Dodge_Chance_Bonus] -= 0.3f;
                 }
-                Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 142987)
             {
-                GameAttributeMap map = new GameAttributeMap();
                 int PowerSNO = Skills.Skills.Monk.Mantras.MantraOfRetribution;
-                map.CombineMap(AttributeMath.BuffIconStop((Actor as Player), PowerSNO));
-                if (map[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
+                AttributeMath.BuffIconStop((Actor as Player), PowerSNO);
+                if (Actor.Attributes[GameAttribute.Buff_Icon_Count0, PowerSNO] == 0)
                 {
                     // last mantra casted expired
                     World.BroadcastIfRevealed(new PlayEffectMessage()
@@ -584,7 +551,6 @@ namespace Mooege.Core.GS.FXEffect
                     // TODO: remove mantra's effect
                     Actor.Attributes[GameAttribute.Dodge_Chance_Bonus] -= 0.3f;
                 }
-                Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 98557)
             {
@@ -600,8 +566,7 @@ namespace Mooege.Core.GS.FXEffect
             else if (EffectID == 111132)
             {
                 int PowerSNO = Skills.Skills.Monk.SpiritSpenders.DashingStrike;
-                GameAttributeMap map = new GameAttributeMap();
-                map.CombineMap(AttributeMath.BuffStop(Actor, PowerSNO));
+                AttributeMath.BuffStop(Actor, PowerSNO);
                 World.BroadcastIfRevealed(new PlayEffectMessage()
                 {
                     ActorId = this.Actor.DynamicID,
@@ -610,9 +575,8 @@ namespace Mooege.Core.GS.FXEffect
                 }, this.Actor);
                 Mooege.Core.GS.Actors.Actor target = CombatSystem.GetNearestTarget(World, Actor, Actor.Position, 8f);
                 if (target != null) {
-                    GameAttributeMap[] combatResult = CombatSystem.ResolveCombat(Actor, target);
+                    CombatSystem.ResolveCombat(Actor, target);
                 }
-                Actor.UpdateMap.CombineMap(map);
             }
             else if (EffectID == 162301)
             {
@@ -631,10 +595,8 @@ namespace Mooege.Core.GS.FXEffect
                 {
                     Actor.Attributes[GameAttribute.Hit_Chance] = 0.95f;
                 }
-                GameAttributeMap map = new GameAttributeMap();
-                map[GameAttribute.Blind] = false;
-                map[GameAttribute.Buff_Visual_Effect, 2032] = false;
-                Actor.UpdateMap.CombineMap(map);
+                Actor.Attributes[GameAttribute.Blind] = false;
+                Actor.Attributes[GameAttribute.Buff_Visual_Effect, 2032] = false;
             }
         }
     }
@@ -671,7 +633,7 @@ namespace Mooege.Core.GS.FXEffect
     {
         protected override void EffectStartingAction()
         {
-            Actor.UpdateMap.CombineMap(AttributeMath.CooldownStop((Actor as Player), EffectID));
+            AttributeMath.CooldownStop((Actor as Player), EffectID);
         }
     }
 
@@ -851,12 +813,11 @@ namespace Mooege.Core.GS.FXEffect
             }, Actor);
 
             GameAttributeMap attribs = new GameAttributeMap();
-            attribs[GameAttribute.Hitpoints_Cur] = 0f;
-            attribs[GameAttribute.Could_Have_Ragdolled] = true;
-            attribs[GameAttribute.Deleted_On_Server] = true;
-            attribs[GameAttribute.Queue_Death] = true;
-            Actor.Attributes.CombineMap(attribs);
-            attribs.BroadcastInclusive(World, Actor); // NEEDED to show anim
+            Actor.Attributes[GameAttribute.Hitpoints_Cur] = 0f;
+            Actor.Attributes[GameAttribute.Could_Have_Ragdolled] = true;
+            Actor.Attributes[GameAttribute.Deleted_On_Server] = true;
+            Actor.Attributes[GameAttribute.Queue_Death] = true;
+            Actor.Update(); // NEEDED to show anim
 
             this.World.BroadcastInclusive(new PlayEffectMessage()
             {

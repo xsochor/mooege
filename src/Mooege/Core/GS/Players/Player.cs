@@ -38,16 +38,15 @@ using Mooege.Net.GS.Message.Definitions.Hero;
 using Mooege.Net.GS.Message.Definitions.Player;
 using Mooege.Net.GS.Message.Definitions.Skill;
 using Mooege.Net.GS.Message.Definitions.Effect;
-using Mooege.Net.GS.Message.Definitions.Tick;
 using Mooege.Net.GS.Message.Definitions.Conversation;
 using Mooege.Common.Helpers;
 using Mooege.Net.GS.Message.Definitions.Combat;
 using System;
-using Mooege.Core.GS.Test;
 using Mooege.Net.GS.Message.Definitions.Trade;
 using Mooege.Core.GS.Actors.Implementations;
 using Mooege.Net.GS.Message.Definitions.Artisan;
 using Mooege.Core.GS.Actors.Implementations.Artisans;
+using Mooege.Core.GS.Test;
 
 namespace Mooege.Core.GS.Players
 {
@@ -173,15 +172,16 @@ namespace Mooege.Core.GS.Players
             this.Attributes[GameAttribute.Skill, 0x7545] = 1;
             this.Attributes[GameAttribute.Skill_Total, 0x76B7] = 1; //Punch!
             this.Attributes[GameAttribute.Skill, 0x76B7] = 1;
+            // TODO: remove and substitute with MPQ based unlocking skill
             this.Attributes[GameAttribute.Skill_Total, 0x216FA] = 1; //Monk's Blinding Flash
             this.Attributes[GameAttribute.Skill, 0x216FA] = 1;
             this.Attributes[GameAttribute.Skill_Total, 0x176C4] = 1; //Monk's Fist of Thunder
             this.Attributes[GameAttribute.Skill, 0x176C4] = 1;
+            // END of todo
             this.Attributes[GameAttribute.Skill_Total, 0x6DF] = 1; //Use Item
             this.Attributes[GameAttribute.Skill, 0x6DF] = 1;
             this.Attributes[GameAttribute.Skill_Total, 0x7780] = 1; //Basic Attack
             this.Attributes[GameAttribute.Skill, 0x7780] = 1;
-           
             this.Attributes[GameAttribute.Skill_Total, 0x0002EC66] = 0; //stone of recall
             this.Attributes[GameAttribute.Skill_Total, 0xFFFFF] = 1;
             this.Attributes[GameAttribute.Skill, 0xFFFFF] = 1;
@@ -191,8 +191,6 @@ namespace Mooege.Core.GS.Players
             this.Attributes[GameAttribute.Buff_Icon_End_Tick0, 0x00033C40] = 0x000003FB;
             this.Attributes[GameAttribute.Buff_Icon_Start_Tick0, 0x00033C40] = 0x00000077;
             this.Attributes[GameAttribute.Buff_Icon_Count0, 0x00033C40] = 1;
-            this.Attributes[GameAttribute.Buff_Active, 0xCE11] = true;
-            this.Attributes[GameAttribute.Buff_Icon_Count0, 0x0000CE11] = 1;
             this.Attributes[GameAttribute.Buff_Visual_Effect, 0xFFFFF] = true;
 
             //Resistance
@@ -212,49 +210,49 @@ namespace Mooege.Core.GS.Players
 
             //Damage
             this.Attributes[GameAttribute.Damage_Delta_Total, 0] = 1f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 1] = 0f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 2] = 0f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 3] = 0f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 4] = 0f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 5] = 0f;
-            this.Attributes[GameAttribute.Damage_Delta_Total, 6] = 0f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 1] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 2] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 3] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 4] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 5] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Delta_Total, 6] = 3.051758E-05f;
             this.Attributes[GameAttribute.Damage_Min_Total, 0] = 2f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 1] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 2] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 3] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 4] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 5] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 6] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Total, 0xFFFFF] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 1] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 2] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 3] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 4] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 5] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 6] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Total, 0xFFFFF] = 3.051758E-05f;
             this.Attributes[GameAttribute.Damage_Min_Subtotal, 0] = 2f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 1] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 2] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 3] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 4] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 5] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 6] = 0f;
-            this.Attributes[GameAttribute.Damage_Min_Subtotal, 0xFFFFF] = 0f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 1] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 2] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 3] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 4] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 5] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 6] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Min_Subtotal, 0xFFFFF] = 3.051758E-05f;
             this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 0] = 2f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 1] = 0f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 2] = 0f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 3] = 0f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 4] = 0f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 5] = 0f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 6] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 1] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 2] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 3] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 4] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 5] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 6] = 3.051758E-05f;
             this.Attributes[GameAttribute.Damage_Weapon_Min, 0] = 2f;
             this.Attributes[GameAttribute.Damage_Weapon_Min_Total, 0] = 2f;
             this.Attributes[GameAttribute.Damage_Weapon_Min_Total_All] = 2f;
             this.Attributes[GameAttribute.Damage_Weapon_Min_Total_MainHand, 0] = 2f;
-            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 0xFFFFF] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Min_Total_CurrentHand, 0xFFFFF] = 3.051758E-05f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta, 0] = 1f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta_SubTotal, 0] = 1f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 0] = 1f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 1] = 0f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 2] = 0f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 3] = 0f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 4] = 0f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 5] = 0f;
-            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 6] = 0f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 1] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 2] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 3] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 4] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 5] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_CurrentHand, 6] = 3.051758E-05f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta_Total, 0] = 1f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_All] = 1f;
             this.Attributes[GameAttribute.Damage_Weapon_Delta_Total_MainHand, 0] = 1f;
@@ -269,16 +267,16 @@ namespace Mooege.Core.GS.Players
             this.Attributes[GameAttribute.Get_Hit_Max_Per_Level] = 10f;
             this.Attributes[GameAttribute.Get_Hit_Max_Base] = 50f;
             this.Attributes[GameAttribute.Hit_Chance] = 1f;
-            this.Attributes[GameAttribute.Dodge_Rating_Total] = 0f;
+            this.Attributes[GameAttribute.Dodge_Rating_Total] = 3.051758E-05f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Item_CurrentHand] = 1.199219f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Item_Total_MainHand] = 1.199219f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Total] = 1.199219f;
             this.Attributes[GameAttribute.Attacks_Per_Second] = 1f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Item_MainHand] = 1.199219f;
             this.Attributes[GameAttribute.Attacks_Per_Second_Item_Total] = 1.199219f;
-            this.Attributes[GameAttribute.Attacks_Per_Second_Item_Subtotal] = 0f;
-            this.Attributes[GameAttribute.Attacks_Per_Second_Item] = 0f;
-            this.Attributes[GameAttribute.Crit_Percent_Cap] = 0.5f;//  0x3F400000; TODO: convert to proper float
+            this.Attributes[GameAttribute.Attacks_Per_Second_Item_Subtotal] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Attacks_Per_Second_Item] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Crit_Percent_Cap] = 0x3F400000;
             this.Attributes[GameAttribute.Casting_Speed_Total] = 1f;
             this.Attributes[GameAttribute.Casting_Speed] = 1f;
 
@@ -297,9 +295,9 @@ namespace Mooege.Core.GS.Players
             this.Attributes[GameAttribute.Hitpoints_Factor_Level] = 4f;
             this.Attributes[GameAttribute.Hitpoints_Factor_Vitality] = 4f;
             //this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 3.051758E-05f;
-            this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f; // For now, this just adds 40 hitpoints to the hitpoints gained from vitality
+            this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f;
             this.Attributes[GameAttribute.Hitpoints_Total_From_Vitality] = this.Attributes[GameAttribute.Vitality] * this.Attributes[GameAttribute.Hitpoints_Factor_Vitality];
-            this.Attributes[GameAttribute.Hitpoints_Max] = 40f;
+            this.Attributes[GameAttribute.Hitpoints_Max] = 40f; // STATIC
             this.Attributes[GameAttribute.Hitpoints_Max_Total] = GetMaxTotalHitpoints();
             this.Attributes[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Max_Total];
 
@@ -310,11 +308,39 @@ namespace Mooege.Core.GS.Players
             this.Attributes[GameAttribute.Resource_Effective_Max, this.ResourceID] = 200f;
             this.Attributes[GameAttribute.Resource_Regen_Total, this.ResourceID] = 0f;
             this.Attributes[GameAttribute.Resource_Type_Primary] = this.ResourceID;
-            this.Attributes[GameAttribute.Resource_Regen_Bonus_Percent] = 0f;
-            this.Attributes[GameAttribute.Resource_Regen_Per_Second] = 0f;
-            this.Attributes[GameAttribute.Resource_Regen_Percent_Per_Second] = 0f;
 
-            // Class specific
+            //Movement
+            this.Attributes[GameAttribute.Movement_Scalar_Total] = 1f;
+            this.Attributes[GameAttribute.Movement_Scalar_Capped_Total] = 1f;
+            this.Attributes[GameAttribute.Movement_Scalar_Subtotal] = 1f;
+            this.Attributes[GameAttribute.Movement_Scalar] = 1f;
+            this.Attributes[GameAttribute.Walking_Rate_Total] = 0.2797852f;
+            this.Attributes[GameAttribute.Walking_Rate] = 0.2797852f;
+            this.Attributes[GameAttribute.Running_Rate_Total] = 0.3598633f;
+            this.Attributes[GameAttribute.Running_Rate] = 0.3598633f;
+            this.Attributes[GameAttribute.Sprinting_Rate_Total] = 3.051758E-05f;
+            this.Attributes[GameAttribute.Strafing_Rate_Total] = 3.051758E-05f;
+
+            //Miscellaneous
+
+            //this.Attributes[GameAttribute.Disabled] = true; // we should be making use of these ones too /raist.
+            //this.Attributes[GameAttribute.Loading] = true;
+            //this.Attributes[GameAttribute.Invulnerable] = true;
+
+            this.Attributes[GameAttribute.Hidden] = false;
+            this.Attributes[GameAttribute.Immobolize] = true;
+            this.Attributes[GameAttribute.Untargetable] = true;
+            this.Attributes[GameAttribute.CantStartDisplayedPowers] = true;
+            this.Attributes[GameAttribute.IsTrialActor] = true;
+            this.Attributes[GameAttribute.TeamID] = 2;
+            this.Attributes[GameAttribute.Shared_Stash_Slots] = 14;
+            this.Attributes[GameAttribute.Backpack_Slots] = 60;
+            this.Attributes[GameAttribute.General_Cooldown] = 0;
+            #endregion // Attributes
+
+            this.Inventory = new Inventory(this); // Here because it needs attributes /fasbat
+
+ // Class specific
             switch (this.Properties.Class)
             {
                 case ToonClass.Barbarian:
@@ -338,12 +364,14 @@ namespace Mooege.Core.GS.Players
                     this.Attributes[GameAttribute.Resource_Type_Secondary] = Discipline;
                     this.Attributes[GameAttribute.Resource_Regen_Per_Second, this.ResourceID] = 30f;
                     this.Attributes[GameAttribute.Resource_Regen_Per_Second, Discipline] = 5f;
-                    this.Attributes.CombineMap(AttributeMath.ComputeResourceRegen(this, Discipline)); // doesn't work
+                    AttributeMath.ComputeResourceRegen(this, Discipline); // doesn't work
                     break;
                 case ToonClass.Monk:
                     this.Attributes[GameAttribute.Skill_Total, 0x0000CE11] = 1;  //Spirit Trait
                     this.Attributes[GameAttribute.Skill, 0x0000CE11] = 1;
                     this.Attributes[GameAttribute.Trait, 0x0000CE11] = 1;
+                    this.Attributes[GameAttribute.Buff_Active, 0xCE11] = true;
+                    this.Attributes[GameAttribute.Buff_Icon_Count0, 0x0000CE11] = 1;
                     break;
                 case ToonClass.WitchDoctor:
                     /* // unknown
@@ -362,40 +390,6 @@ namespace Mooege.Core.GS.Players
             }
 
             AttributeMath.ComputeResourceRegen(this, this.ResourceID);
-
-            //Movement
-            this.Attributes[GameAttribute.Movement_Scalar_Total] = 1f;
-            this.Attributes[GameAttribute.Movement_Scalar_Capped_Total] = 1f;
-            this.Attributes[GameAttribute.Movement_Scalar_Subtotal] = 1f;
-            this.Attributes[GameAttribute.Movement_Scalar] = 1f;
-            this.Attributes[GameAttribute.Walking_Rate_Total] = 0.2797852f;
-            this.Attributes[GameAttribute.Walking_Rate] = 0.2797852f;
-            this.Attributes[GameAttribute.Running_Rate_Total] = 0.3598633f;
-            this.Attributes[GameAttribute.Running_Rate] = 0.3598633f;
-            this.Attributes[GameAttribute.Sprinting_Rate_Total] = 0f;
-            this.Attributes[GameAttribute.Strafing_Rate_Total] = 0f;
-
-            //Miscellaneous
-
-            //this.Attributes[GameAttribute.Disabled] = true; // we should be making use of these ones too /raist.
-            //this.Attributes[GameAttribute.Loading] = true;
-            //this.Attributes[GameAttribute.Invulnerable] = true;
-
-            this.Attributes[GameAttribute.Hidden] = false;
-            this.Attributes[GameAttribute.Immobolize] = true;
-            this.Attributes[GameAttribute.Untargetable] = true;
-            this.Attributes[GameAttribute.CantStartDisplayedPowers] = true;
-            this.Attributes[GameAttribute.IsTrialActor] = false;
-            this.Attributes[GameAttribute.TeamID] = 2;
-            this.Attributes[GameAttribute.Shared_Stash_Slots] = 14;
-            this.Attributes[GameAttribute.Backpack_Slots] = 60;
-            this.Attributes[GameAttribute.General_Cooldown] = 0;
-            #endregion // Attributes
-
-            this.Inventory = new Inventory(this); // Here because it needs attributes /fasbat
-            // temp attributes
-            this.Attributes[GameAttribute.ItemMeltUnlocked] = true;
-            this.Attributes[GameAttribute.Crit_Percent_Base] = 0.15f;
             AttributeMath.ComputeStats(this, new GameAttributeMap(), true);
         }
 
@@ -415,6 +409,7 @@ namespace Mooege.Core.GS.Players
             else if (message is PlayerMovementMessage) OnPlayerMovement(client, (PlayerMovementMessage)message);
             else if (message is TryWaypointMessage) OnTryWaypoint(client, (TryWaypointMessage)message);
             else if (message is RequestBuyItemMessage) OnRequestBuyItem(client, (RequestBuyItemMessage)message);
+            else if (message is RequestAddSocketMessage) OnRequestAddSocket(client, (RequestAddSocketMessage)message);
             else if (message is SocketSpellMessage) OnSocketSpell(client, (SocketSpellMessage)message);
             else if (message is RequestAddSocketMessage) OnRequestAddSocket(client, (RequestAddSocketMessage)message);
             else return;
@@ -435,103 +430,105 @@ namespace Mooege.Core.GS.Players
             }
             if (skillIndex == -1)
             {
-                // validity of message in controlled on client side, this shouldn't happen
+                // validity of message is controlled on client side, this shouldn't happen
                 return;
             }
-            GameAttributeMap map = new GameAttributeMap();
-            if (Attributes[GameAttribute.Rune_A, PowerSNO] != 0)
-            {
-                // TODO: remove old rune
-                Attributes[GameAttribute.Rune_A, PowerSNO] = 0;
-                map[GameAttribute.Rune_A, PowerSNO] = 0;
-            }
-            if (Attributes[GameAttribute.Rune_B, PowerSNO] != 0)
-            {
-                // TODO: remove old rune
-                Attributes[GameAttribute.Rune_B, PowerSNO] = 0;
-                map[GameAttribute.Rune_B, PowerSNO] = 0;
-            }
-            if (Attributes[GameAttribute.Rune_C, PowerSNO] != 0)
-            {
-                // TODO: remove old rune
-                Attributes[GameAttribute.Rune_C, PowerSNO] = 0;
-                map[GameAttribute.Rune_C, PowerSNO] = 0;
-            }
-            if (Attributes[GameAttribute.Rune_D, PowerSNO] != 0)
-            {
-                // TODO: remove old rune
-                Attributes[GameAttribute.Rune_D, PowerSNO] = 0;
-                map[GameAttribute.Rune_D, PowerSNO] = 0;
-            }
-            if (Attributes[GameAttribute.Rune_E, PowerSNO] != 0)
-            {
-                // TODO: remove old rune
-                Attributes[GameAttribute.Rune_E, PowerSNO] = 0;
-                map[GameAttribute.Rune_E, PowerSNO] = 0;
-            }
-            // type of rune is in AttributeSpec
-            //            Attributes[GameAttribute.Rune_Rank] = <in spec>; // on rune, inititalized in creation
+            // removes old rune (if present)
+            Item oldRune = this.Inventory.RemoveRune(skillIndex);
+            // type of rune is in Name
+            //            Attributes[GameAttribute.Rune_<x>] = <rank>; // on attuned runes ONLY
+            //            Attributes[GameAttribute.Rune_Rank] = <in spec>; // on unattuned rune ONLY, inititalized in creation
             //            Attributes[GameAttribute.Rune_Attuned_Power] = 0; // 0 on unattuned or  random value from all powers, inititalized in creation
-
-            // if unattuned, pick random color and set attunement
-            if (rune.Attributes[GameAttribute.Rune_Attuned_Power] == 0)
+            if (rune.Attributes[GameAttribute.Rune_Rank] != 0)
             {
-                GameAttributeMap m = new GameAttributeMap();
-                rune.Attributes[GameAttribute.Rune_Attuned_Power] = PowerSNO;
-                m[GameAttribute.Rune_Attuned_Power] = PowerSNO;
+                // if unattuned, pick random color and set attunement to new rune
+                int rank = rune.Attributes[GameAttribute.Rune_Rank];
                 int colorIndex = RandomHelper.Next(0, 5);
+                Item newRune = ItemGenerator.Cook(this, "Runestone_" + (char)('A' + colorIndex) + "_0" + rank);
+                newRune.Attributes[GameAttribute.Rune_Attuned_Power] = PowerSNO;
                 switch (colorIndex)
                 {
                     case 0:
-                        //rune.ActorSNO = <SNODataMessage for Rune_A>
+                        newRune.Attributes[GameAttribute.Rune_A] = rank;
+                        this.Attributes[GameAttribute.Rune_A, PowerSNO] = rank;
                         break;
                     case 1:
-                        //rune.ActorSNO = <SNODataMessage for Rune_A>
+                        newRune.Attributes[GameAttribute.Rune_B] = rank;
+                        this.Attributes[GameAttribute.Rune_B, PowerSNO] = rank;
                         break;
                     case 2:
-                        //rune.ActorSNO = <SNODataMessage for Rune_A>
+                        newRune.Attributes[GameAttribute.Rune_C] = rank;
+                        this.Attributes[GameAttribute.Rune_C, PowerSNO] = rank;
                         break;
                     case 3:
-                        //rune.ActorSNO = <SNODataMessage for Rune_A>
+                        newRune.Attributes[GameAttribute.Rune_D] = rank;
+                        this.Attributes[GameAttribute.Rune_D, PowerSNO] = rank;
                         break;
                     case 4:
-                        //rune.ActorSNO = <SNODataMessage for Rune_A>
+                        newRune.Attributes[GameAttribute.Rune_E] = rank;
+                        this.Attributes[GameAttribute.Rune_E, PowerSNO] = rank;
                         break;
                 }
-                m.SendMessage(InGameClient, rune.DynamicID);
-                // TODO: send change actor to rune
+                newRune.Owner = this;
+                newRune.Attributes.SendChangedMessage(this.InGameClient, newRune.DynamicID);
+                rune.SetInventoryLocation(-1, -1, -1);
+                this.Inventory.DestroyInventoryItem(rune);
+                newRune.Reveal(this);
+                newRune.SetInventoryLocation(16, skillIndex, 0); // skills (16), index, 0
+                this.Inventory.SetRune(newRune, skillIndex);
             }
             else
             {
-                // TODO: switch between rune's color
-                Attributes[GameAttribute.Rune_A, PowerSNO] = rune.Attributes[GameAttribute.Rune_Rank];
-                map[GameAttribute.Rune_A, PowerSNO] = rune.Attributes[GameAttribute.Rune_Rank];
+                // TODO: optimization possible?
+                if (rune.Attributes[GameAttribute.Rune_A] != 0)
+                {
+                    Attributes[GameAttribute.Rune_A, PowerSNO] = rune.Attributes[GameAttribute.Rune_A];
+                } else if (rune.Attributes[GameAttribute.Rune_B] != 0)
+                {
+                    Attributes[GameAttribute.Rune_B, PowerSNO] = rune.Attributes[GameAttribute.Rune_B];
+                } else if (rune.Attributes[GameAttribute.Rune_C] != 0)
+                {
+                    Attributes[GameAttribute.Rune_C, PowerSNO] = rune.Attributes[GameAttribute.Rune_C];
+                }
+                else if (rune.Attributes[GameAttribute.Rune_D] != 0)
+                {
+                    Attributes[GameAttribute.Rune_D, PowerSNO] = rune.Attributes[GameAttribute.Rune_D];
+                }
+                else if (rune.Attributes[GameAttribute.Rune_E] != 0)
+                {
+                    Attributes[GameAttribute.Rune_E, PowerSNO] = rune.Attributes[GameAttribute.Rune_E];
+                }
+                this.Inventory.SetRune(rune, skillIndex);
             }
-            map.SendMessage(InGameClient, DynamicID);
-            rune.SetInventoryLocation(16, skillIndex, 0); // skills (16), index, 0
-            /*
-             // need info from BETA if and how this changes 
-            this.SkillKeyMappings[0].Power = PowerSNO;
-            this.SkillKeyMappings[0].Field1 = unchecked((int)rune.DynamicID);
-            this.SkillKeyMappings[0].Field2 = rune.Attributes[GameAttribute.Rune_Rank];
-             */
+            if (oldRune != null) {
+                this.Inventory.PickUp(oldRune);
+            }
+            // need info from BETA if and how this changes 
+            //            this.SkillKeyMappings[0].Power = PowerSNO;
+            //            this.SkillKeyMappings[0].Field1 = unchecked((int)rune.DynamicID); // ???
+            //            this.SkillKeyMappings[0].Field2 = rune.Attributes[GameAttribute.Rune_Rank]; // ???
             UpdateHeroState();
         }
 
         private void OnAssignActiveSkill(GameClient client, AssignActiveSkillMessage message)
         {
             var oldSNOSkill = this.SkillSet.ActiveSkills[message.SkillIndex]; // find replaced skills SNO.
-            GameAttributeMap map = new GameAttributeMap();
             if (oldSNOSkill != -1)
             {
                 // switch off old skill in hotbar
-                map[GameAttribute.Skill, oldSNOSkill] = 0;
-                map[GameAttribute.Skill_Total, oldSNOSkill] = 0;
+                this.Attributes[GameAttribute.Skill, oldSNOSkill] = 0;
+                this.Attributes[GameAttribute.Skill_Total, oldSNOSkill] = 0;
+                // if old power was socketted, pickup rune
+                Item oldRune = this.Inventory.RemoveRune(message.SkillIndex);
+                if (oldRune != null)
+                {
+                    this.Inventory.PickUp(oldRune);
+                }
             }
             // switch on new skill in hotbar
-            map[GameAttribute.Skill, message.SNOSkill] = 1;
-            map[GameAttribute.Skill_Total, message.SNOSkill] = 1;
-            map.SendMessage(InGameClient, this.DynamicID);
+            this.Attributes[GameAttribute.Skill, message.SNOSkill] = 1;
+            this.Attributes[GameAttribute.Skill_Total, message.SNOSkill] = 1;
+            this.Attributes.SendChangedMessage(InGameClient, this.DynamicID);
 
             foreach (HotbarButtonData button in this.SkillSet.HotBarSkills.Where(button => button.SNOSkill == oldSNOSkill)) // loop through hotbar and replace the old skill with new one
             {
@@ -544,19 +541,18 @@ namespace Mooege.Core.GS.Players
         private void OnAssignPassiveSkill(GameClient client, AssignPassiveSkillMessage message)
         {
             var oldSNOSkill = this.SkillSet.PassiveSkills[message.SkillIndex]; // find replaced skills SNO.
-            GameAttributeMap map = new GameAttributeMap();
             if (oldSNOSkill != -1)
             {
                 // switch off old passive skill
-                map[GameAttribute.Trait, oldSNOSkill] = 0;
-                map[GameAttribute.Skill, oldSNOSkill] = 0;
-                map[GameAttribute.Skill_Total, oldSNOSkill] = 0;
+                this.Attributes[GameAttribute.Trait, oldSNOSkill] = 0;
+                this.Attributes[GameAttribute.Skill, oldSNOSkill] = 0;
+                this.Attributes[GameAttribute.Skill_Total, oldSNOSkill] = 0;
             }
             // switch on new passive skill
-            map[GameAttribute.Trait, message.SNOSkill] = 1;
-            map[GameAttribute.Skill, message.SNOSkill] = 1;
-            map[GameAttribute.Skill_Total, message.SNOSkill] = 1;
-            map.SendMessage(InGameClient, this.DynamicID); this.SkillSet.PassiveSkills[message.SkillIndex] = message.SNOSkill;
+            this.Attributes[GameAttribute.Trait, message.SNOSkill] = 1;
+            this.Attributes[GameAttribute.Skill, message.SNOSkill] = 1;
+            this.Attributes[GameAttribute.Skill_Total, message.SNOSkill] = 1;
+            this.Attributes.SendChangedMessage(InGameClient, this.DynamicID);
             this.SkillSet.PassiveSkills[message.SkillIndex] = message.SNOSkill;
             this.UpdateHeroState();
         }
@@ -568,9 +564,9 @@ namespace Mooege.Core.GS.Players
 
         private void OnObjectTargeted(GameClient client, TargetMessage message)
         {
-            Mooege.Core.GS.FXEffect.ClientEffect.ProcessSkill(client.Player, message);
+            Mooege.Core.GS.FXEffect.ClientEffect.ProcessSkill(this, message);
             Actor actor = this.World.GetActor(message.TargetID);
-            if (actor == null) return; // some skills DON'T send target
+            if (actor == null) return;
 
             if ((actor.GBHandle.Type == 1) && (actor.Attributes[GameAttribute.TeamID] == 10))
             {
@@ -647,7 +643,10 @@ namespace Mooege.Core.GS.Players
 
             // Check if there is an conversation to close in this tick
             CheckOpenConversations();
-            base.Update();
+//            if (this.EnteredWorld)
+//            {
+                base.Update();
+//            }
             this.InGameClient.SendTick(); // if there's available messages to send, will handle ticking and flush the outgoing buffer.
         }
 
@@ -1252,12 +1251,14 @@ namespace Mooege.Core.GS.Players
                 // Hitpoints from level may actually change. This needs to be verified by someone with the beta.
                 //this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = this.Attributes[GameAttribute.Level] * this.Attributes[GameAttribute.Hitpoints_Factor_Level];
 
+                /*
                 // For now, hit points are based solely on vitality and initial hitpoints received.
                 // This will have to change when hitpoint bonuses from items are implemented.
                 this.Attributes[GameAttribute.Hitpoints_Total_From_Vitality] = this.Attributes[GameAttribute.Vitality] * this.Attributes[GameAttribute.Hitpoints_Factor_Vitality];
-                this.Attributes[GameAttribute.Hitpoints_Max] = 40f; // STATIC value
+                this.Attributes[GameAttribute.Hitpoints_Max] = GetMaxTotalHitpoints();
                 this.Attributes[GameAttribute.Hitpoints_Max_Total] = GetMaxTotalHitpoints();
-
+                */
+                AttributeMath.ComputeStats(this, this.Inventory.GetEquippedMap());
                 // On level up, health is set to max
                 this.Attributes[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Max_Total];
 
@@ -1555,14 +1556,14 @@ namespace Mooege.Core.GS.Players
 
         public void AddPercentageHP(int percentage)
         {
-            float quantity = (percentage * this.Attributes[GameAttribute.Hitpoints_Max]) / 100;
+            float quantity = (percentage * this.Attributes[GameAttribute.Hitpoints_Max_Total]) / 100;
             this.AddHP(quantity);
         }
 
         public void AddHP(float quantity)
         {
-            if (this.Attributes[GameAttribute.Hitpoints_Cur] + quantity >= this.Attributes[GameAttribute.Hitpoints_Max])
-                this.Attributes[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Max];
+            if (this.Attributes[GameAttribute.Hitpoints_Cur] + quantity >= this.Attributes[GameAttribute.Hitpoints_Max_Total])
+                this.Attributes[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Max_Total];
             else
                 this.Attributes[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Cur] + quantity;
         }

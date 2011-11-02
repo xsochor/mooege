@@ -36,12 +36,13 @@ namespace Mooege.Core.GS.Players
         static readonly Logger Logger = LogManager.CreateLogger();
 
         // Access by ID
-        public Dictionary<uint, Item> Items { get; private set; } // Not needed atm. Whats the suppose of it? // needed for transferring items between worlds - xsochor
+        public Dictionary<uint, Item> Items { get; private set; } // Not needed atm. Whats the suppose of it?
         private readonly Player _owner; // Used, because most information is not in the item class but Actors managed by the world
 
         private Equipment _equipment;
         private InventoryGrid _inventoryGrid;
         private InventoryGrid _stashGrid;
+        private uint[] _skillSocketRunes;
 
         public Inventory(Player owner)
         {
@@ -49,7 +50,8 @@ namespace Mooege.Core.GS.Players
             this.Items = new Dictionary<uint, Item>();
             this._equipment = new Equipment(owner);
             this._inventoryGrid = new InventoryGrid(owner, owner.Attributes[GameAttribute.Backpack_Slots]/10, 10);
-            this._stashGrid = new InventoryGrid(owner, owner.Attributes[GameAttribute.Shared_Stash_Slots]/7, 7, (int) EquipmentSlotId.Stash);
+            this._stashGrid = new InventoryGrid(owner, owner.Attributes[GameAttribute.Shared_Stash_Slots] / 7, 7, (int)EquipmentSlotId.Stash);
+            this._skillSocketRunes = new uint[6];
         }
 
         private void AcceptMoveRequest(Item item)
@@ -125,14 +127,6 @@ namespace Mooege.Core.GS.Players
         }
 
         /// <summary>
-        /// Returns attribute map from ALL equipped items for stats computation
-        /// </summary>
-        public GameAttributeMap GetEquippedMap()
-        {
-            return _equipment.GetEquippedMap();
-        }
-
-        /// <summary>
         /// Handles a request to move an item within the inventory.
         /// This covers moving items within the backpack, from equipment
         /// slot to backpack and from backpack to equipment slot
@@ -146,7 +140,7 @@ namespace Mooege.Core.GS.Players
             {
                 var sourceGrid = (item.InvLoc.EquipmentSlot == 0 ? _inventoryGrid :
                     item.InvLoc.EquipmentSlot == (int)EquipmentSlotId.Stash ? _stashGrid : null);
-                System.Diagnostics.Debug.Assert(sourceGrid.Contains(request.ItemID) || _equipment.IsItemEquipped(request.ItemID), "Request to equip unknown item");
+                System.Diagnostics.Debug.Assert(((sourceGrid != null) && sourceGrid.Contains(request.ItemID)) || _equipment.IsItemEquipped(request.ItemID), "Request to equip unknown item");
 
                 int targetEquipSlot = request.Location.EquipmentSlot;
 
@@ -198,6 +192,21 @@ namespace Mooege.Core.GS.Players
             // Request to move an item (from backpack or equipmentslot)
             else
             {
+                if (request.Location.EquipmentSlot == 0)
+                {
+                    // check if not unsocketting rune
+                    for (int i = 0; i < _skillSocketRunes.Length; i++)
+                    {
+                        if (_skillSocketRunes[i] == request.ItemID)
+                        {
+                            RemoveRune(i);
+                            _inventoryGrid.AddItem(item, request.Location.Row, request.Location.Column);
+                            if (item.InvLoc.EquipmentSlot != request.Location.EquipmentSlot)
+                                AcceptMoveRequest(item);
+                            return;
+                        }
+                    }
+                }
                 var destGrid = (request.Location.EquipmentSlot == 0 ? _inventoryGrid : _stashGrid);
 
                 if (destGrid.FreeSpace(item, request.Location.Row, request.Location.Column))
@@ -373,6 +382,56 @@ namespace Mooege.Core.GS.Players
             _inventoryGrid.RemoveItem(item);
             _equipment.UnequipItem(item);
             item.Destroy();
+        }
+
+        public Item GetRune(int skillIndex)
+        {
+            if ((skillIndex < 0) || (skillIndex > 5)) {
+                return null;
+            }
+            if (_skillSocketRunes[skillIndex] == 0) {
+                return null;
+            }
+            return this._owner.World.GetItem(_skillSocketRunes[skillIndex]);
+        }
+
+        public void SetRune(Item rune, int skillIndex)
+        {
+            if ((skillIndex < 0) || (skillIndex > 5))
+            {
+                return;
+            }
+            if (rune == null)
+            {
+                _skillSocketRunes[skillIndex] = 0;
+                return;
+            }
+            _inventoryGrid.RemoveItem(rune);
+            rune.Owner = _owner;
+            _skillSocketRunes[skillIndex] = rune.DynamicID;
+            rune.SetInventoryLocation(16, skillIndex, 0); // skills (16), index, 0
+        }
+
+        public Item RemoveRune(int skillIndex)
+        {
+            if ((skillIndex < 0) || (skillIndex > 5))
+            {
+                return null;
+            }
+            Item rune = GetRune(skillIndex);
+            int PowerSNO = _owner.SkillSet.ActiveSkills[skillIndex];
+            _skillSocketRunes[skillIndex] = 0;
+            _owner.Attributes[GameAttribute.Rune_A, PowerSNO] = 0;
+            _owner.Attributes[GameAttribute.Rune_B, PowerSNO] = 0;
+            _owner.Attributes[GameAttribute.Rune_C, PowerSNO] = 0;
+            _owner.Attributes[GameAttribute.Rune_D, PowerSNO] = 0;
+            _owner.Attributes[GameAttribute.Rune_E, PowerSNO] = 0;
+            return rune;
+        }
+
+        public GameAttributeMap GetEquippedMap()
+        {
+            return _equipment.GetEquippedMap();
         }
     }
 }

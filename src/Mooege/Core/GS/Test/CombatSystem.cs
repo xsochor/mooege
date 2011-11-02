@@ -62,21 +62,18 @@ namespace Mooege.Core.GS.Test
             }, projectile);
         }
 
-        public static GameAttributeMap[] ResolveCombat(Actor attacker, Actor defender, bool damageTypeOverriden = false, int damageTypeOverride = 0)
+        public static void ResolveCombat(Actor attacker, Actor defender, bool damageTypeOverriden = false, int damageTypeOverride = 0)
         {
-            GameAttributeMap[] maps = new GameAttributeMap[2];
-            maps[0] = new GameAttributeMap();
-            maps[1] = new GameAttributeMap();
             if (defender.Attributes[GameAttribute.No_Damage])
             {
-                return maps;
+                return;
             }
             bool hit = AttributeMath.IsHit(attacker, defender);
             bool critical = false;
             float damage = 0f;
             if (!hit)
             {
-                return maps;
+                return;
             }
             if (AttributeMath.IsDodge(defender))
             {
@@ -95,7 +92,7 @@ namespace Mooege.Core.GS.Test
                     Target = defender,
                     Type = FloatingNumberMessage.FloatType.Immune
                 });
-                return maps;
+                return;
             }
             bool blocked = AttributeMath.IsBlock(defender);
             if (blocked)
@@ -106,11 +103,11 @@ namespace Mooege.Core.GS.Test
                     Target = defender,
                     Type = FloatingNumberMessage.FloatType.Block
                 });
-                return maps;
+                return;
             }
             damage = defender.Attributes[GameAttribute.Hitpoints_Cur];
             critical = AttributeMath.IsCriticalHit(attacker, defender);
-            maps = AttributeMath.ComputeCombat(attacker, defender, critical, blocked, damageTypeOverriden, damageTypeOverride);
+            AttributeMath.ComputeCombat(attacker, defender, critical, blocked, damageTypeOverriden, damageTypeOverride);
             damage -= defender.Attributes[GameAttribute.Hitpoints_Cur];
 //            Logger.Info("damage: " + damage);
             if (damage == 0f)
@@ -142,9 +139,6 @@ namespace Mooege.Core.GS.Test
                     });
                 }
             }
-            attacker.UpdateMap.CombineMap(maps[0]);
-            defender.UpdateMap.CombineMap(maps[1]);
-            return maps;
         }
 
         public static void MoveToBasic(Actor mover, Actor target, float speed, int? animationSNO)

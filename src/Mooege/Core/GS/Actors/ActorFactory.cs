@@ -61,8 +61,7 @@ namespace Mooege.Core.GS.Actors
             switch (actorData.Type)
             {
                 case ActorType.Monster:
-                //    return new Monster(world, snoId, position, tags);
-                    return new NPC(world, snoId, position, tags);
+                    return new Monster(world, snoId, position, tags);
                 case ActorType.Gizmo:
                     return CreateGizmo(world, snoId, position, tags);
 

@@ -37,7 +37,6 @@ namespace Mooege.Core.GS.Actors
         public override ActorType ActorType { get { return ActorType.Monster; } }
 
         // TODO: Setter needs to update world. Also, this is probably an ACD field. /komiga
-        public int AnimationSNO { get; set; }
 
         public Monster(World world, int actorSNO, Vector3D position, Dictionary<int, TagMapEntry> tags)
             : base(world, actorSNO, position, tags)
@@ -50,7 +49,12 @@ namespace Mooege.Core.GS.Actors
 
         public override void OnTargeted(Player player, TargetMessage message)
         {
-            this.Die(player);
+//            this.Die(player);
+        }
+
+        public override void Update()
+        {
+            base.Update();
         }
 
         // FIXME: Hardcoded hell. /komiga
@@ -168,5 +172,22 @@ namespace Mooege.Core.GS.Actors
 
             this.Destroy();
         }
+
+        public void Die()
+        {
+            var players = this.World.GetPlayersInRange(this.Position, 480.0f);
+            foreach (var player in players)
+            {
+                player.UpdateExp(this.Attributes[GameAttribute.Experience_Granted]);
+                player.UpdateExpBonusData(player.GBHandle.Type, this.GBHandle.Type);
+                this.World.SpawnRandomItemDrop(player, this.Position);
+                this.World.SpawnGold(player, this.Position);
+                int rGlobes = RandomHelper.Next(1, 100);
+                if (rGlobes < 20)
+                    this.World.SpawnHealthGlobe(player, this.Position); // should be shared globe
+            }
+            this.Destroy();
+        }
+
     }
 }

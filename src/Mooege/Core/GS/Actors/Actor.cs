@@ -34,6 +34,7 @@ using Mooege.Net.GS.Message.Fields;
 using Mooege.Net.GS.Message.Definitions.ACD;
 using Mooege.Net.GS.Message.Definitions.Misc;
 using Mooege.Core.Common.Items;
+using Mooege.Net.GS;
 
 namespace Mooege.Core.GS.Actors
 {
@@ -414,6 +415,31 @@ namespace Mooege.Core.GS.Actors
         public override string ToString()
         {
             return string.Format("Actor: [Type: {0}] [Id:{1}] [Position: {2}] {3}", this.ActorType, this.SNOName.SNOId, this.Position, this.SNOName.Name);
+        }
+
+        public override void Update()
+        {
+
+            if (this.World == null)
+            {
+                return;
+            }
+            if (this.Attributes.Count == this.Attributes.ChangedCount)
+            {
+                return; // initialization, skip
+            }
+            if (this.Attributes.ChangedCount > 0)
+            {
+                var players = this.World.GetPlayersInRange(this.Position, World.ActorProximity);
+                if (players.Count > 0)
+                {
+                    var clients = new List<GameClient>();
+                    foreach (var p in players) {
+                        clients.Add(p.InGameClient);
+                    }
+                    this.Attributes.SendChangedMessage(clients, this.DynamicID);
+                }
+            }
         }
     }
 

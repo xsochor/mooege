@@ -20,7 +20,6 @@ using System.Text;
 using Mooege.Common.Helpers;
 using Mooege.Core.GS.Skills;
 using Mooege.Net.GS.Message.Fields;
-using Mooege.Core.GS.FXEffect;
 
 namespace Mooege.Net.GS.Message.Definitions.Animation
 {
@@ -32,7 +31,7 @@ namespace Mooege.Net.GS.Message.Definitions.Animation
 
         public void Handle(GameClient client)
         {
-            ClientEffect.ProcessSkillPlayer(client.Player, this);
+            Mooege.Core.GS.FXEffect.ClientEffect.ProcessSkillPlayer(client.Player, this);
         }
 
         public override void Parse(GameBitBuffer buffer)

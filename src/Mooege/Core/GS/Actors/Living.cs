@@ -54,10 +54,10 @@ namespace Mooege.Core.GS.Actors
             this.AnimationSNO = 0x11150;
             this.CollFlags = 1;
 
-            this.Attributes[GameAttribute.Hitpoints_Max_Total] = 4.546875f;
-            this.Attributes[GameAttribute.Hitpoints_Max] = 4.546875f;
+            this.Attributes[GameAttribute.Hitpoints_Max_Total] = 4f;
+            this.Attributes[GameAttribute.Hitpoints_Max] = 4f;
             this.Attributes[GameAttribute.Hitpoints_Total_From_Level] = 0f;
-            this.Attributes[GameAttribute.Hitpoints_Cur] = 4.546875f;
+            this.Attributes[GameAttribute.Hitpoints_Cur] = 4f;
 
             this.Attributes[GameAttribute.Level] = 1;
         }

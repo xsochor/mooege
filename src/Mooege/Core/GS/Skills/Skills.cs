@@ -252,13 +252,13 @@ namespace Mooege.Core.GS.Skills
 
             public class HatredGenerators
             {
-                public const int HungeringArrow = 0x0001F8BF;
-                public const int EvasiveFire = 0x00020C41;
-                public const int BolaShot = 0x00012EF0;
-                public const int EntanglingShot = 0x00012861;
-                public const int Grenades = 0x00015252;
-                public const int SpikeTrap = 0x00012625;
-                public const int Strafe = 0x00020B8E;
+                public const int HungeringArrow = 0x0001F8BF; // ok
+                public const int EvasiveFire = 0x00020C41; // ok
+                public const int BolaShot = 0x00012EF0; // ok
+                public const int EntanglingShot = 0x00012861; // ok
+                public const int Grenades = 0x00015252; // ok
+                public const int SpikeTrap = 0x00012625; // ok
+                public const int Strafe = 0x00020B8E; // ok
 
                 public static readonly List<int> List = new List<int>
                 {
@@ -274,14 +274,14 @@ namespace Mooege.Core.GS.Skills
 
             public class HatredSpenders
             {
-                public const int Impale = 0x00020126;
-                public const int RapidFire = 0x00020078;
-                public const int Chakram = 0x0001F8BD;
-                public const int ElementalArrow = 0x000200FD;
-                public const int FanOfKnives = 0x00012EEA;
-                public const int Multishot = 0x00012F51;
-                public const int ClusterArrow = 0x0001F8BE;
-                public const int RainOfVengeance = 0x001FF01;
+                public const int Impale = 0x00020126; // ok
+                public const int RapidFire = 0x00020078; // generator
+                public const int Chakram = 0x0001F8BD; // generator
+                public const int ElementalArrow = 0x000200FD; // generator
+                public const int FanOfKnives = 0x00012EEA; // generator
+                public const int Multishot = 0x00012F51; // generator
+                public const int ClusterArrow = 0x0001F8BE; // generator
+                public const int RainOfVengeance = 0x001FF0F; // generator, WAS wrong value
 
                 public static readonly List<int> List = new List<int>
                 {
@@ -298,14 +298,14 @@ namespace Mooege.Core.GS.Skills
 
             public class Discipline
             {
-                public const int Caltrops = 0x0001F8C0;
-                public const int Vault = 0x0001B26F;
-                public const int ShadowPower = 0x0001FF0E;
-                public const int Companion = 0x00020A3F;
-                public const int SmokeScreen = 0x0001FE87;
-                public const int Sentry = 0x0001F8C1;
-                public const int MarkedForDeath = 0x0001FEB2;
-                public const int Preparation = 0x0001F8BC;
+                public const int Caltrops = 0x0001F8C0; // spender
+                public const int Vault = 0x0001B26F; // spender
+                public const int ShadowPower = 0x0001FF0E; // spender
+                public const int Companion = 0x00020A3F; // spender
+                public const int SmokeScreen = 0x0001FE87; // spender
+                public const int Sentry = 0x0001F8C1; // spender
+                public const int MarkedForDeath = 0x0001FEB2; // spender
+                public const int Preparation = 0x0001F8BC; // ok
 
                 public static readonly List<int> List = new List<int>
                 {

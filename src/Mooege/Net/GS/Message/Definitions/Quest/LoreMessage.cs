@@ -20,7 +20,7 @@ using System.Text;
 
 namespace Mooege.Net.GS.Message.Definitions.Quest
 {
-    [Message(new[] {Opcodes.LoreMessage1,Opcodes.LoreMessage2})]
+    [Message(new[] { Opcodes.LoreMessage1, Opcodes.LoreMessage2 })] // id 212 - new lore button, 213 - play immediatelly
     public class LoreMessage : GameMessage
     {
         public int /* sno */ snoLore;

@@ -17,11 +17,8 @@
  */
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using Mooege.Net.GS.Message.Definitions.Attribute;
-using Mooege.Core.GS.Map;
-using Mooege.Core.GS.Actors;
 
 namespace Mooege.Net.GS.Message
 {
@@ -57,6 +54,9 @@ namespace Mooege.Net.GS.Message
 
         private HashSet<KeyId> _changedAttributes = new HashSet<KeyId>();
         private Dictionary<KeyId, GameAttributeValue> _attributeValues = new Dictionary<KeyId, GameAttributeValue>();
+
+        public int Count { get { return _attributeValues.Count; } }
+        public int ChangedCount { get { return _changedAttributes.Count; } } 
 
         public void SendMessage(GameClient client, uint actorID)
         {
@@ -98,72 +98,9 @@ namespace Mooege.Net.GS.Message
             _changedAttributes.Clear();
         }
 
-        public void BroadcastMessage(World world, uint actorID)
-        {
-            var list = GetMessageList(actorID);
-            foreach (var player in world.GetAllPlayers())
-            {
-                foreach (var msg in list)
-                    player.InGameClient.SendMessage(msg);
-            }
-        }
-
-        public void BroadcastIfRevealed(World world, Actor actor)
-        {
-            var list = GetMessageList(actor.DynamicID);
-            foreach (var player in world.GetAllPlayers())
-            {
-                if (player.RevealedObjects.ContainsKey(actor.DynamicID))
-                {
-                    foreach (var msg in list)
-                        player.InGameClient.SendMessage(msg);
-                }
-            }
-        }
-
-        public void BroadcastGlobal(World world, Actor actor)
-        {
-            var list = GetMessageList(actor.DynamicID);
-            foreach (var player in world.GetAllPlayers())
-            {
-                foreach (var msg in list)
-                    player.InGameClient.SendMessage(msg);
-            }
-        }
-
-        public void BroadcastInclusive(World world, Actor actor)
-        {
-            var players = world.GetPlayersInRange(actor.Position, 480.0f);
-            if ((players == null) || (players.Count == 0))
-            {
-                return;
-            }
-            var list = GetMessageList(actor.DynamicID); 
-            foreach (var player in players)
-            {
-                foreach (var msg in list)
-                    player.InGameClient.SendMessage(msg);
-            }
-        }
-
-        public void BroadcastExclusive(World world, Actor actor)
-        {
-            var players = world.GetPlayersInRange(actor.Position, 480.0f);
-            if ((players == null) || (players.Count == 0))
-            {
-                return;
-            }
-            var list = GetMessageList(actor.DynamicID);
-            foreach (var player in players.Where(player => player != actor))
-            {
-                foreach (var msg in list)
-                    player.InGameClient.SendMessage(msg);
-            }
-        }
-
         public GameAttributeMap CombineMap(GameAttributeMap map)
         {
-            Dictionary<KeyId, GameAttributeValue> mapValues = map.GetValues();
+            Dictionary<KeyId, GameAttributeValue> mapValues = map._attributeValues;
             if (mapValues.Count == 0)
             {
                 return this;
@@ -179,21 +116,22 @@ namespace Mooege.Net.GS.Message
                 {
                     _attributeValues.Add(e.Current.Key, e.Current.Value);
                 }
+                _changedAttributes.Add(e.Current.Key);
             }
             return this;
         }
 
         public GameAttributeMap AddMap(GameAttributeMap map)
         {
-            Dictionary<KeyId, GameAttributeValue> mapValues = map.GetValues();
+            Dictionary<KeyId, GameAttributeValue> mapValues = map._attributeValues;
             if (mapValues.Count == 0)
             {
                 return this;
             }
-            var e = _attributeValues.GetEnumerator();
+            var e = mapValues.GetEnumerator();
             while (e.MoveNext())
             {
-                if (mapValues.ContainsKey(e.Current.Key))
+                if (_attributeValues.ContainsKey(e.Current.Key))
                 {
                     if (mapValues[e.Current.Key].ValueF != 0f)
                     {
@@ -206,60 +144,14 @@ namespace Mooege.Net.GS.Message
                         _attributeValues[e.Current.Key] = new GameAttributeValue(_attributeValues[e.Current.Key].Value + mapValues[e.Current.Key].Value);
                     } // 0 in both fields means nothing to add
                 }
+                else
+                {
+                    _attributeValues.Add(e.Current.Key, e.Current.Value);
+                }
             }
             return this;
         }
-
-        /// <summary>
-        /// Combines THIS map to target map
-        /// </summary>
-        /// <param name="map">target map for combination</param>
-        /// <returns>map with changed values</returns>
-        public GameAttributeMap CombineToMapAndRemoveIdentities(GameAttributeMap map)
-        {
-            GameAttributeMap result = new GameAttributeMap();
-            Dictionary<KeyId, GameAttributeValue> mapValues = map.GetValues();
-            if (mapValues.Count == 0)
-            {
-                return this;
-            }
-            var e = _attributeValues.GetEnumerator();
-            while (e.MoveNext())
-            {
-                if (mapValues.ContainsKey(e.Current.Key))
-                {
-                    if ((mapValues[e.Current.Key].ValueF != e.Current.Value.ValueF) ||
-                        (mapValues[e.Current.Key].Value == e.Current.Value.Value))
-                    {
-                        // not identical
-                        result._attributeValues.Add(e.Current.Key, e.Current.Value);
-                    }
-                    mapValues[e.Current.Key] = e.Current.Value;
-                }
-                else
-                {
-                    mapValues.Add(e.Current.Key, e.Current.Value);
-                    result._attributeValues.Add(e.Current.Key, e.Current.Value);
-                }
-            }
-            return result;
-        }
-
-        Dictionary<KeyId, GameAttributeValue> GetValues()
-        {
-            return _attributeValues;
-        }
-
-        public bool IsEmpty()
-        {
-            return _attributeValues.Count == 0;
-        }
-
-        public void Clear()
-        {
-            _attributeValues.Clear();
-        }
-
+        
         public List<GameMessage> GetMessageList(uint actorID)
         {
             var e = _attributeValues.Keys.GetEnumerator();

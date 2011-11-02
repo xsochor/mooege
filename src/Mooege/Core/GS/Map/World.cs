@@ -33,8 +33,6 @@ using Mooege.Core.Common.Items;
 using Mooege.Core.GS.Players;
 using Mooege.Net.GS.Message;
 using Mooege.Net.GS.Message.Definitions.World;
-using Mooege.Core.GS.Test;
-using Mooege.Core.GS.FXEffect;
 
 namespace Mooege.Core.GS.Map
 {
@@ -52,7 +50,6 @@ namespace Mooege.Core.GS.Map
         /// </summary>
         public int SNOId { get; set; }
 
-        private readonly List<FXEffect.FXEffect> _effects;
         /// <summary>
         /// QuadTree that contains scenes & actors.
         /// </summary>
@@ -79,7 +76,6 @@ namespace Mooege.Core.GS.Map
         public bool HasPlayersIn { get { return this.Players.Count > 0; } }
 
 
-
         /// <summary>
         /// Returns a new dynamicId for scenes.
         /// </summary>
@@ -101,7 +97,7 @@ namespace Mooege.Core.GS.Map
         /// <summary>
         /// Actors revealing proximity for player.
         /// </summary>
-        private const int ActorProximity = 240;
+        public const int ActorProximity = 240;
 
         /// <summary>
         /// Returns list of available starting points.
@@ -126,7 +122,6 @@ namespace Mooege.Core.GS.Map
             this.Actors = new ConcurrentDictionary<uint, Actor>();
             this.Players = new ConcurrentDictionary<uint, Player>();
             this.QuadTree = new QuadTree(new Size(60, 60), 0);
-            this._effects = new List<FXEffect.FXEffect>();
             this.Game.AddWorld(this); 
         }
 
@@ -135,13 +130,14 @@ namespace Mooege.Core.GS.Map
         public override void Update()
         {
             // update players.
-//            foreach (var pair in this._players) { pair.Value.Update(); }
+            //            foreach (var pair in this._players) { pair.Value.Update(); }
 
             // update effects.
             int tick = this.Game.Tick;
             if (this._effects.Count != 0)
             {
-                for (int index = 0; index < this._effects.Count;) {
+                for (int index = 0; index < this._effects.Count; )
+                {
                     if (this._effects[index].Process(tick))
                     {
                         this._effects.RemoveAt(index);
@@ -157,7 +153,6 @@ namespace Mooege.Core.GS.Map
             foreach (var pair in this.Actors) { pair.Value.Update(); }
 
         }
-
         #endregion
 
         #region message broadcasting
@@ -423,18 +418,6 @@ namespace Mooege.Core.GS.Map
         #endregion
 
         #region collections managemnet
-        public void AddEffect(FXEffect.FXEffect effect)
-        {
-            bool notAdding = false;
-            effect.World = this;
-            int tick = this.Game.Tick;
-            if (!effect.StartingTick.HasValue || (effect.StartingTick <= tick))
-            {
-                notAdding = effect.Process(tick);
-            }
-            if (!notAdding) this._effects.Add(effect);
-        }
-
 
         /// <summary>
         /// Adds given scene to world.
@@ -767,16 +750,6 @@ namespace Mooege.Core.GS.Map
             return GetPlayersInRange(position.X, position.Y, position.Z, range);
         }
 
-        public List<Player> GetAllPlayers()
-        {
-            var result = new List<Player>();
-            foreach (var player in this.Players.Values)
-            {
-                result.Add(player);
-            }
-            return result;
-        }
-
         #endregion
 
         #region misc-queries
@@ -813,6 +786,23 @@ namespace Mooege.Core.GS.Map
             game.EndTracking(this);
         }
 
+        #endregion
+
+        #region effects
+
+        private readonly List<FXEffect.FXEffect> _effects = new List<FXEffect.FXEffect>();
+
+        public void AddEffect(FXEffect.FXEffect effect)
+        {
+            bool notAdding = false;
+            effect.World = this;
+            int tick = this.Game.Tick;
+            if (!effect.StartingTick.HasValue || (effect.StartingTick <= tick))
+            {
+                notAdding = effect.Process(tick);
+            }
+            if (!notAdding) this._effects.Add(effect);
+        }
         #endregion
     }
 }

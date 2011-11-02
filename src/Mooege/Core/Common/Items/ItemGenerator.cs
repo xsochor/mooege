@@ -83,6 +83,10 @@ namespace Mooege.Core.Common.Items
                 AllowedItemTypes.Add(hash);
             foreach (int hash in ItemGroup.SubTypesToHashList("CraftingPlan"))
                 AllowedItemTypes.Add(hash);
+            foreach (int hash in ItemGroup.SubTypesToHashList("Book"))
+                AllowedItemTypes.Add(hash);
+            foreach (int hash in ItemGroup.SubTypesToHashList("SpellRune"))
+                AllowedItemTypes.Add(hash);
         }
 
         // generates a random item.
@@ -119,7 +123,7 @@ namespace Mooege.Core.Common.Items
                 if (itemDefinition.Name.ToLower().Contains("unique")) continue;
                 if (itemDefinition.Name.ToLower().Contains("crafted")) continue;
                 if (itemDefinition.Name.ToLower().Contains("debug")) continue;
-
+                if ((itemDefinition.ItemType1 == StringHashHelper.HashItemName("Book")) && (itemDefinition.BaseGoldValue == 0)) continue; // i hope all lore with npc spawned
                 if (itemDefinition.SNOActor == -1) continue;
 
                 found = true;

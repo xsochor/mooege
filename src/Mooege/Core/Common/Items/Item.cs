@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
 using Mooege.Common;
@@ -32,6 +33,8 @@ using Mooege.Net.GS.Message;
 using Mooege.Common.MPQ.FileFormats;
 using Mooege.Common.Helpers;
 using Mooege.Core.Common.Scripting;
+using Mooege.Common.MPQ;
+using Mooege.Core.GS.Common.Types.SNO;
 
 // TODO: This entire namespace belongs in GS. Bnet only needs a certain representation of items whereas nearly everything here is GS-specific
 
@@ -152,10 +155,10 @@ namespace Mooege.Core.Common.Items
 
             ApplyWeaponSpecificOptions(definition);
             ApplyArmorSpecificOptions(definition);
+            ApplySpellRuneOption(definition);
             ApplyDurability(definition);
             ApplySkills(definition);
             ApplyAttributeSpecifier(definition);
-
             int affixNumber = 1;
             if (Attributes[GameAttribute.Item_Quality_Level] >= 3)
                 affixNumber = Attributes[GameAttribute.Item_Quality_Level] - 2;
@@ -224,6 +227,39 @@ namespace Mooege.Core.Common.Items
             if (definition.SNOSkill3 != -1)
             {
                 Attributes[GameAttribute.Skill, definition.SNOSkill3] = 1;
+            }
+        }
+
+        private void ApplySpellRuneOption(ItemTable definition)
+        {
+            if (ItemGroup.SubTypesToHashList("SpellRune").Contains(definition.ItemType1))
+            {
+                // unatuned, rank set in randomization
+                if (!definition.Name.Contains("X"))
+                {
+                    // atuned, randomize power - isn't this supposed to happen in randomization?
+                    int classRnd = RandomHelper.Next(0, 5);
+                    int PowerSNO = -1;
+                    switch (classRnd)
+                    {
+                        case 0:
+                            PowerSNO = Mooege.Core.GS.Skills.Skills.Barbarian.AllActiveSkillsList.ElementAt(RandomHelper.Next(0, Mooege.Core.GS.Skills.Skills.Barbarian.AllActiveSkillsList.Count));
+                            break;
+                        case 1:
+                            PowerSNO = Mooege.Core.GS.Skills.Skills.DemonHunter.AllActiveSkillsList.ElementAt(RandomHelper.Next(0, Mooege.Core.GS.Skills.Skills.DemonHunter.AllActiveSkillsList.Count));
+                            break;
+                        case 2:
+                            PowerSNO = Mooege.Core.GS.Skills.Skills.Monk.AllActiveSkillsList.ElementAt(RandomHelper.Next(0, Mooege.Core.GS.Skills.Skills.Monk.AllActiveSkillsList.Count));
+                            break;
+                        case 3:
+                            PowerSNO = Mooege.Core.GS.Skills.Skills.WitchDoctor.AllActiveSkillsList.ElementAt(RandomHelper.Next(0, Mooege.Core.GS.Skills.Skills.WitchDoctor.AllActiveSkillsList.Count));
+                            break;
+                        case 4:
+                            PowerSNO = Mooege.Core.GS.Skills.Skills.Wizard.AllActiveSkillsList.ElementAt(RandomHelper.Next(0, Mooege.Core.GS.Skills.Skills.Wizard.AllActiveSkillsList.Count));
+                            break;
+                    }
+                    this.Attributes[GameAttribute.Rune_Attuned_Power] = PowerSNO;
+                }
             }
         }
 
@@ -352,14 +388,10 @@ namespace Mooege.Core.Common.Items
         public override void OnTargeted(Player player, TargetMessage message)
         {
             //Logger.Trace("OnTargeted");
-            player.Inventory.PickUp(this);
-            // after MPQ based items are in master
-            /*
-            //Logger.Trace("OnTargeted");
             if (this.ItemType.Hash == 3646475)
             {
                 // book with lore
-                var y = MPQStorage.Data.Assets[SNOGroup.Actor].FirstOrDefault(x => x.Value.SNOId == this.ActorSNO);
+                var y = MPQStorage.Data.Assets[SNOGroup.Actor].FirstOrDefault(x => x.Value.SNOId == this.SNOId);
                 var e = (y.Value.Data as Mooege.Common.MPQ.FileFormats.Actor).TagMap.TagMapEntries.FirstOrDefault(z => z.Int1 == 67331);
                 if (e != null)
                 {
@@ -367,7 +399,7 @@ namespace Mooege.Core.Common.Items
                     if ((loreSNO != -1) && !player.LearnedLore.m_snoLoreLearned.Contains(loreSNO))
                     {
                         // play lore to player
-                        player.InGameClient.SendMessage(new Mooege.Net.GS.Message.Definitions.Quest.LoreMessage { Id = 213, snoLore = loreSNO }); // id 212 - new lore button, 213 - play immediatelly
+                        player.InGameClient.SendMessage(new Mooege.Net.GS.Message.Definitions.Quest.LoreMessage { Id = 213, snoLore = loreSNO });
                         // add lore to player's lores
                         int loreIndex = 0;
                         while ((loreIndex < player.LearnedLore.m_snoLoreLearned.Length) && (player.LearnedLore.m_snoLoreLearned[loreIndex] != 0))
@@ -396,7 +428,6 @@ namespace Mooege.Core.Common.Items
                 // other items
                 player.Inventory.PickUp(this);
             }
-            */
         }
 
         public override bool Reveal(Player player)
