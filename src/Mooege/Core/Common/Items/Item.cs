@@ -35,6 +35,7 @@ using Mooege.Common.Helpers;
 using Mooege.Core.Common.Scripting;
 using Mooege.Common.MPQ;
 using Mooege.Core.GS.Common.Types.SNO;
+using Mooege.Core.GS.Markers;
 
 // TODO: This entire namespace belongs in GS. Bnet only needs a certain representation of items whereas nearly everything here is GS-specific
 
@@ -104,12 +105,11 @@ namespace Mooege.Core.Common.Items
             }
         }
 
-        public Item(Mooege.Core.GS.Map.World world, ItemTable definition)
-            : base(world, world.NewActorID)
+        public Item(GS.Map.World world, ItemTable definition)
+            : base(world, definition.SNOActor)
         {
             this.ItemDefinition = definition;
 
-            this.SNOId = definition.SNOActor;
             this.GBHandle.Type = (int)GBHandleType.Gizmo;
             this.GBHandle.GBID = definition.Hash;
             this.ItemType = ItemGroup.FromHash(definition.ItemType1);
@@ -163,8 +163,6 @@ namespace Mooege.Core.Common.Items
             if (Attributes[GameAttribute.Item_Quality_Level] >= 3)
                 affixNumber = Attributes[GameAttribute.Item_Quality_Level] - 2;
             AffixGenerator.Generate(this, affixNumber);
-
-            this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
         }
 
         private void ApplyWeaponSpecificOptions(ItemTable definition)
@@ -270,7 +268,7 @@ namespace Mooege.Core.Common.Items
                 float result;
                 if (FormulaScript.Evaluate(effect.Formula.ToArray(), this.RandomGenerator, out result))
                 {
-                    Logger.Debug("Randomized value for attribute " + GameAttribute.Attributes[effect.AttributeId].Name + " is " + result);
+                    //Logger.Debug("Randomized value for attribute " + GameAttribute.Attributes[effect.AttributeId].Name + " is " + result);
 
                     if (GameAttribute.Attributes[effect.AttributeId] is GameAttributeF)
                     {
@@ -381,8 +379,7 @@ namespace Mooege.Core.Common.Items
         public void Drop(Player owner, Vector3D position)
         {
             this.Owner = owner;
-            this.Position = position;
-            // TODO: Notify the world so that players get the state change
+            this.EnterWorld(position);
         }
 
         public override void OnTargeted(Player player, TargetMessage message)
@@ -392,7 +389,7 @@ namespace Mooege.Core.Common.Items
             {
                 // book with lore
                 var y = MPQStorage.Data.Assets[SNOGroup.Actor].FirstOrDefault(x => x.Value.SNOId == this.SNOId);
-                var e = (y.Value.Data as Mooege.Common.MPQ.FileFormats.Actor).TagMap.TagMapEntries.FirstOrDefault(z => z.Int1 == 67331);
+                var e = (y.Value.Data as Mooege.Common.MPQ.FileFormats.Actor).TagMap.TagMapEntries.FirstOrDefault(z => z.TagID == (int)MarkerTagTypes.LoreSNO);
                 if (e != null)
                 {
                     int loreSNO = e.Int2;

@@ -40,6 +40,7 @@ using Mooege.Core.GS.Common.Types.Math;
 using Mooege.Core.GS.Common.Types.SNO;
 using Mooege.Core.Common.Toons;
 using Mooege.Core.GS.Players;
+using Mooege.Core.GS.Common.Types.Misc;
 
 namespace Mooege.Core.GS.FXEffect
 {
@@ -86,7 +87,7 @@ namespace Mooege.Core.GS.FXEffect
          */
         public bool Process(int tick)
         {
-            if ((this.Actor == null) || (this.Actor.World == null) || (this.Actor.World.GetActor(this.Actor.DynamicID) == null))
+            if ((this.Actor == null) || (this.Actor.World == null) || (this.Actor.World.GetActorByDynamicId(this.Actor.DynamicID) == null))
             {
                 // actor already left world, remove effect
                 return true;
@@ -174,7 +175,7 @@ namespace Mooege.Core.GS.FXEffect
             else
             {
                 // check if effect should end
-                if ((this.NeedsActor) && ((this.ProxyActor == null) || (this.ProxyActor.World == null) || (this.ProxyActor.World.GetActor(this.ProxyActor.DynamicID) == null)))
+                if ((this.NeedsActor) && ((this.ProxyActor == null) || (this.ProxyActor.World == null) || (this.ProxyActor.World.GetActorByDynamicId(this.ProxyActor.DynamicID) == null)))
                 {
                     // proxy actor already left world, remove effect
                     EffectEndingAction();
@@ -293,7 +294,7 @@ namespace Mooege.Core.GS.FXEffect
                 ProxyActor.Attributes[GameAttribute.Always_Hits] = true;
                 ProxyActor.Attributes[GameAttribute.Custom_Target_Weight] = 100f;
                 ProxyActor.Attributes[GameAttribute.Is_Player_Decoy] = true;
-                List<Mooege.Core.GS.Actors.Actor> actors = World.GetActorsInRange(Actor.Position, 40f);
+                List<Mooege.Core.GS.Actors.Actor> actors = World.QuadTree.Query<Mooege.Core.GS.Actors.Actor>(new Circle(Actor.Position.X, Actor.Position.Y, 40f));
                 Mooege.Core.GS.Actors.Monster monster = null;
                 for (int i = 0; i < actors.Count; i++)
                 {
@@ -381,7 +382,7 @@ namespace Mooege.Core.GS.FXEffect
                     OptionalParameter = 137107,
                 }, Actor);
                 // blinding flash
-                List<Mooege.Core.GS.Actors.Actor> actors = World.GetActorsInRange(Actor.Position, 20f);
+                List<Mooege.Core.GS.Actors.Actor> actors = World.QuadTree.Query<Mooege.Core.GS.Actors.Actor>(new Circle(Actor.Position.X, Actor.Position.Y, 20f));
                 for (int i = 0; i < actors.Count; i++)
                 {
                     if ((actors[i].World != null) && (actors[i].ActorType == ActorType.Monster))
@@ -405,7 +406,8 @@ namespace Mooege.Core.GS.FXEffect
             else if ((EffectID == 140870) || (EffectID == 140871) || (EffectID == 140872))
             {
                 // deadly strike
-                List<Mooege.Core.GS.Actors.Actor> actors = World.GetActorsInRange(Actor.Position, 20f);
+                List<Mooege.Core.GS.Actors.Actor> actors = World.QuadTree.Query<Mooege.Core.GS.Actors.Actor>(new Circle(Actor.Position.X, Actor.Position.Y, 20f));
+
                 for (int i = 0; i < actors.Count; i++)
                 {
                     if ((actors[i].World == null) || (actors[i].ActorType != ActorType.Monster))
@@ -457,7 +459,7 @@ namespace Mooege.Core.GS.FXEffect
                         Effect = Effect.PlayEffectGroup,
                         OptionalParameter = 99504
                     }, this.ProxyActor);
-                List<Mooege.Core.GS.Actors.Actor> actors = World.GetActorsInRange(ProxyActor.Position, 20f);
+                List<Mooege.Core.GS.Actors.Actor> actors = World.QuadTree.Query<Mooege.Core.GS.Actors.Actor>(new Circle(Actor.Position.X, Actor.Position.Y, 20f));
                 for (int i = 0; i < actors.Count; i++)
                 {
                     if (i > 63)
@@ -845,7 +847,7 @@ namespace Mooege.Core.GS.FXEffect
             if (Actor is Mooege.Core.GS.Actors.Monster)
             {
                 // play lore if 1st kill for player
-                var players = this.World.GetPlayersInRange(Actor.Position, 480f);
+                var players = Actor.GetPlayersInRange();
                 if (players != null)
                 {
                     var y = MPQStorage.Data.Assets[SNOGroup.Monster].FirstOrDefault(x => (x.Value.Data as Mooege.Common.MPQ.FileFormats.Monster).ActorSNO == Actor.SNOId);
@@ -916,18 +918,18 @@ namespace Mooege.Core.GS.FXEffect
 
         protected int ticksBetweenActions = 30; // 500 ms
 
-        public EffectActor(Mooege.Core.GS.Map.World world, int actorSNO, Vector3D position)
-            : base(world, world.NewActorID)
+        public EffectActor(Mooege.Core.GS.Map.World world, int snoId, Vector3D position)
+            : base(world, snoId)
         {
-            this.SNOId = actorSNO;
+            this.SNOId = snoId;
             // FIXME: This is hardcoded crap
             this.Field2 = 0x8;
             this.Field3 = 0x0;
             this.Scale = 1f;
-            this.Position.Set(position);
+            this.Position.Set(position.X, position.Y, position.Z);
             this.RotationAmount = (float)(RandomHelper.NextDouble() * 2.0f * Math.PI);
             this.RotationAxis.X = 0f; this.RotationAxis.Y = 0f; this.RotationAxis.Z = 1f;
-            this.GBHandle.Type = (int)GBHandleType.ClientEffect; this.GBHandle.GBID = actorSNO;
+            this.GBHandle.Type = (int)GBHandleType.ClientEffect; this.GBHandle.GBID = snoId;
             this.Field7 = 0x00000001;
             this.Field8 = this.SNOId;
             this.Field10 = 0x0;
@@ -1037,7 +1039,7 @@ namespace Mooege.Core.GS.FXEffect
             Mooege.Core.GS.Actors.Actor target = null;
             if (this.Attributes[GameAttribute.Last_ACD_Attacked] != 0)
             {
-                target = this.World.GetActor((uint)this.Attributes[GameAttribute.Last_ACD_Attacked]);
+                target = this.World.GetActorByDynamicId((uint)this.Attributes[GameAttribute.Last_ACD_Attacked]);
             }
             if ((target == null) || (target.World == null))
             {
@@ -1246,7 +1248,7 @@ namespace Mooege.Core.GS.FXEffect
 
                     this.World.AddEffect(new ProjectileFXEffect
                     {
-                        Actor = this.World.GetActor((uint)this.Attributes[GameAttribute.Spawned_by_ACDID]),
+                        Actor = this.World.GetActorByDynamicId((uint)this.Attributes[GameAttribute.Spawned_by_ACDID]),
                         EffectID = 77116,
                         Target = target,
                         NeedsActor = true,
@@ -1350,7 +1352,7 @@ namespace Mooege.Core.GS.FXEffect
             Mooege.Core.GS.Actors.Actor target = null;
             if (message.TargetID != 0xFFFFFFFF)
             {
-                target = world.GetActor(message.TargetID);
+                target = world.GetActorByDynamicId(message.TargetID);
                 if (target != null)
                 {
                     targetPosition = target.Position;
@@ -1533,7 +1535,7 @@ namespace Mooege.Core.GS.FXEffect
             Mooege.Core.GS.Actors.Actor target = null;
             if (message.TargetID != 0xFFFFFFFF)
             {
-                target = world.GetActor(message.TargetID);
+                target = world.GetActorByDynamicId(message.TargetID);
                 if (target != null)
                 {
                     targetPosition = target.Position;
