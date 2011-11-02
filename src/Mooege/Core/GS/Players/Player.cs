@@ -44,6 +44,10 @@ using Mooege.Common.Helpers;
 using Mooege.Net.GS.Message.Definitions.Combat;
 using System;
 using Mooege.Core.GS.Test;
+using Mooege.Net.GS.Message.Definitions.Trade;
+using Mooege.Core.GS.Actors.Implementations;
+using Mooege.Net.GS.Message.Definitions.Artisan;
+using Mooege.Core.GS.Actors.Implementations.Artisans;
 
 namespace Mooege.Core.GS.Players
 {
@@ -115,7 +119,7 @@ namespace Mooege.Core.GS.Players
         private int _lastEnvironmentDestroyTick;
         private int _lastEnvironmentDestroyMonsterKills;
         private int _lastEnvironmentDestroyMonsterKillTick;
-       
+
         /// <summary>
         /// Creates a new player.
         /// </summary>
@@ -147,7 +151,6 @@ namespace Mooege.Core.GS.Players
             this.Field10 = 0x0;
 
             this.RevealedObjects = new Dictionary<uint, IRevealable>();
-            this.Inventory = new Inventory(this);
             this.SkillSet = new SkillSet(this.Properties.Class);
             this.GroundItems = new Dictionary<uint, Item>();
             this.OpenConversations = new List<OpenConversation>();
@@ -196,7 +199,7 @@ namespace Mooege.Core.GS.Players
             this.Attributes[GameAttribute.Resistance, 0xDE] = 0.5f;
             this.Attributes[GameAttribute.Resistance, 0x226] = 0.5f;
             this.Attributes[GameAttribute.Resistance_Total, 0] = 10f; // im pretty sure key = 0 doesnt do anything since the lookup is (attributeId | (key << 12)), maybe this is some base resistance? /cm
-            // likely the physical school of damage, it probably doesn't actually do anything in this case (or maybe just not for the player's hero) 
+            // likely the physical school of damage, it probably doesn't actually do anything in this case (or maybe just not for the player's hero)
             // but exists for the sake of parity with weapon damage schools
             this.Attributes[GameAttribute.Resistance_Total, 1] = 10f; //Fire
             this.Attributes[GameAttribute.Resistance_Total, 2] = 10f; //Lightning
@@ -387,8 +390,9 @@ namespace Mooege.Core.GS.Players
             this.Attributes[GameAttribute.Shared_Stash_Slots] = 14;
             this.Attributes[GameAttribute.Backpack_Slots] = 60;
             this.Attributes[GameAttribute.General_Cooldown] = 0;
-
             #endregion // Attributes
+
+            this.Inventory = new Inventory(this); // Here because it needs attributes /fasbat
             // temp attributes
             this.Attributes[GameAttribute.ItemMeltUnlocked] = true;
             this.Attributes[GameAttribute.Crit_Percent_Base] = 0.15f;
@@ -410,7 +414,9 @@ namespace Mooege.Core.GS.Players
             else if (message is TargetMessage) OnObjectTargeted(client, (TargetMessage)message);
             else if (message is PlayerMovementMessage) OnPlayerMovement(client, (PlayerMovementMessage)message);
             else if (message is TryWaypointMessage) OnTryWaypoint(client, (TryWaypointMessage)message);
-//            else if (message is SocketSpellMessage) OnSocketSpell(client, (SocketSpellMessage)message);
+            else if (message is RequestBuyItemMessage) OnRequestBuyItem(client, (RequestBuyItemMessage)message);
+            else if (message is SocketSpellMessage) OnSocketSpell(client, (SocketSpellMessage)message);
+            else if (message is RequestAddSocketMessage) OnRequestAddSocket(client, (RequestAddSocketMessage)message);
             else return;
         }
 
@@ -577,7 +583,7 @@ namespace Mooege.Core.GS.Players
 
         private void OnPlayerMovement(GameClient client, PlayerMovementMessage message)
         {
-            // here we should also be checking the position and see if it's valid. If not we should be resetting player to a good position with ACDWorldPositionMessage 
+            // here we should also be checking the position and see if it's valid. If not we should be resetting player to a good position with ACDWorldPositionMessage
             // so we can have a basic precaution for hacks & exploits /raist.
 
             if (message.Position != null)
@@ -607,6 +613,26 @@ namespace Mooege.Core.GS.Players
 
             this.Position = wayPoint.Position;
             InGameClient.SendMessage(this.ACDWorldPositionMessage);
+        }
+
+        private void OnRequestBuyItem(GameClient client, RequestBuyItemMessage requestBuyItemMessage)
+        {
+            var item = World.GetItem(requestBuyItemMessage.ItemId);
+            if (item == null || item.Owner == null || !(item.Owner is Vendor))
+                return;
+            (item.Owner as Vendor).OnRequestBuyItem(this, item);
+        }
+
+        private void OnRequestAddSocket(GameClient client, RequestAddSocketMessage requestAddSocketMessage)
+        {
+            var item = World.GetItem(requestAddSocketMessage.ItemID);
+            if (item == null || item.Owner != this)
+                return;
+            var jeweler = World.GetInstance<Jeweler>();
+            if (jeweler == null)
+                return;
+
+            jeweler.OnAddSocket(this, item);
         }
 
         #endregion
@@ -679,7 +705,7 @@ namespace Mooege.Core.GS.Players
         #endregion
 
         #region proximity based actor & scene revealing
-        
+
         protected override void OnPositionChange(Vector3D prevPosition)
         {
             if (!this.EnteredWorld) return;
@@ -717,7 +743,7 @@ namespace Mooege.Core.GS.Players
         }
 
         #endregion
-           
+
         #region player attribute handling
 
         public float InitialAttack // Defines the amount of attack points with which a player starts
@@ -1176,7 +1202,7 @@ namespace Mooege.Core.GS.Players
                     (this.Attributes[GameAttribute.Hitpoints_Total_From_Level]);
         }
 
-        public static int[] LevelBorders = 
+        public static int[] LevelBorders =
         {
             0, 1200, 2250, 4000, 6050, 8500, 11700, 15400, 19500, 24000, /* Level 1-10 */
             28900, 34200, 39900, 44100, 45000, 46200, 48300, 50400, 52500, 54600, /* Level 11-20 */
@@ -1206,7 +1232,6 @@ namespace Mooege.Core.GS.Players
 
         public void UpdateExp(int addedExp)
         {
-            GameAttributeMap attribs = new GameAttributeMap();
 
             this.Attributes[GameAttribute.Experience_Next] -= addedExp;
 
@@ -1236,18 +1261,7 @@ namespace Mooege.Core.GS.Players
                 // On level up, health is set to max
                 this.Attributes[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Max_Total];
 
-                attribs[GameAttribute.Level] = this.Attributes[GameAttribute.Level];
-                attribs[GameAttribute.Defense] = this.Attributes[GameAttribute.Defense];
-                attribs[GameAttribute.Vitality] = this.Attributes[GameAttribute.Vitality];
-                attribs[GameAttribute.Precision] = this.Attributes[GameAttribute.Precision];
-                attribs[GameAttribute.Attack] = this.Attributes[GameAttribute.Attack];
-                attribs[GameAttribute.Experience_Next] = this.Attributes[GameAttribute.Experience_Next];
-                attribs[GameAttribute.Hitpoints_Total_From_Vitality] = this.Attributes[GameAttribute.Hitpoints_Total_From_Vitality];
-                attribs[GameAttribute.Hitpoints_Max_Total] = this.Attributes[GameAttribute.Hitpoints_Max_Total];
-                attribs[GameAttribute.Hitpoints_Max] = this.Attributes[GameAttribute.Hitpoints_Max];
-                attribs[GameAttribute.Hitpoints_Cur] = this.Attributes[GameAttribute.Hitpoints_Cur];
-
-                attribs.SendMessage(this.InGameClient, this.DynamicID);
+                this.Attributes.SendChangedMessage(this.InGameClient, this.DynamicID);
 
                 this.InGameClient.SendMessage(new PlayerLevel()
                 {
@@ -1271,11 +1285,12 @@ namespace Mooege.Core.GS.Players
             }
 
             // constant 0 exp at Level_Cap
-            if (this.Attributes[GameAttribute.Experience_Next] < 0) { this.Attributes[GameAttribute.Experience_Next] = 0; }
+            if (this.Attributes[GameAttribute.Experience_Next] < 0) 
+            { 
+                this.Attributes[GameAttribute.Experience_Next] = 0;
 
-            attribs[GameAttribute.Experience_Next] = this.Attributes[GameAttribute.Experience_Next];
-            attribs.SendMessage(this.InGameClient, this.DynamicID);
-
+            }
+            this.Attributes.SendChangedMessage(this.InGameClient, this.DynamicID);
             //this.Attributes.SendMessage(this.InGameClient, this.DynamicID); kills the player atm
         }
 
@@ -1492,7 +1507,7 @@ namespace Mooege.Core.GS.Players
                 Item item;
                 if (!(actor is Item)) continue;
                 item = (Item)actor;
-                if (item.ItemType != ItemType.Gold) continue;
+                if (!Item.IsGold(item.ItemType)) continue;
 
                 this.InGameClient.SendMessage(new FloatingAmountMessage()
                 {
@@ -1521,7 +1536,7 @@ namespace Mooege.Core.GS.Players
                 Item item;
                 if (!(actor is Item)) continue;
                 item = (Item)actor;
-                if (item.ItemType != ItemType.HealthGlobe) continue;
+                if (!Item.IsHealthGlobe(item.ItemType)) continue;
 
                 this.InGameClient.SendMessage(new PlayEffectMessage() //Remember, for PlayEffectMessage, field1=7 are globes picking animation.
                 {

@@ -34,7 +34,6 @@ using Mooege.Net.GS.Message.Fields;
 using Mooege.Net.GS.Message.Definitions.ACD;
 using Mooege.Net.GS.Message.Definitions.Misc;
 using Mooege.Core.Common.Items;
-using System;
 
 namespace Mooege.Core.GS.Actors
 {
@@ -123,7 +122,6 @@ namespace Mooege.Core.GS.Actors
         /// </summary>
         public Dictionary<int, TagMapEntry> Tags { get; private set; }
 
-        public GameAttributeMap UpdateMap { get; private set; }
         /// <summary>
         /// Attribute map.
         /// </summary>
@@ -182,7 +180,6 @@ namespace Mooege.Core.GS.Actors
             this.GBHandle = new GBHandle { Type = -1, GBID = -1 }; // Seems to be the default. /komiga
             this.SNOName = new SNOName { Group =  SNOGroup.Actor, SNOId = this.SNOId };
             this.CollFlags = 0x00000000;
-            this.UpdateMap = new GameAttributeMap();
 
             this.Tags = tags;
             this.ReadTags();
@@ -242,6 +239,7 @@ namespace Mooege.Core.GS.Actors
 
             player.InGameClient.SendMessage(msg);
 
+            /*
             // Affixes of the actor, two messages with 1 and 2,i guess prefix and suffix so it does not
             // make sense to send the same list twice. server does not do this
             var affixGbis = new int[AffixList.Count];
@@ -263,6 +261,7 @@ namespace Mooege.Core.GS.Actors
                 Field1 = 0x00000002,
                 aAffixGBIDs = affixGbis,
             });
+             */
 
             // Collision Flags
             player.InGameClient.SendMessage(new ACDCollFlagsMessage
@@ -304,19 +303,6 @@ namespace Mooege.Core.GS.Actors
             player.InGameClient.SendMessage(new ACDDestroyActorMessage(this.DynamicID));
             player.RevealedObjects.Remove(this.DynamicID);
             return true;
-        }
-
-        public override void Update()
-        {
-            if (!UpdateMap.IsEmpty() && (this.World != null))
-            {
-                SendUpdateMap();
-            }
-        }
-
-        private void SendUpdateMap() {
-            UpdateMap.BroadcastInclusive(this.World, this);
-            UpdateMap.Clear();
         }
 
         #endregion

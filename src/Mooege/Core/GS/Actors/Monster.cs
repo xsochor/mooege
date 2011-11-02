@@ -29,7 +29,6 @@ using Mooege.Net.GS.Message.Fields;
 using Mooege.Net.GS.Message.Definitions.Animation;
 using Mooege.Net.GS.Message.Definitions.Effect;
 using Mooege.Net.GS.Message.Definitions.Misc;
-using Mooege.Core.GS.Test;
 
 namespace Mooege.Core.GS.Actors
 {
@@ -47,88 +46,11 @@ namespace Mooege.Core.GS.Actors
             this.GBHandle.Type = (int)GBHandleType.Monster; this.GBHandle.GBID = 1;
             this.Attributes[GameAttribute.TeamID] = 10;
             this.Attributes[GameAttribute.Experience_Granted] = 125;
-           
-            // hack
-            this.Attributes[GameAttribute.Hit_Chance] = 0.65f;
-        }
-
-        public override void Update()
-        {
-            this.Brain(); // let him think. /raist
-            base.Update();
-        }
-
-        private bool sentWalkAnimation = false;
-
-        public virtual void Brain()
-        {
-            // intellectual activities goes here ;) /raist
-            if (this.Attributes[GameAttribute.Queue_Death])
-            {
-                // will die
-                return;
-            }/*
-            if (true)
-            {
-                return; // weird side-effect on mpq based spawning - all npcs are monsters
-            }*/
-            Actor target = null;
-            if (this.Attributes[GameAttribute.Last_ACD_Attacked] != 0)
-            {
-                target = this.World.GetActor((uint)this.Attributes[GameAttribute.Last_ACD_Attacked]);
-            }
-            if (this.Attributes[GameAttribute.Forced_Enemy_ACDID] != 0)
-            {
-                target = this.World.GetActor((uint)this.Attributes[GameAttribute.Forced_Enemy_ACDID]);
-            }
-            if ((target == null) || (target.World == null))
-            {
-                this.Attributes[GameAttribute.Forced_Enemy_ACDID] = 0;
-                target = CombatSystem.GetNearestTarget(this.World, this, this.Position, 50f, Actors.ActorType.Player);
-                if (target != null)
-                {
-                    this.Attributes[GameAttribute.Last_ACD_Attacked] = unchecked((int)target.DynamicID);
-                }
-            }
-            if (target == null)
-            {
-                return;
-            }
-            if (!ActorUtils.CheckRange(this, target, 8f))
-            {
-                if (!sentWalkAnimation)
-                {
-                    CombatSystem.MoveToBasic(this, target, 0.1f, 69728);
-                    sentWalkAnimation = true;
-                }
-                else
-                {
-                    CombatSystem.MoveToBasic(this, target, 0.1f, null);
-                }
-            }
-            else if (target != null)
-            {
-                if (this.World.Game.Tick < this.Attributes[GameAttribute.Last_Action_Timestamp] + (6 * 12))
-                {
-                    return;
-                }
-                this.Attributes[GameAttribute.Last_Action_Timestamp] = this.World.Game.Tick;
-                if (target.World != null)
-                {
-                    CombatSystem.Attack(this, target, 11465);
-                    CombatSystem.ResolveCombat(this, target);
-                    this.Attributes[GameAttribute.Last_ACD_Attacked] = 0;
-                }
-                else
-                {
-                    this.Attributes[GameAttribute.Last_ACD_Attacked] = 0;
-                }
-            }
         }
 
         public override void OnTargeted(Player player, TargetMessage message)
         {
-//            this.Die(player);
+            this.Die(player);
         }
 
         // FIXME: Hardcoded hell. /komiga
@@ -230,7 +152,7 @@ namespace Mooege.Core.GS.Actors
                 ActorId = this.DynamicID,
                 Effect = Effect.Burned2
             }, this);
-            /*
+
             this.World.BroadcastIfRevealed(new PlayHitEffectMessage()
             {
                 ActorID = this.DynamicID,
@@ -238,28 +160,12 @@ namespace Mooege.Core.GS.Actors
                 Field2 = 0x2,
                 Field3 = false,
             }, this);
-            */
+
             this.World.SpawnRandomItemDrop(player, this.Position);
             this.World.SpawnGold(player, this.Position);
             if (RandomHelper.Next(1, 100) < 20)
                 this.World.SpawnHealthGlobe(player, this.Position);
 
-            this.Destroy();
-        }
-
-        public void Die()
-        {
-            var players = this.World.GetPlayersInRange(this.Position, 480.0f);
-            foreach (var player in players)
-            {
-                player.UpdateExp(this.Attributes[GameAttribute.Experience_Granted]);
-                player.UpdateExpBonusData(player.GBHandle.Type, this.GBHandle.Type);
-                this.World.SpawnRandomItemDrop(player, this.Position);
-                this.World.SpawnGold(player, this.Position);
-                int rGlobes = RandomHelper.Next(1, 100);
-                if (rGlobes < 20)
-                    this.World.SpawnHealthGlobe(player, this.Position); // should be shared globe
-            }
             this.Destroy();
         }
     }
