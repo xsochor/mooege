@@ -155,7 +155,6 @@ namespace Mooege.Core.Common.Items
 
             ApplyWeaponSpecificOptions(definition);
             ApplyArmorSpecificOptions(definition);
-            ApplySpellRuneOption(definition);
             ApplyDurability(definition);
             ApplySkills(definition);
             ApplyAttributeSpecifier(definition);
@@ -225,39 +224,6 @@ namespace Mooege.Core.Common.Items
             if (definition.SNOSkill3 != -1)
             {
                 Attributes[GameAttribute.Skill, definition.SNOSkill3] = 1;
-            }
-        }
-
-        private void ApplySpellRuneOption(ItemTable definition)
-        {
-            if (ItemGroup.SubTypesToHashList("SpellRune").Contains(definition.ItemType1))
-            {
-                // unatuned, rank set in randomization
-                if (!definition.Name.Contains("X"))
-                {
-                    // atuned, randomize power - isn't this supposed to happen in randomization?
-                    int classRnd = RandomHelper.Next(0, 5);
-                    int PowerSNO = -1;
-                    switch (classRnd)
-                    {
-                        case 0:
-                            PowerSNO = Mooege.Core.GS.Skills.Skills.Barbarian.AllActiveSkillsList.ElementAt(RandomHelper.Next(0, Mooege.Core.GS.Skills.Skills.Barbarian.AllActiveSkillsList.Count));
-                            break;
-                        case 1:
-                            PowerSNO = Mooege.Core.GS.Skills.Skills.DemonHunter.AllActiveSkillsList.ElementAt(RandomHelper.Next(0, Mooege.Core.GS.Skills.Skills.DemonHunter.AllActiveSkillsList.Count));
-                            break;
-                        case 2:
-                            PowerSNO = Mooege.Core.GS.Skills.Skills.Monk.AllActiveSkillsList.ElementAt(RandomHelper.Next(0, Mooege.Core.GS.Skills.Skills.Monk.AllActiveSkillsList.Count));
-                            break;
-                        case 3:
-                            PowerSNO = Mooege.Core.GS.Skills.Skills.WitchDoctor.AllActiveSkillsList.ElementAt(RandomHelper.Next(0, Mooege.Core.GS.Skills.Skills.WitchDoctor.AllActiveSkillsList.Count));
-                            break;
-                        case 4:
-                            PowerSNO = Mooege.Core.GS.Skills.Skills.Wizard.AllActiveSkillsList.ElementAt(RandomHelper.Next(0, Mooege.Core.GS.Skills.Skills.Wizard.AllActiveSkillsList.Count));
-                            break;
-                    }
-                    this.Attributes[GameAttribute.Rune_Attuned_Power] = PowerSNO;
-                }
             }
         }
 

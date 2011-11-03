@@ -118,9 +118,9 @@ namespace Mooege.Core.GS.FXEffect
                             World.BroadcastIfRevealed(new EffectGroupACDToACDMessage()
                             {
                                 Id = 0xaa,
-                                Field2 = unchecked((int)this.Actor.DynamicID),
-                                Field1 = unchecked((int)this.Target.DynamicID),
-                                Field0 = this.EffectID,
+                                ActorID = this.Actor.DynamicID,
+                                TargetID = this.Target.DynamicID,
+                                EffectSNOId = this.EffectID,
                             }, this.Actor);
                         }
                         EffectStartingAction();
@@ -1362,10 +1362,12 @@ namespace Mooege.Core.GS.FXEffect
             int startingTick = world.Game.TickCounter;
             int effectID = 0;
             int masterEffectID = 0;
+            /* // broken ticking
             if (message.Field6 != null)
             {
                 startingTick =  message.Field6.Field1;
             }
+             */
             switch (message.PowerSNO)
             {
                 case Skills.Skills.Monk.SpiritGenerator.FistsOfThunder:

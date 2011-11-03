@@ -405,6 +405,11 @@ namespace Mooege.Core.GS.Players
             else return;
         }
 
+        /// <summary>
+        /// Sockets skill with rune.
+        /// </summary>
+        /// <param name="client"></param>
+        /// <param name="socketSpellMessage"></param>
         private void OnSocketSpell(GameClient client, SocketSpellMessage socketSpellMessage)
         {
             Item rune = this.World.GetItem(unchecked((uint)socketSpellMessage.Field0));
@@ -423,19 +428,13 @@ namespace Mooege.Core.GS.Players
                 // validity of message is controlled on client side, this shouldn't happen
                 return;
             }
-            // removes old rune (if present)
-            Item oldRune = this.Inventory.RemoveRune(skillIndex);
-            // type of rune is in Name
-            //            Attributes[GameAttribute.Rune_<x>] = <rank>; // on attuned runes ONLY
-            //            Attributes[GameAttribute.Rune_Rank] = <in spec>; // on unattuned rune ONLY, inititalized in creation
-            //            Attributes[GameAttribute.Rune_Attuned_Power] = 0; // 0 on unattuned or  random value from all powers, inititalized in creation
+            Item oldRune = this.Inventory.RemoveRune(skillIndex); // removes old rune (if present)
             if (rune.Attributes[GameAttribute.Rune_Rank] != 0)
             {
-                // if unattuned, pick random color and set attunement to new rune
+                // unattuned rune: pick random color, create new rune, set attunement to new rune and destroy unattuned one
                 int rank = rune.Attributes[GameAttribute.Rune_Rank];
                 int colorIndex = RandomHelper.Next(0, 5);
-                Item newRune = ItemGenerator.Cook(this, "Runestone_" + (char)('A' + colorIndex) + "_0" + rank);
-                newRune.EnterWorld(this.Position);
+                Item newRune = ItemGenerator.Cook(this, "Runestone_" + (char)('A' + colorIndex) + "_0" + rank); // TODO: quite of hack, find better solution /xsochor
                 newRune.Attributes[GameAttribute.Rune_Attuned_Power] = PowerSNOId;
                 switch (colorIndex)
                 {
@@ -461,16 +460,14 @@ namespace Mooege.Core.GS.Players
                         break;
                 }
                 newRune.Owner = this;
-                newRune.Attributes.SendChangedMessage(this.InGameClient, newRune.DynamicID);
-                rune.SetInventoryLocation(-1, -1, -1);
-                this.Inventory.DestroyInventoryItem(rune);
+                newRune.EnterWorld(this.Position);
+                this.Inventory.DestroyInventoryItem(rune); // destroy unattuned rune
                 newRune.Reveal(this);
-                newRune.SetInventoryLocation(16, skillIndex, 0); // skills (16), index, 0
                 this.Inventory.SetRune(newRune, PowerSNOId, skillIndex);
             }
             else
             {
-                // TODO: optimization possible?
+                // TODO: optimization possible? /xsochor
                 if (rune.Attributes[GameAttribute.Rune_A] != 0)
                 {
                     Attributes[GameAttribute.Rune_A, PowerSNOId] = rune.Attributes[GameAttribute.Rune_A];
@@ -492,12 +489,12 @@ namespace Mooege.Core.GS.Players
                 this.Inventory.SetRune(rune, PowerSNOId, skillIndex);
             }
             if (oldRune != null) {
-                this.Inventory.PickUp(oldRune);
+                this.Inventory.PickUp(oldRune); // pick removed rune
             }
-            // need info from BETA if and how this changes 
+            // TODO: need info if and how this changes /xsochor
             //            this.SkillKeyMappings[0].Power = PowerSNO;
-            //            this.SkillKeyMappings[0].Field1 = unchecked((int)rune.DynamicID); // ???
-            //            this.SkillKeyMappings[0].Field2 = rune.Attributes[GameAttribute.Rune_Rank]; // ???
+            //            this.SkillKeyMappings[0].Field1 = unchecked((int)rune.DynamicID); // not sure /xsochor
+            //            this.SkillKeyMappings[0].Field2 = rune.Attributes[GameAttribute.Rune_Rank]; // not sure /xsochor
             UpdateHeroState();
         }
 
@@ -512,6 +509,8 @@ namespace Mooege.Core.GS.Players
                 {
                     if (!this.Inventory.PickUp(oldRune))
                     {
+                        // full inventory, cancel socketting
+                        this.Inventory.SetRune(oldRune, oldSNOSkill, message.SkillIndex); // readd old rune
                         return;
                     }
                 }

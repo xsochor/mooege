@@ -45,6 +45,7 @@ namespace Mooege.Core.GS.Players
         private Equipment _equipment;
         private InventoryGrid _inventoryGrid;
         private InventoryGrid _stashGrid;
+        // backpack for spellRunes
         private uint[] _skillSocketRunes;
 
         public Inventory(Player owner)
@@ -383,6 +384,11 @@ namespace Mooege.Core.GS.Players
             item.Destroy();
         }
 
+        /// <summary>
+        /// Returns rune in skill's socket
+        /// </summary>
+        /// <param name="skillIndex"></param>
+        /// <returns></returns>
         public Item GetRune(int skillIndex)
         {
             if ((skillIndex < 0) || (skillIndex > 5)) {
@@ -394,6 +400,12 @@ namespace Mooege.Core.GS.Players
             return this._owner.World.GetItem(_skillSocketRunes[skillIndex]);
         }
 
+        /// <summary>
+        /// Visually adds rune to skill
+        /// </summary>
+        /// <param name="rune"></param>
+        /// <param name="PowerSNOId"></param>
+        /// <param name="skillIndex"></param>
         public void SetRune(Item rune, int PowerSNOId, int skillIndex)
         {
             if ((skillIndex < 0) || (skillIndex > 5))
@@ -408,6 +420,7 @@ namespace Mooege.Core.GS.Players
             _inventoryGrid.RemoveItem(rune);
             rune.Owner = _owner;
             _skillSocketRunes[skillIndex] = rune.DynamicID;
+            // position of rune is read from mpq as INDEX of skill in skill kit /xsochor
             var y = MPQStorage.Data.Assets[SNOGroup.SkillKit].FirstOrDefault(x => x.Value.SNOId == _owner.SkillKit);
             for (int i = 0; i < (y.Value.Data as SkillKit).ActiveSkillEntries.Count; i++)
             {
@@ -419,6 +432,11 @@ namespace Mooege.Core.GS.Players
             }
         }
 
+        /// <summary>
+        /// Visually removes rune from skill. Also removes effect of that rune
+        /// </summary>
+        /// <param name="skillIndex"></param>
+        /// <returns></returns>
         public Item RemoveRune(int skillIndex)
         {
             if ((skillIndex < 0) || (skillIndex > 5))
@@ -426,13 +444,13 @@ namespace Mooege.Core.GS.Players
                 return null;
             }
             Item rune = GetRune(skillIndex);
-            int PowerSNO = _owner.SkillSet.ActiveSkills[skillIndex];
+            int PowerSNOId = _owner.SkillSet.ActiveSkills[skillIndex];
             _skillSocketRunes[skillIndex] = 0;
-            _owner.Attributes[GameAttribute.Rune_A, PowerSNO] = 0;
-            _owner.Attributes[GameAttribute.Rune_B, PowerSNO] = 0;
-            _owner.Attributes[GameAttribute.Rune_C, PowerSNO] = 0;
-            _owner.Attributes[GameAttribute.Rune_D, PowerSNO] = 0;
-            _owner.Attributes[GameAttribute.Rune_E, PowerSNO] = 0;
+            _owner.Attributes[GameAttribute.Rune_A, PowerSNOId] = 0;
+            _owner.Attributes[GameAttribute.Rune_B, PowerSNOId] = 0;
+            _owner.Attributes[GameAttribute.Rune_C, PowerSNOId] = 0;
+            _owner.Attributes[GameAttribute.Rune_D, PowerSNOId] = 0;
+            _owner.Attributes[GameAttribute.Rune_E, PowerSNOId] = 0;
             return rune;
         }
 
