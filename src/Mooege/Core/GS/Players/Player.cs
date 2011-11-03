@@ -106,7 +106,6 @@ namespace Mooege.Core.GS.Players
         /// </summary>
         public List<OpenConversation> OpenConversations { get; set; }
 
-
         /// <summary>
         /// NPC currently interaced with
         /// </summary>
@@ -554,7 +553,7 @@ namespace Mooege.Core.GS.Players
 
             if ((actor.GBHandle.Type == 1) && (actor.Attributes[GameAttribute.TeamID] == 10))
             {
-                this.ExpBonusData.MonsterAttacked(this.InGameClient.Game.Tick);
+                this.ExpBonusData.MonsterAttacked(this.InGameClient.Game.TickCounter);
             }
 
             actor.OnTargeted(this, message);
@@ -621,7 +620,7 @@ namespace Mooege.Core.GS.Players
 
         #region update-logic
 
-        public override void Update()
+        public override void Update(int tickCounter)
         {
             // Check the Killstreaks
             this.ExpBonusData.Check(0);
@@ -642,14 +641,17 @@ namespace Mooege.Core.GS.Players
         /// </summary>
         public void RevealScenesToPlayer()
         {
-            var scenes = this.GetScenesInRange();
+            var scenes = this.GetScenesInRegion();
 
             foreach (var scene in scenes) // reveal scenes in player's proximity.
             {
                 if (scene.IsRevealedToPlayer(this)) // if the actors is already revealed skip it.
                     continue; // if the scene is already revealed, skip it.
 
-                scene.Reveal(this);
+                if (scene.Parent != null) // if it's a subscene, always make sure it's parent get reveals first and then it reveals his childs.
+                    scene.Parent.Reveal(this); 
+                else 
+                    scene.Reveal(this);
             }
         }
 
@@ -1344,7 +1346,7 @@ namespace Mooege.Core.GS.Players
                     Field0 = 0x0000006E,
                     SNOConversation = snoConversation
                 },
-                this.InGameClient.Game.Tick + 200
+                this.InGameClient.Game.TickCounter + 200
             ));
         }
 
@@ -1354,7 +1356,7 @@ namespace Mooege.Core.GS.Players
             {
                 foreach (OpenConversation openConversation in this.OpenConversations)
                 {
-                    if (openConversation.endTick <= this.InGameClient.Game.Tick)
+                    if (openConversation.endTick <= this.InGameClient.Game.TickCounter)
                     {
                         this.InGameClient.SendMessage(openConversation.endConversationMessage);
                     }

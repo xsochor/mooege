@@ -385,7 +385,7 @@ namespace Mooege.Core.Common.Items
         public override void OnTargeted(Player player, TargetMessage message)
         {
             //Logger.Trace("OnTargeted");
-            if (this.ItemType.Hash == 3646475)
+            if (this.ItemType.Hash == 3646475) // hash for "Book"
             {
                 // book with lore
                 var y = MPQStorage.Data.Assets[SNOGroup.Actor].FirstOrDefault(x => x.Value.SNOId == this.SNOId);

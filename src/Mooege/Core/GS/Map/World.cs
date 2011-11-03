@@ -111,7 +111,7 @@ namespace Mooege.Core.GS.Map
 
         #region update & tick logic
 
-        public override void Update()
+        public override void Update(int tickCounter)
         {
             // update effects.
             int tick = this.Game.Tick;
@@ -135,8 +135,7 @@ namespace Mooege.Core.GS.Map
                 if (!scene.HasPlayers) 
                     continue; // if scene has no players in, just skip the scene.
 
-
-                scene.Update();
+                scene.Update(tickCounter);
             }
         }
         #endregion

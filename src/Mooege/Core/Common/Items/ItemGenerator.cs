@@ -123,7 +123,7 @@ namespace Mooege.Core.Common.Items
                 if (itemDefinition.Name.ToLower().Contains("unique")) continue;
                 if (itemDefinition.Name.ToLower().Contains("crafted")) continue;
                 if (itemDefinition.Name.ToLower().Contains("debug")) continue;
-                if ((itemDefinition.ItemType1 == StringHashHelper.HashItemName("Book")) && (itemDefinition.BaseGoldValue == 0)) continue; // i hope all lore with npc spawned
+                if ((itemDefinition.ItemType1 == StringHashHelper.HashItemName("Book")) && (itemDefinition.BaseGoldValue == 0)) continue; // i hope it catches all lore with npc spawned /xsochor
                 if (itemDefinition.SNOActor == -1) continue;
 
                 found = true;
