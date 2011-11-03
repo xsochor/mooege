@@ -131,7 +131,7 @@ namespace Mooege.Core.GS.FXEffect
                         if (!this.StartingTick.HasValue)
                         {
                             // lingering effect without set start, set actual tick
-                            this.StartingTick = World.Game.Tick;
+                            this.StartingTick = World.Game.TickCounter;
                         }
                         // lingering effect
                         if (this.NeedsActor)
@@ -232,7 +232,7 @@ namespace Mooege.Core.GS.FXEffect
         // effect start actions
         protected virtual void EffectStartingAction()
         {
-            int tick = World.Game.Tick;
+            int tick = World.Game.TickCounter;
             /* streaming skills (which drain resource until dismissed):
              * starts using with targetMessage
              * ends with DWordDataMessage5 - moving skill
@@ -1055,11 +1055,11 @@ namespace Mooege.Core.GS.FXEffect
             }
             else if (target != null)
             {
-                if (this.World.Game.Tick < this.Attributes[GameAttribute.Last_Action_Timestamp] + this.ticksBetweenActions)
+                if (this.World.Game.TickCounter < this.Attributes[GameAttribute.Last_Action_Timestamp] + this.ticksBetweenActions)
                 {
                     return;
                 }
-                this.Attributes[GameAttribute.Last_Action_Timestamp] = this.World.Game.Tick;
+                this.Attributes[GameAttribute.Last_Action_Timestamp] = this.World.Game.TickCounter;
                 if (target.World != null)
                 {
                     CombatSystem.Attack(this, target, attackAnimationSNO);
@@ -1161,7 +1161,7 @@ namespace Mooege.Core.GS.FXEffect
 
         public override void Update()
         {
-            if (expiresInTick.HasValue && (this.World.Game.Tick >= expiresInTick.Value))
+            if (expiresInTick.HasValue && (this.World.Game.TickCounter >= expiresInTick.Value))
             {
                 this.Die();
                 return;
@@ -1211,7 +1211,7 @@ namespace Mooege.Core.GS.FXEffect
         public HydraEffectActor(Mooege.Core.GS.Map.World world, int actorSNO, Vector3D position, int attackOffsetTick, Mooege.Core.GS.Actors.Actor owner)
             : base(world, actorSNO, position)
         {
-            this.Attributes[GameAttribute.Last_Action_Timestamp] = world.Game.Tick - attackOffsetTick;
+            this.Attributes[GameAttribute.Last_Action_Timestamp] = world.Game.TickCounter - attackOffsetTick;
             this.Attributes[GameAttribute.Spawned_by_ACDID] = unchecked((int)owner.DynamicID);
             this.World.Enter(this); // Enter only once all fields have been initialized to prevent a run condition
         }
@@ -1233,11 +1233,12 @@ namespace Mooege.Core.GS.FXEffect
             map[GameAttribute.Queue_Death] = true;
             map.BroadcastInclusive(this.World, this);
              */
-            if (this.World.Game.Tick >= this.Attributes[GameAttribute.Last_Action_Timestamp] + this.ticksBetweenActions) {
+            if (this.World.Game.TickCounter >= this.Attributes[GameAttribute.Last_Action_Timestamp] + this.ticksBetweenActions)
+            {
                 Mooege.Core.GS.Actors.Actor target = CombatSystem.GetNearestTarget(this.World, this, this.Position, 30f);
                 if (target != null)
                 {
-                    this.Attributes[GameAttribute.Last_Action_Timestamp] = this.World.Game.Tick;
+                    this.Attributes[GameAttribute.Last_Action_Timestamp] = this.World.Game.TickCounter;
                     CombatSystem.Attack(this, target, attackAnimationSNO);
                     Vector3D pos = new Vector3D
                     {
@@ -1255,7 +1256,7 @@ namespace Mooege.Core.GS.FXEffect
                         DurationInTicks = (60 * 5),
                         Position = pos,
                         Speed = 0.3f,
-                        StartingTick = this.World.Game.Tick,
+                        StartingTick = this.World.Game.TickCounter,
                         Angle = ActorUtils.GetFacingAngle(pos, target.Position),
                     });
                 }
@@ -1358,7 +1359,7 @@ namespace Mooege.Core.GS.FXEffect
                     targetPosition = target.Position;
                 }
             }
-            int startingTick = world.Game.Tick;
+            int startingTick = world.Game.TickCounter;
             int effectID = 0;
             int masterEffectID = 0;
             if (message.Field6 != null)
@@ -1539,6 +1540,10 @@ namespace Mooege.Core.GS.FXEffect
                 if (target != null)
                 {
                     targetPosition = target.Position;
+                    if (target is Mooege.Core.GS.Actors.Monster)
+                    {
+                        (target as Mooege.Core.GS.Actors.Monster).Die();
+                    }
                 }
             } switch (message.PowerSNO)
             {

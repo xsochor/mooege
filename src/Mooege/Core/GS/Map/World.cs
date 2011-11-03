@@ -114,7 +114,7 @@ namespace Mooege.Core.GS.Map
         public override void Update(int tickCounter)
         {
             // update effects.
-            int tick = this.Game.Tick;
+            int tick = this.Game.TickCounter;
             if (this._effects.Count != 0)
             {
                 for (int index = 0; index < this._effects.Count; )
@@ -617,7 +617,7 @@ namespace Mooege.Core.GS.Map
         {
             bool notAdding = false;
             effect.World = this;
-            int tick = this.Game.Tick;
+            int tick = this.Game.TickCounter;
             if (!effect.StartingTick.HasValue || (effect.StartingTick <= tick))
             {
                 notAdding = effect.Process(tick);

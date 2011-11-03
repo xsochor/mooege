@@ -17,6 +17,7 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using Mooege.Common;
 using Mooege.Net.GS;
 using Mooege.Net.GS.Message;
@@ -27,6 +28,8 @@ using Mooege.Core.GS.Common;
 using Mooege.Core.Common.Items;
 using Mooege.Common.MPQ.FileFormats;
 using Mooege.Net.GS.Message.Definitions.Stash;
+using Mooege.Common.MPQ;
+using Mooege.Core.GS.Common.Types.SNO;
 
 namespace Mooege.Core.GS.Players
 {
@@ -395,7 +398,7 @@ namespace Mooege.Core.GS.Players
             return this._owner.World.GetItem(_skillSocketRunes[skillIndex]);
         }
 
-        public void SetRune(Item rune, int skillIndex)
+        public void SetRune(Item rune, int PowerSNOId, int skillIndex)
         {
             if ((skillIndex < 0) || (skillIndex > 5))
             {
@@ -409,7 +412,15 @@ namespace Mooege.Core.GS.Players
             _inventoryGrid.RemoveItem(rune);
             rune.Owner = _owner;
             _skillSocketRunes[skillIndex] = rune.DynamicID;
-            rune.SetInventoryLocation(16, skillIndex, 0); // skills (16), index, 0
+            var y = MPQStorage.Data.Assets[SNOGroup.SkillKit].FirstOrDefault(x => x.Value.SNOId == _owner.SkillKit);
+            for (int i = 0; i < (y.Value.Data as SkillKit).ActiveSkillEntries.Count; i++)
+            {
+                if ((y.Value.Data as SkillKit).ActiveSkillEntries[i].SNOPower == PowerSNOId)
+                {
+                    rune.SetInventoryLocation(16, i, 0);
+                    break;
+                }
+            }
         }
 
         public Item RemoveRune(int skillIndex)

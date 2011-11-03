@@ -125,6 +125,7 @@ namespace Mooege.Core.Common.Items
                 if (itemDefinition.Name.ToLower().Contains("debug")) continue;
                 if ((itemDefinition.ItemType1 == StringHashHelper.HashItemName("Book")) && (itemDefinition.BaseGoldValue == 0)) continue; // i hope it catches all lore with npc spawned /xsochor
                 if (itemDefinition.SNOActor == -1) continue;
+//                if (!ItemGroup.SubTypesToHashList("SpellRune").Contains(itemDefinition.ItemType1)) continue;
 
                 found = true;
             }

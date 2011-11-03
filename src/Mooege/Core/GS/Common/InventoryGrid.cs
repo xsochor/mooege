@@ -117,7 +117,7 @@ namespace Mooege.Core.GS.Common
                     if (_backpack[r, c] == item.DynamicID)
                     {
                         _backpack[r, c] = 0;
-                        item.SetInventoryLocation(-1, -1, -1);
+                        item.SetInventoryLocation(-1, -1, -1); // client doesn't like this
                         item.Owner = null;
                     }
                 }

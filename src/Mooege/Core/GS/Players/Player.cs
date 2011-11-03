@@ -372,6 +372,13 @@ namespace Mooege.Core.GS.Players
                     break;
             }
 
+            // unlocking assigned skills
+            for (int i = 0; i < this.SkillSet.ActiveSkills.Length; i++)
+            {
+                this.Attributes[GameAttribute.Skill, this.SkillSet.ActiveSkills[i]] = 1;
+                this.Attributes[GameAttribute.Skill_Total, this.SkillSet.ActiveSkills[i]] = 1;
+            }
+
             AttributeMath.ComputeResourceRegen(this, this.ResourceID);
             AttributeMath.ComputeStats(this, new GameAttributeMap(), true);
         }
@@ -401,11 +408,11 @@ namespace Mooege.Core.GS.Players
         private void OnSocketSpell(GameClient client, SocketSpellMessage socketSpellMessage)
         {
             Item rune = this.World.GetItem(unchecked((uint)socketSpellMessage.Field0));
-            int PowerSNO = socketSpellMessage.Field1;
+            int PowerSNOId = socketSpellMessage.Field1;
             int skillIndex = -1; // find index of powerSNO.
             for (int i = 0; i < this.SkillSet.ActiveSkills.Length; i++)
             {
-                if (this.SkillSet.ActiveSkills[i] == PowerSNO)
+                if (this.SkillSet.ActiveSkills[i] == PowerSNOId)
                 {
                     skillIndex = i;
                     break;
@@ -428,28 +435,29 @@ namespace Mooege.Core.GS.Players
                 int rank = rune.Attributes[GameAttribute.Rune_Rank];
                 int colorIndex = RandomHelper.Next(0, 5);
                 Item newRune = ItemGenerator.Cook(this, "Runestone_" + (char)('A' + colorIndex) + "_0" + rank);
-                newRune.Attributes[GameAttribute.Rune_Attuned_Power] = PowerSNO;
+                newRune.EnterWorld(this.Position);
+                newRune.Attributes[GameAttribute.Rune_Attuned_Power] = PowerSNOId;
                 switch (colorIndex)
                 {
                     case 0:
                         newRune.Attributes[GameAttribute.Rune_A] = rank;
-                        this.Attributes[GameAttribute.Rune_A, PowerSNO] = rank;
+                        this.Attributes[GameAttribute.Rune_A, PowerSNOId] = rank;
                         break;
                     case 1:
                         newRune.Attributes[GameAttribute.Rune_B] = rank;
-                        this.Attributes[GameAttribute.Rune_B, PowerSNO] = rank;
+                        this.Attributes[GameAttribute.Rune_B, PowerSNOId] = rank;
                         break;
                     case 2:
                         newRune.Attributes[GameAttribute.Rune_C] = rank;
-                        this.Attributes[GameAttribute.Rune_C, PowerSNO] = rank;
+                        this.Attributes[GameAttribute.Rune_C, PowerSNOId] = rank;
                         break;
                     case 3:
                         newRune.Attributes[GameAttribute.Rune_D] = rank;
-                        this.Attributes[GameAttribute.Rune_D, PowerSNO] = rank;
+                        this.Attributes[GameAttribute.Rune_D, PowerSNOId] = rank;
                         break;
                     case 4:
                         newRune.Attributes[GameAttribute.Rune_E] = rank;
-                        this.Attributes[GameAttribute.Rune_E, PowerSNO] = rank;
+                        this.Attributes[GameAttribute.Rune_E, PowerSNOId] = rank;
                         break;
                 }
                 newRune.Owner = this;
@@ -458,30 +466,30 @@ namespace Mooege.Core.GS.Players
                 this.Inventory.DestroyInventoryItem(rune);
                 newRune.Reveal(this);
                 newRune.SetInventoryLocation(16, skillIndex, 0); // skills (16), index, 0
-                this.Inventory.SetRune(newRune, skillIndex);
+                this.Inventory.SetRune(newRune, PowerSNOId, skillIndex);
             }
             else
             {
                 // TODO: optimization possible?
                 if (rune.Attributes[GameAttribute.Rune_A] != 0)
                 {
-                    Attributes[GameAttribute.Rune_A, PowerSNO] = rune.Attributes[GameAttribute.Rune_A];
+                    Attributes[GameAttribute.Rune_A, PowerSNOId] = rune.Attributes[GameAttribute.Rune_A];
                 } else if (rune.Attributes[GameAttribute.Rune_B] != 0)
                 {
-                    Attributes[GameAttribute.Rune_B, PowerSNO] = rune.Attributes[GameAttribute.Rune_B];
+                    Attributes[GameAttribute.Rune_B, PowerSNOId] = rune.Attributes[GameAttribute.Rune_B];
                 } else if (rune.Attributes[GameAttribute.Rune_C] != 0)
                 {
-                    Attributes[GameAttribute.Rune_C, PowerSNO] = rune.Attributes[GameAttribute.Rune_C];
+                    Attributes[GameAttribute.Rune_C, PowerSNOId] = rune.Attributes[GameAttribute.Rune_C];
                 }
                 else if (rune.Attributes[GameAttribute.Rune_D] != 0)
                 {
-                    Attributes[GameAttribute.Rune_D, PowerSNO] = rune.Attributes[GameAttribute.Rune_D];
+                    Attributes[GameAttribute.Rune_D, PowerSNOId] = rune.Attributes[GameAttribute.Rune_D];
                 }
                 else if (rune.Attributes[GameAttribute.Rune_E] != 0)
                 {
-                    Attributes[GameAttribute.Rune_E, PowerSNO] = rune.Attributes[GameAttribute.Rune_E];
+                    Attributes[GameAttribute.Rune_E, PowerSNOId] = rune.Attributes[GameAttribute.Rune_E];
                 }
-                this.Inventory.SetRune(rune, skillIndex);
+                this.Inventory.SetRune(rune, PowerSNOId, skillIndex);
             }
             if (oldRune != null) {
                 this.Inventory.PickUp(oldRune);
@@ -498,15 +506,18 @@ namespace Mooege.Core.GS.Players
             var oldSNOSkill = this.SkillSet.ActiveSkills[message.SkillIndex]; // find replaced skills SNO.
             if (oldSNOSkill != -1)
             {
-                // switch off old skill in hotbar
-                this.Attributes[GameAttribute.Skill, oldSNOSkill] = 0;
-                this.Attributes[GameAttribute.Skill_Total, oldSNOSkill] = 0;
                 // if old power was socketted, pickup rune
                 Item oldRune = this.Inventory.RemoveRune(message.SkillIndex);
                 if (oldRune != null)
                 {
-                    this.Inventory.PickUp(oldRune);
+                    if (!this.Inventory.PickUp(oldRune))
+                    {
+                        return;
+                    }
                 }
+                // switch off old skill in hotbar
+                this.Attributes[GameAttribute.Skill, oldSNOSkill] = 0;
+                this.Attributes[GameAttribute.Skill_Total, oldSNOSkill] = 0;
             }
             // switch on new skill in hotbar
             this.Attributes[GameAttribute.Skill, message.SNOSkill] = 1;

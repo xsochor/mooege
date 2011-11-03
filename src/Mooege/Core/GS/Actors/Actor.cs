@@ -482,7 +482,7 @@ namespace Mooege.Core.GS.Actors
             return string.Format("[Actor] [Type: {0}] SNOId:{1} DynamicId: {2} Position: {3} Name: {4}", this.ActorType, this.SNOId, this.DynamicID, this.Position, this.SNOName.Name);
         }
 
-        public override void Update()
+        public virtual void Update()
         {
 
             if (this.World == null)
