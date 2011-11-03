@@ -868,7 +868,7 @@ namespace Mooege.Core.GS.FXEffect
                                 if (loreIndex < player.LearnedLore.m_snoLoreLearned.Length)
                                 {
                                     player.LearnedLore.m_snoLoreLearned[loreIndex] = loreSNO;
-                                    player.LearnedLore.Field0++; // Count
+                                    player.LearnedLore.Count++; // Count
                                     player.UpdateHeroState();
                                 }
                             }

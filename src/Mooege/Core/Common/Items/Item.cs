@@ -389,24 +389,19 @@ namespace Mooege.Core.Common.Items
             {
                 // book with lore
                 var y = MPQStorage.Data.Assets[SNOGroup.Actor].FirstOrDefault(x => x.Value.SNOId == this.SNOId);
-                var e = (y.Value.Data as Mooege.Common.MPQ.FileFormats.Actor).TagMap.TagMapEntries.FirstOrDefault(z => z.TagID == (int)MarkerTagTypes.LoreSNO);
+                var e = (y.Value.Data as Mooege.Common.MPQ.FileFormats.Actor).TagMap.TagMapEntries.FirstOrDefault(z => z.TagID == (int)MarkerTagTypes.LoreSNOId);
                 if (e != null)
                 {
-                    int loreSNO = e.Int2;
-                    if ((loreSNO != -1) && !player.LearnedLore.m_snoLoreLearned.Contains(loreSNO))
+                    int LoreSNOId = e.Int2;
+                    if ((LoreSNOId != -1) && !player.LearnedLore.m_snoLoreLearned.Contains(LoreSNOId))
                     {
                         // play lore to player
-                        player.InGameClient.SendMessage(new Mooege.Net.GS.Message.Definitions.Quest.LoreMessage { Id = 213, snoLore = loreSNO });
+                        player.InGameClient.SendMessage(new Mooege.Net.GS.Message.Definitions.Quest.LoreMessage { Id = 213, snoLore = LoreSNOId });
                         // add lore to player's lores
-                        int loreIndex = 0;
-                        while ((loreIndex < player.LearnedLore.m_snoLoreLearned.Length) && (player.LearnedLore.m_snoLoreLearned[loreIndex] != 0))
+                        if (player.LearnedLore.Count < player.LearnedLore.m_snoLoreLearned.Length)
                         {
-                            loreIndex++;
-                        }
-                        if (loreIndex < player.LearnedLore.m_snoLoreLearned.Length)
-                        {
-                            player.LearnedLore.m_snoLoreLearned[loreIndex] = loreSNO;
-                            player.LearnedLore.Field0++; // Count
+                            player.LearnedLore.m_snoLoreLearned[player.LearnedLore.Count] = LoreSNOId;
+                            player.LearnedLore.Count++; // Count
                             player.UpdateHeroState();
                         }
                     }

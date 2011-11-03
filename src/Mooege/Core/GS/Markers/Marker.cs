@@ -32,6 +32,6 @@ namespace Mooege.Core.GS.Markers
         DestinationActorTag  = 526851,
         ActorTag             = 526852,  // maybe find another name
         DestinationLevelArea = 526853,
-        LoreSNO              = 67331,
+        LoreSNOId              = 67331,
     }
 }

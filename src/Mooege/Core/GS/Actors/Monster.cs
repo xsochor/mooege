@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Mooege.Common.Helpers;
 using Mooege.Common.MPQ.FileFormats.Types;
 using Mooege.Core.GS.Common.Types.Math;
@@ -29,6 +30,8 @@ using Mooege.Net.GS.Message.Fields;
 using Mooege.Net.GS.Message.Definitions.Animation;
 using Mooege.Net.GS.Message.Definitions.Effect;
 using Mooege.Net.GS.Message.Definitions.Misc;
+using Mooege.Common.MPQ;
+using Mooege.Core.GS.Common.Types.SNO;
 
 namespace Mooege.Core.GS.Actors
 {
@@ -169,5 +172,35 @@ namespace Mooege.Core.GS.Actors
             this.Destroy();
         }
 
+        /// <summary>
+        /// Play lore if it's first kill for player
+        /// </summary>
+        private void PlayLore()
+        {
+            var players = this.GetPlayersInRange();
+            if (players != null)
+            {
+                var y = MPQStorage.Data.Assets[SNOGroup.Monster].FirstOrDefault(x => (x.Value.Data as Mooege.Common.MPQ.FileFormats.Monster).ActorSNO == this.SNOId);
+                if (y.Value != null)
+                {
+                    int loreSNOId = (y.Value.Data as Mooege.Common.MPQ.FileFormats.Monster).SNOLore;
+                    if (loreSNOId != -1)
+                    {
+                        foreach (var player in players.Where(player => !player.LearnedLore.m_snoLoreLearned.Contains(loreSNOId)))
+                        {
+                            // play lore to player
+                            player.InGameClient.SendMessage(new Mooege.Net.GS.Message.Definitions.Quest.LoreMessage { Id = 212, snoLore = loreSNOId });
+                            // add lore to player's lores
+                            if (player.LearnedLore.Count < player.LearnedLore.m_snoLoreLearned.Length)
+                            {
+                                player.LearnedLore.m_snoLoreLearned[player.LearnedLore.Count] = loreSNOId;
+                                player.LearnedLore.Count++; // Count
+                                player.UpdateHeroState();
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }

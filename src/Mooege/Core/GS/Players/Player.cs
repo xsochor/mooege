@@ -978,7 +978,7 @@ namespace Mooege.Core.GS.Players
 
         public LearnedLore LearnedLore = new LearnedLore()
         {
-            Field0 = 0x00000000,
+            Count = 0x00000000,
             m_snoLoreLearned = new int[256]
              {
                 0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,0x00000000,
